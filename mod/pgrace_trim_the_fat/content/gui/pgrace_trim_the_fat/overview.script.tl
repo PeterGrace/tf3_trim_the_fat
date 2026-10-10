@@ -71,12 +71,6 @@ local record OverviewData
 	sortAscending : boolean
 	-- Differs per build, so a refresh remounts the table (cells keep their first userParam).
 	generation : integer
-	-- The rows shown at the last render, for the scroll after a sort.
-	visible : {integer : boolean}
-	-- Frames left in which the table scrolls to its first row after a header click (0: nothing pending). A re-sorting
-	-- table keeps its current row (the last row clicked, else the first) in view, which leaves the list scrolled
-	-- partway down; Commuter Compass had the same.
-	scrollSteps : integer
 end
 
 -- The verdict filters. TooNew and NoVehicles have none: there's nothing to act on, and they show while no verdict
@@ -166,7 +160,7 @@ local nextGeneration = 0
 local function buildOverview(cats : {Category}) : OverviewData
 	nextGeneration = nextGeneration + 1
 	local data : OverviewData = { error = false, rows = {}, keys = {}, sortColumn = 3, sortAscending = true,
-		generation = nextGeneration, visible = {}, scrollSteps = 0 }
+		generation = nextGeneration }
 	local start = os.clock() -- PROBE (remove before release)
 	local ok, err = pcall(function() : boolean
 		for __, line in ipairs(line_data.playerLines()) do
@@ -248,40 +242,14 @@ local function compareValue(data : OverviewData, column : integer, rowKey : inte
 	return number(function(r : Row) : number return r.vehicleCount end, -1)
 end
 
--- The visible row that sorts first under the current sort, or nil.
-local function firstRow(data : OverviewData, visible : {integer : boolean}) : integer
-	local best : integer = nil
-	local bestValue : any = nil
-	for __, key in ipairs(data.keys) do
-		if visible[key] then
-			local value = compareValue(data, data.sortColumn, key)
-			if best == nil then
-				best, bestValue = key, value
-			else
-				local ok, before = pcall(function() : boolean
-					if data.sortAscending then
-						return (value as number) < (bestValue as number)
-					end
-					return (value as number) > (bestValue as number)
-				end)
-				if ok and before then
-					best, bestValue = key, value
-				end
-			end
-		end
-	end
-	return best
-end
-
 local function makeTable(data : OverviewData, visible : {integer : boolean}, filterKey : string,
-		onSort : function(integer, boolean),
-		tableRef : ReactRefWrapApiT<Builtin.DataTableParam, Builtin.DataTableApi>) : TreeNodeId
+		onSort : function(integer, boolean)) : TreeNodeId
 	local function column(index : integer) : function(integer) : any
 		return function(rowKey : integer) : any
 			return compareValue(data, index, rowKey)
 		end
 	end
-	return builtin.DataTable(react.ref(tableRef), {
+	return builtin.DataTable{
 		meta = { localKey = "lines_" .. tostring(data.generation) .. "_" .. filterKey },
 		columns = {
 			builtin.ColumnDesc{ name = _("Line"), recipe = LineCell, weight = 3, getCompareValue = column(1) },
@@ -300,7 +268,7 @@ local function makeTable(data : OverviewData, visible : {integer : boolean}, fil
 		fnUserFilter = function(rowKey : integer) : boolean
 			return visible[rowKey] or false
 		end,
-	})
+	}
 end
 
 local function summaryText(s : PgraceTrimTheFatMetrics.Summary) : string
@@ -350,35 +318,20 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	local data = dataState:old()
 	local enabled = enabledState:old()
 	local verdictEnabled = verdictState:old()
-	local tableRef = react.useNodeRef(builtin.DataTable)
 
-	-- After a sort, scroll the table to its new first row on each of the next few frames: waiting until it had
-	-- surely re-sorted showed the jump down, then the jump back (in-game: an obvious flicker).
-	react.onStep(function()
-		if data.scrollSteps <= 0 then
-			return
-		end
-		data.scrollSteps = data.scrollSteps - 1
-		local key = firstRow(data, data.visible)
-		if key ~= nil and not tableRef:hasExpired() then
-			pcall(function() : boolean
-				tableRef:get():getApi().scrollToRowKey(key, true)
-				return true
-			end)
-		end
-	end)
-
-	local function onSort(column : integer, ascending : boolean)
-		if column ~= data.sortColumn or ascending ~= data.sortAscending then
-			data.scrollSteps = 3
-		end
-		data.sortColumn, data.sortAscending = column, ascending
+	local function refresh(column : integer, ascending : boolean)
+		local fresh = buildOverview(cats)
+		fresh.sortColumn, fresh.sortAscending = column, ascending
+		dataState:set(fresh)
 	end
 
-	local function refresh()
-		local fresh = buildOverview(cats)
-		fresh.sortColumn, fresh.sortAscending = data.sortColumn, data.sortAscending
-		dataState:set(fresh)
+	-- A sort recalculates every line and builds a new table, already in the new order. Re-sorting the existing table
+	-- kept its current row (the last row clicked, else the first) in view, which left the list scrolled partway
+	-- down, and scrolling it back afterwards flickered. A fresh table starts at the top.
+	local function onSort(column : integer, ascending : boolean)
+		if column ~= data.sortColumn or ascending ~= data.sortAscending then
+			refresh(column, ascending)
+		end
 	end
 
 	-- F2's category filter (statistics_react_util.createCarrierCategoryFilter): small toggles with an 18 px icon,
@@ -431,7 +384,9 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			path = REFRESH_ICON,
 			scaling = builtin.type.ImageViewScaling.AutoFit,
 		},
-		onClick = refresh,
+		onClick = function()
+			refresh(data.sortColumn, data.sortAscending)
+		end,
 	}
 
 	-- F2's expand toggle (statistics.tl): the stylesheet gives the expanded window most of the screen height.
@@ -510,8 +465,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			end
 		end
 		body[#body + 1] = ui.textRow(summaryText(metrics.summarise(shown)), "font-scale-annotation")
-		data.visible = visible
-		body[#body + 1] = makeTable(data, visible, filterKey, onSort, tableRef)
+		body[#body + 1] = makeTable(data, visible, filterKey, onSort)
 		if anyAnnualised then
 			body[#body + 1] = ui.textRow(_("* scaled up to a full year from less than a year of data"), "font-scale-annotation")
 		end
