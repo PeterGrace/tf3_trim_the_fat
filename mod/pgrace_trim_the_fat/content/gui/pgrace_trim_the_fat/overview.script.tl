@@ -304,6 +304,9 @@ local function summaryText(s : PgraceTrimTheFatMetrics.Summary) : string
 		parts[#parts + 1] = ui.fill(_("{lines} could run with fewer vehicles: up to {vehicles} to remove"),
 			{ lines = ui.linesText(s.tooManyCount), vehicles = ui.vehiclesText("vehicle", s.trimTotal) })
 	end
+	if s.busyCount > 0 then
+		parts[#parts + 1] = ui.fill(_("{lines} may need more vehicles"), { lines = ui.linesText(s.busyCount) })
+	end
 	if #parts == 0 then
 		return _("No lines are losing money or have too many vehicles.")
 	end

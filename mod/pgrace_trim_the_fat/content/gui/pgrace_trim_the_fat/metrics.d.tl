@@ -77,6 +77,8 @@ global record PgraceTrimTheFatMetrics
 		-- Lines with a trim suggestion (losing or not), and the sum of the trims.
 		tooManyCount : integer
 		trimTotal : integer
+		-- Lines whose verdict is Busy.
+		busyCount : integer
 	end
 
 	-- Target average load for passenger lines and lines carrying several cargo types.

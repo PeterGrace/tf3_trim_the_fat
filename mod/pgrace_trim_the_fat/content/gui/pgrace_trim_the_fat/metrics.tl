@@ -170,11 +170,15 @@ function metrics.severity(kind : PgraceTrimTheFatMetrics.VerdictKind) : integer
 end
 
 function metrics.summarise(assessments : {PgraceTrimTheFatMetrics.Assessment}) : PgraceTrimTheFatMetrics.Summary
-	local s : PgraceTrimTheFatMetrics.Summary = { losingCount = 0, losingPerYear = 0, tooManyCount = 0, trimTotal = 0 }
+	local s : PgraceTrimTheFatMetrics.Summary = { losingCount = 0, losingPerYear = 0, tooManyCount = 0, trimTotal = 0,
+		busyCount = 0 }
 	for __, a in ipairs(assessments) do
 		if a.verdict == "Losing" then
 			s.losingCount = s.losingCount + 1
 			s.losingPerYear = s.losingPerYear + (a.balancePerYear or 0)
+		end
+		if a.verdict == "Busy" then
+			s.busyCount = s.busyCount + 1
 		end
 		if a.trim > 0 then
 			s.tooManyCount = s.tooManyCount + 1

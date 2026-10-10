@@ -347,6 +347,17 @@ t.test("summarise: counts and sums", function()
 	t.eq(s.losingPerYear, -150)
 	t.eq(s.tooManyCount, 2, "lines with a trim, losing or not")
 	t.eq(s.trimTotal, 5)
+	t.eq(s.busyCount, 0)
+end)
+
+t.test("summarise: busy lines", function()
+	local s = metrics.summarise({
+		assessment({ verdict = "Busy", balancePerYear = 100 }),
+		assessment({ verdict = "Busy", balancePerYear = 200 }),
+		assessment({ verdict = "Ok", balancePerYear = 300 }),
+	})
+	t.eq(s.busyCount, 2)
+	t.eq(s.losingCount, 0)
 end)
 
 t.test("summarise: empty", function()
@@ -355,6 +366,7 @@ t.test("summarise: empty", function()
 	t.eq(s.losingPerYear, 0)
 	t.eq(s.tooManyCount, 0)
 	t.eq(s.trimTotal, 0)
+	t.eq(s.busyCount, 0)
 end)
 
 t.test("vehiclePerYear: nil under a month of data", function()
