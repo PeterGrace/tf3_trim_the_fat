@@ -120,3 +120,18 @@ content/gui/pgrace_trim_the_fat/
   `game_react_globals` works; the button shows pressed while the window is open. 116 lines took 45 ms, so the
   window computes everything on open. Without a size the window shrinks to its content at the top left: give it
   `initialX/Y` and a stylesheet size.
+- **Round 2:**
+  - Sizing by id selector (`#pgrace_trim_the_fat.overview`) never applied; matching the window by class with the
+    font prefixes (`!font-small Window!<class>`, as the base map editor) works. The window now copies F2: compact,
+    docked bottom-centre above the game bar, F2's sizes and expand toggle.
+  - A `TabWidgetChild` item must not be a layout (whole-UI crash); wrap it in a `builtin.Component`.
+  - F2's filters start off and narrow the list when turned on; ours now match. Verdict filters (text toggles) were
+    added on request and combine with the transport filters.
+  - Re-sorting the table kept its current row in view and left the list scrolled down. Scrolling back with
+    `scrollToRowKey` (after 3 frames, or on each of 3 frames) flickered visibly; rebuilding the data and the table
+    on every sort (a fresh table starts at the top) only flashes, which the user preferred. A sort therefore also
+    refreshes the numbers.
+  - A bus bought days earlier showed −381,038* on the line card: a few days of costs scaled up to a year. Vehicles
+    with under a month of data now show "Too new" and sort last (`metrics.vehiclePerYear`).
+  - The summary's second part read as a separate group from the losing lines; it now says "{lines} could run with
+    fewer vehicles".
