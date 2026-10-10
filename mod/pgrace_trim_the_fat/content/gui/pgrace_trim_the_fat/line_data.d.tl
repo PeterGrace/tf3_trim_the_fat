@@ -40,8 +40,6 @@ global record PgraceTrimTheFatLineData
 	-- The line-level numbers without per-vehicle rows (what the overview needs).
 	record LineFacts
 		input : PgraceTrimTheFatMetrics.LineInput
-		-- Of the first vehicle; nil without vehicles.
-		carrier : Carrier
 		noun : Noun
 	end
 

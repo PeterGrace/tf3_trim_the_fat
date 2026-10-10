@@ -1,5 +1,6 @@
 local react = ug_require "::/gui/main/react.lua" as React
 local builtin = ug_require "::/gui/main/builtin.lua" as Builtin
+local engine_react_util = ug_require "::/gui/main/engine_react_util.tl" as EngineReactUtil
 local tool_react_util = ug_require "::/gui/main/tool_react_util.tl" as ToolReactUtil
 local game_react_globals = ug_require "::/gui/main/game_react_globals.tl" as GameReactGlobals
 local main_mod_button_area = ug_require "::/gui/main/main_mod_button_area.tl" as MainModButtonArea
@@ -136,8 +137,13 @@ local function buildRow(line : Engine.Entity, cats : {Category}) : Row
 		row.kind = kind
 		row.verdictText, row.verdictClass = verdictText(kind, a)
 		row.verdictSort = metrics.severity(kind) * SEVERITY_SCALE + (a.balancePerYear or 0)
-		row.balanceText = ui.moneyText(a.balancePerYear, a.annualised)
-		if a.balancePerYear ~= nil then
+		-- A few days of money scaled up to a year would mislead (the card hides it for TooNew lines too).
+		if kind == "TooNew" then
+			row.balanceText = _("Too new")
+		else
+			row.balanceText = ui.moneyText(a.balancePerYear, a.annualised)
+		end
+		if a.balancePerYear ~= nil and kind ~= "TooNew" then
 			row.balanceClass = a.balancePerYear < 0 and "font-scale-body, negative" or "font-scale-body, positive"
 		end
 		row.loadText = ui.formatPercent(a.load)
@@ -176,6 +182,16 @@ local function buildOverview(cats : {Category}) : OverviewData
 end
 
 local LineCell = react.RegisterRecipe("PgraceTrimTheFatOverviewLineCell", function(params : Builtin.TableCellParam) : TreeNodeId
+	-- A line deleted while the window is open keeps its row until a refresh; the base widgets would read its missing
+	-- components (an uncatchable error that takes down the UI) or, once its ID is reused, act on another entity.
+	local existsState = engine_react_util.useStepStateTimer(function() : boolean
+		local ok, existsOrError = pcall(api.engine.entityExists, params.rowKey)
+		return ok and existsOrError as boolean
+	end, 1.0)
+	if not existsState:old() then
+		local row = (params.userParam as OverviewData).rows[params.rowKey]
+		return ui.textRow(row ~= nil and row.name or "", "font-scale-body")
+	end
 	return builtin.BoxLayout{
 		orientation = builtin.type.Orientation.Horizontal,
 		children = {
@@ -217,7 +233,7 @@ local VehiclesCell = makeNumberCell("PgraceTrimTheFatOverviewVehiclesCell", func
 	return row.vehiclesText
 end, nil)
 
--- What each column sorts on; the table and the scroll-to-top after a sort both use it.
+-- What each column sorts on.
 local function compareValue(data : OverviewData, column : integer, rowKey : integer) : any
 	local row = data.rows[rowKey]
 	if row == nil then
@@ -232,7 +248,10 @@ local function compareValue(data : OverviewData, column : integer, rowKey : inte
 	elseif column == 2 then
 		return row.verdictSort
 	elseif column == 3 then
-		return number(function(r : Row) : number return r.assessment.balancePerYear end, math.huge)
+		-- Too new lines show no amount, so they sort with the missing ones.
+		return number(function(r : Row) : number
+			return r.kind ~= "TooNew" and r.assessment.balancePerYear or nil
+		end, math.huge)
 	elseif column == 4 then
 		return number(function(r : Row) : number return r.assessment.load end, -1)
 	end
@@ -262,8 +281,13 @@ local function makeTable(data : OverviewData, visible : {integer : boolean}, fil
 		userParam = data,
 		initialSortColumn = { data.sortColumn, data.sortAscending },
 		onSortColumnChange = onSort,
+		-- Deleted lines drop out, as in F2.
 		fnUserFilter = function(rowKey : integer) : boolean
-			return visible[rowKey] or false
+			if not visible[rowKey] then
+				return false
+			end
+			local ok, exists = pcall(api.engine.entityExists, rowKey)
+			return ok and exists as boolean
 		end,
 	}
 end
@@ -441,6 +465,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			anyEnabled = anyEnabled or enabled[i]
 		end
 		local anyVerdict = false
+		local anyVisible = false
 		for i = 1, #groups do
 			anyVerdict = anyVerdict or verdictEnabled[i] == true
 		end
@@ -458,10 +483,12 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			visible[line] = match
 			if match and not row.error then
 				shown[#shown + 1] = row.assessment
-				anyAnnualised = anyAnnualised or row.assessment.annualised
+				anyAnnualised = anyAnnualised or (row.assessment.annualised and row.kind ~= "TooNew")
 			end
+			anyVisible = anyVisible or match
 		end
-		body[#body + 1] = ui.textRow(summaryText(metrics.summarise(shown)), "font-scale-annotation")
+		local summary = anyVisible and summaryText(metrics.summarise(shown)) or _("No lines match the filters.")
+		body[#body + 1] = ui.textRow(summary, "font-scale-annotation")
 		body[#body + 1] = makeTable(data, visible, filterKey, onSort)
 		if anyAnnualised then
 			body[#body + 1] = ui.textRow(_("* scaled up to a full year from less than a year of data"), "font-scale-annotation")

@@ -98,6 +98,7 @@
         "Shrink": "Verkleinern",
         "Recalculate every line": "Alle Linien neu berechnen",
         "No lines yet.": "Noch keine Linien.",
+        "No lines match the filters.": "Keine Linie passt zu den Filtern.",
         "{count} lines|one": "{count} Linie",
         "{count} lines|other": "{count} Linien"
     },
@@ -180,6 +181,7 @@
         "Shrink": "Reducir",
         "Recalculate every line": "Recalcular todas las líneas",
         "No lines yet.": "Aún no hay líneas.",
+        "No lines match the filters.": "Ninguna línea coincide con los filtros.",
         "{count} lines|one": "{count} línea",
         "{count} lines|other": "{count} líneas"
     },
@@ -262,6 +264,7 @@
         "Shrink": "Réduire",
         "Recalculate every line": "Recalculer toutes les lignes",
         "No lines yet.": "Aucune ligne pour l’instant.",
+        "No lines match the filters.": "Aucune ligne ne correspond aux filtres.",
         "{count} lines|one": "{count} ligne",
         "{count} lines|other": "{count} lignes"
     },
@@ -344,6 +347,7 @@
         "Shrink": "Comprimi",
         "Recalculate every line": "Ricalcola tutte le linee",
         "No lines yet.": "Ancora nessuna linea.",
+        "No lines match the filters.": "Nessuna linea corrisponde ai filtri.",
         "{count} lines|one": "{count} linea",
         "{count} lines|other": "{count} linee"
     },
@@ -418,6 +422,7 @@
         "Shrink": "縮める",
         "Recalculate every line": "すべての路線を再計算",
         "No lines yet.": "路線はまだありません。",
+        "No lines match the filters.": "フィルターに一致する路線はありません。",
         "{count} lines|other": "{count}路線"
     },
     "ko": {
@@ -491,6 +496,7 @@
         "Shrink": "축소",
         "Recalculate every line": "모든 노선 다시 계산",
         "No lines yet.": "아직 노선이 없습니다.",
+        "No lines match the filters.": "필터와 일치하는 노선이 없습니다.",
         "{count} lines|other": "노선 {count}개"
     },
     "nl": {
@@ -572,6 +578,7 @@
         "Shrink": "Krimpen",
         "Recalculate every line": "Alle lijnen opnieuw berekenen",
         "No lines yet.": "Nog geen lijnen.",
+        "No lines match the filters.": "Geen lijnen voldoen aan de filters.",
         "{count} lines|one": "{count} lijn",
         "{count} lines|other": "{count} lijnen"
     },
@@ -662,6 +669,7 @@
         "Shrink": "Zwiń",
         "Recalculate every line": "Przelicz wszystkie linie",
         "No lines yet.": "Brak linii.",
+        "No lines match the filters.": "Żadna linia nie pasuje do filtrów.",
         "{count} lines|one": "{count} linia",
         "{count} lines|few": "{count} linie",
         "{count} lines|many": "{count} linii"
@@ -745,6 +753,7 @@
         "Shrink": "Reduzir",
         "Recalculate every line": "Recalcular todas as linhas",
         "No lines yet.": "Ainda não há linhas.",
+        "No lines match the filters.": "Nenhuma linha corresponde aos filtros.",
         "{count} lines|one": "{count} linha",
         "{count} lines|other": "{count} linhas"
     },
@@ -835,6 +844,7 @@
         "Shrink": "Свернуть",
         "Recalculate every line": "Пересчитать все маршруты",
         "No lines yet.": "Маршрутов пока нет.",
+        "No lines match the filters.": "Нет маршрутов, подходящих под фильтры.",
         "{count} lines|one": "{count} маршрут",
         "{count} lines|few": "{count} маршрута",
         "{count} lines|many": "{count} маршрутов"
@@ -910,6 +920,7 @@
         "Shrink": "缩小",
         "Recalculate every line": "重新计算所有线路",
         "No lines yet.": "还没有线路。",
+        "No lines match the filters.": "没有符合筛选条件的线路。",
         "{count} lines|other": "{count} 条线路"
     },
     "zh_TW": {
@@ -983,6 +994,7 @@
         "Shrink": "縮小",
         "Recalculate every line": "重新計算所有路線",
         "No lines yet.": "還沒有路線。",
+        "No lines match the filters.": "沒有符合篩選條件的路線。",
         "{count} lines|other": "{count} 條路線"
     }
 }

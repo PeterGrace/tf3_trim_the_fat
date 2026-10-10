@@ -183,7 +183,6 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			loadNow = line_data.lineLoadNow(line),
 			carriesPassengers = passengers,
 		},
-		carrier = carrier,
 		noun = nounFor(carrier, passengers),
 	}
 	return facts, rows
