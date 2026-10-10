@@ -73,7 +73,7 @@ local record OverviewData
 	generation : integer
 	-- The rows shown at the last render, for the scroll after a sort.
 	visible : {integer : boolean}
-	-- Frames left until the table scrolls to its first row after a header click (0: nothing pending). A re-sorting
+	-- Frames left in which the table scrolls to its first row after a header click (0: nothing pending). A re-sorting
 	-- table keeps its current row (the last row clicked, else the first) in view, which leaves the list scrolled
 	-- partway down; Commuter Compass had the same.
 	scrollSteps : integer
@@ -352,20 +352,19 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	local verdictEnabled = verdictState:old()
 	local tableRef = react.useNodeRef(builtin.DataTable)
 
-	-- After a sort, scroll the table to its new first row, a few frames later so it has re-sorted.
+	-- After a sort, scroll the table to its new first row on each of the next few frames: waiting until it had
+	-- surely re-sorted showed the jump down, then the jump back (in-game: an obvious flicker).
 	react.onStep(function()
 		if data.scrollSteps <= 0 then
 			return
 		end
 		data.scrollSteps = data.scrollSteps - 1
-		if data.scrollSteps == 0 then
-			local key = firstRow(data, data.visible)
-			if key ~= nil and not tableRef:hasExpired() then
-				pcall(function() : boolean
-					tableRef:get():getApi().scrollToRowKey(key, true)
-					return true
-				end)
-			end
+		local key = firstRow(data, data.visible)
+		if key ~= nil and not tableRef:hasExpired() then
+			pcall(function() : boolean
+				tableRef:get():getApi().scrollToRowKey(key, true)
+				return true
+			end)
 		end
 	end)
 
