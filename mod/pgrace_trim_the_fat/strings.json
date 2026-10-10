@@ -19,6 +19,8 @@
     },
     "de": {
         "Line efficiency": "Linieneffizienz",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: alle Linien",
         "Error (see log)": "Fehler (siehe Log)",
         "No vehicles on this line": "Keine Fahrzeuge auf dieser Linie",
         "Too new to judge": "Zu neu für eine Bewertung",
@@ -67,6 +69,8 @@
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: todas las líneas",
         "Error (see log)": "Error (ver registro)",
         "No vehicles on this line": "No hay vehículos en esta línea",
         "Too new to judge": "Demasiado nueva para evaluar",
@@ -115,6 +119,8 @@
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat : toutes les lignes",
         "Error (see log)": "Erreur (voir le journal)",
         "No vehicles on this line": "Aucun véhicule sur cette ligne",
         "Too new to judge": "Trop récente pour juger",
@@ -163,6 +169,8 @@
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: tutte le linee",
         "Error (see log)": "Errore (vedi log)",
         "No vehicles on this line": "Nessun veicolo su questa linea",
         "Too new to judge": "Troppo recente per valutare",
@@ -211,6 +219,8 @@
     },
     "ja": {
         "Line efficiency": "路線効率",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat：全路線",
         "Error (see log)": "エラー（ログを参照）",
         "No vehicles on this line": "この路線に車両がありません",
         "Too new to judge": "判断するには新しすぎます",
@@ -251,6 +261,8 @@
     },
     "ko": {
         "Line efficiency": "노선 효율",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: 모든 노선",
         "Error (see log)": "오류 (로그 참조)",
         "No vehicles on this line": "이 노선에 운송 수단이 없습니다",
         "Too new to judge": "아직 판단하기 이릅니다",
@@ -291,6 +303,8 @@
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: alle lijnen",
         "Error (see log)": "Fout (zie log)",
         "No vehicles on this line": "Geen voertuigen op deze lijn",
         "Too new to judge": "Te nieuw om te beoordelen",
@@ -339,6 +353,8 @@
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: wszystkie linie",
         "Error (see log)": "Błąd (zobacz log)",
         "No vehicles on this line": "Brak pojazdów na tej linii",
         "Too new to judge": "Za wcześnie na ocenę",
@@ -395,6 +411,8 @@
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: todas as linhas",
         "Error (see log)": "Erro (veja o log)",
         "No vehicles on this line": "Nenhum veículo nesta linha",
         "Too new to judge": "Nova demais para avaliar",
@@ -443,6 +461,8 @@
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat: все маршруты",
         "Error (see log)": "Ошибка (см. журнал)",
         "No vehicles on this line": "На маршруте нет транспорта",
         "Too new to judge": "Слишком новый для оценки",
@@ -499,6 +519,8 @@
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat：所有线路",
         "Error (see log)": "错误（见日志）",
         "No vehicles on this line": "此线路没有载具",
         "Too new to judge": "太新，无法评估",
@@ -539,6 +561,8 @@
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
+        "Trim the Fat": "Trim the Fat",
+        "Trim the Fat: all lines": "Trim the Fat：所有路線",
         "Error (see log)": "錯誤（見日誌）",
         "No vehicles on this line": "此路線沒有車輛",
         "Too new to judge": "太新，無法評估",

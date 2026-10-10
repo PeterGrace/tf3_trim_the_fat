@@ -7,6 +7,8 @@
         "gui/pgrace_trim_the_fat/line_data.tl",
         "gui/pgrace_trim_the_fat/metrics.d.tl",
         "gui/pgrace_trim_the_fat/metrics.tl",
+        "gui/pgrace_trim_the_fat/overview.script.tl",
+        "gui/pgrace_trim_the_fat/overview_button.res.lua",
         "gui/pgrace_trim_the_fat/ui.d.tl",
         "gui/pgrace_trim_the_fat/ui.tl"
     ]
