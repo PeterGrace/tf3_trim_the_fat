@@ -21,7 +21,7 @@ global record PgraceTrimTheFatLineData
 		-- a replaced vehicle keeps its history but its age restarts).
 		-- Per-vehicle journal (the statistics window's convention); rows need not sum to the line's balance, which
 		-- uses the line's own journal like the line window.
-		-- nil under a quarter of a year of data (metrics.vehiclePerYear).
+		-- nil under half a year of data (metrics.vehiclePerYear).
 		balancePerYear : number
 		annualised : boolean
 		-- Cargo on board ÷ capacity when the snapshot was taken; nil without capacity.

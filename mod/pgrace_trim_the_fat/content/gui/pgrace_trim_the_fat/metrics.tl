@@ -7,7 +7,7 @@ metrics.MIN_DATA_FRACTION = 1 / 12
 metrics.STUCK_LOAD_NOW = 0.75
 metrics.STUCK_AVERAGE_LOAD = 0.25
 metrics.BACKLOG_VEHICLES = 1
-metrics.MIN_VEHICLE_DATA_FRACTION = 0.25
+metrics.MIN_VEHICLE_DATA_FRACTION = 0.5
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
