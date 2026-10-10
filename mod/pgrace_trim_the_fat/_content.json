@@ -1,6 +1,8 @@
 {
     "archives": null,
     "files": [
+        "gui/pgrace_trim_the_fat/line_card.res.lua",
+        "gui/pgrace_trim_the_fat/line_card.script.tl",
         "gui/pgrace_trim_the_fat/line_data.d.tl",
         "gui/pgrace_trim_the_fat/line_data.tl",
         "gui/pgrace_trim_the_fat/metrics.d.tl",
