@@ -258,3 +258,49 @@ t.test("assess: unknown load now is not flagged", function()
 	local a = metrics.assess(line({ loadNow = NIL }))
 	t.eq(a.notDelivering, false)
 end)
+
+-- Vehicle-time: each vehicle offers capacity only while it has been on the line.
+t.test("averageLoad: vehicles added recently count only for their own time", function()
+	-- 2 vehicles ran all year (one round trip each, 1200 ms) and were 95% full; 4 more were bought just now, so
+	-- today's interval is a sixth of the round trip.
+	local input = line({ vehicleCount = 6, totalCapacity = 600, intervalMs = 200, itemsTransported = 380,
+		vehicleDataMs = 2 * 1200 })
+	near(metrics.averageLoad(input), 0.95)
+	t.eq(metrics.assess(input).verdict, "Busy")
+end)
+
+t.test("averageLoad: nil when no vehicle has any time on the line", function()
+	t.eq(metrics.averageLoad(line({ vehicleDataMs = 0 })), nil)
+end)
+
+t.test("averageLoad: vehicle-time over a full year matches the line-time formula", function()
+	near(metrics.averageLoad(line({ vehicleDataMs = 8 * 1200 })), 0.34)
+end)
+
+-- Money booked on an entity: nonzero for any window ending after `firstMoney`.
+local function moneyFrom(firstMoney)
+	return function(from, to)
+		return to > firstMoney and -1 or 0
+	end
+end
+
+t.test("dataSpan: capped at a year", function()
+	t.eq(metrics.dataSpan(moneyFrom(0), 1000, 5000, 1200), 1200)
+end)
+
+t.test("dataSpan: a new vehicle has data since it was bought", function()
+	t.eq(metrics.dataSpan(moneyFrom(4700), 4700, 5000, 1200), 300)
+end)
+
+t.test("dataSpan: a replaced vehicle keeps its earlier history", function()
+	-- Year window 3800..5000 in slices of 100; money from 4000, purchase time reset to 4700.
+	t.eq(metrics.dataSpan(moneyFrom(4000), 4700, 5000, 1200), 1000)
+end)
+
+t.test("dataSpan: early in the game the window starts at 0", function()
+	t.eq(metrics.dataSpan(moneyFrom(0), 300, 600, 1200), 600)
+end)
+
+t.test("dataSpan: a year too short to slice falls back to the purchase time", function()
+	t.eq(metrics.dataSpan(moneyFrom(0), 7, 10, 6), 3)
+end)

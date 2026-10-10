@@ -189,3 +189,8 @@ overview later.
   The card's refresh row watches each vehicle's purchase time as well as the count, so it also offers a refresh
   after a replacement.
 - **German pass:** "Macht Verlust", "6 Lkws · 2 Halte", "Ø Auslastung 2 % (Ziel 70 %)", header widths all fit.
+- **Average load uses vehicle-time** (from the final review). The interval is today's, but the items cover the
+  year, so buying vehicles made the year look underused ("remove 4 buses" right after adding them). Offered
+  capacity is now Σ each vehicle's own data span ÷ round-trip time (interval × vehicles) × capacity per vehicle ×
+  stops. Sold vehicles' time can't be counted, so right after a trim the load reads a little high until their
+  months roll out of the year.

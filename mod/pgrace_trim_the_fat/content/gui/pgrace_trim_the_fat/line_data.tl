@@ -106,26 +106,11 @@ function line_data.vehicleSignature(line : Engine.Entity) : string
 	return table.concat(parts, ",")
 end
 
-local HISTORY_SLICES = 12
-
--- How long money has been booked on `entities` within the last year, in ms. Usually since `bought`, but replacing
--- a vehicle resets its purchase time and keeps its balance history, so look for money booked before `bought`.
+-- How long money has been booked on `entities` within the last year (metrics.dataSpan).
 local function dataSpan(entities : {Engine.Entity}, bought : integer, now : integer, yearMs : integer) : integer
-	local from = math.max(now - yearMs, 0)
-	if bought <= from then
-		return now - from
-	end
-	if api.engine.util.finance.calculateBalance(entities, from, bought, true) == 0 then
-		return now - bought
-	end
-	-- Start of the first slice (a month by default) with any money in it.
-	local sliceMs = yearMs // HISTORY_SLICES
-	local start = from
-	while start + sliceMs < bought
-			and api.engine.util.finance.calculateBalance(entities, start, start + sliceMs, true) == 0 do
-		start = start + sliceMs
-	end
-	return now - start
+	return metrics.dataSpan(function(from : integer, to : integer) : number
+		return api.engine.util.finance.calculateBalance(entities, from, to, true)
+	end, bought, now, yearMs)
 end
 
 function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.LineSnapshot
@@ -134,6 +119,7 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 	local from = math.max(now - yearMs, 0)
 	local rows : {VehicleRow} = {}
 	local oldest : integer = nil
+	local vehicleDataMs = 0
 	local carrier : Carrier = nil
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
 		local tv = transportVehicle(vehicle)
@@ -147,7 +133,9 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 			end
 			local ageMs = now - bought
 			local balance = api.engine.util.finance.calculateBalance({ vehicle }, from, now, true)
-			local perYear, annualised = metrics.annualise(balance, dataSpan({ vehicle }, bought, now, yearMs), yearMs)
+			local spanMs = dataSpan({ vehicle }, bought, now, yearMs)
+			vehicleDataMs = vehicleDataMs + spanMs
+			local perYear, annualised = metrics.annualise(balance, spanMs, yearMs)
 			rows[#rows + 1] = {
 				entity = vehicle,
 				name = api.engine.util.getEntityName(vehicle),
@@ -172,6 +160,7 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 			intervalMs = (frequency ~= nil and frequency > 0.0001) and 1000 / frequency or nil,
 			stopCount = lineComponent ~= nil and #lineComponent.stops or nil,
 			dataMs = oldest ~= nil and dataSpan({ line }, oldest, now, yearMs) or 0,
+			vehicleDataMs = vehicleDataMs,
 			yearMs = yearMs,
 			cargoTypeCount = cargoTypes,
 			loadNow = line_data.lineLoadNow(line),

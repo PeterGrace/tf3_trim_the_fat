@@ -23,8 +23,11 @@ global record PgraceTrimTheFatMetrics
 		intervalMs : number
 		-- Stops on the line; each round trip runs one leg per stop.
 		stopCount : integer
-		-- Length of the data window: min(one year, time since the oldest vehicle was bought).
+		-- Length of the data window: how long the line has had money booked, at most a year (dataSpan).
 		dataMs : number
+		-- Sum over the vehicles of how long each has been on the line within the data window (dataSpan of its own
+		-- money). nil means every vehicle covers dataMs.
+		vehicleDataMs : number
 		-- Length of a game year in ms. Required (never nil).
 		yearMs : number
 		-- Cargo types the vehicles currently carry (capacity > 0).
@@ -75,6 +78,11 @@ global record PgraceTrimTheFatMetrics
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
+	-- How long money has been booked on something within the last year, in ms, given balanceBetween(from, to).
+	-- Usually since `bought`, but replacing a vehicle resets its purchase time and keeps its balance history, so
+	-- this looks for money booked before `bought`, a twelfth of a year at a time.
+	dataSpan : function(balanceBetween : function(integer, integer) : number, bought : integer, now : integer,
+		yearMs : integer) : integer
 	-- The verdict and the numbers behind it.
 	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
 	assess : function(input : LineInput) : Assessment

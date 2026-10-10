@@ -58,10 +58,17 @@ function metrics.averageLoad(input : PgraceTrimTheFatMetrics.LineInput) : number
 		or input.dataMs == nil or input.dataMs <= 0 then
 		return nil
 	end
-	-- intervalMs is the time between departures at one stop, so dataMs / intervalMs counts round trips; each round
-	-- trip runs one leg per stop, and every leg offers the vehicle's capacity.
-	local roundTrips = input.dataMs / input.intervalMs
-	local offered = roundTrips * (input.totalCapacity / input.vehicleCount) * input.stopCount
+	-- A round trip takes intervalMs × vehicles (the interval is the time between departures at one stop). Each
+	-- vehicle completes vehicleDataMs / roundTripMs round trips in total, each running one leg per stop, and every
+	-- leg offers the vehicle's capacity. Counting each vehicle's own time keeps vehicles bought recently from
+	-- inflating the capacity offered over the year.
+	local count = input.vehicleCount
+	local vehicleDataMs = input.vehicleDataMs or input.dataMs * count
+	if vehicleDataMs <= 0 then
+		return nil
+	end
+	local roundTrips = vehicleDataMs / (input.intervalMs * count)
+	local offered = roundTrips * (input.totalCapacity / count) * input.stopCount
 	return (input.itemsTransported or 0) / offered
 end
 
@@ -70,6 +77,26 @@ function metrics.annualise(amount : number, spanMs : number, yearMs : number) : 
 		return amount, false
 	end
 	return amount * yearMs / spanMs, true
+end
+
+local HISTORY_SLICES = 12
+
+function metrics.dataSpan(balanceBetween : function(integer, integer) : number, bought : integer, now : integer,
+		yearMs : integer) : integer
+	local from = math.max(now - yearMs, 0)
+	if bought <= from then
+		return now - from
+	end
+	local sliceMs = yearMs // HISTORY_SLICES
+	if sliceMs <= 0 or balanceBetween(from, bought) == 0 then
+		return now - bought
+	end
+	-- Start of the first slice (a month by default) with any money in it.
+	local start = from
+	while start + sliceMs < bought and balanceBetween(start, start + sliceMs) == 0 do
+		start = start + sliceMs
+	end
+	return now - start
 end
 
 -- Guards ceil() against float noise: 8 × 0.25 ÷ 0.5 may come out as 4.000000001.
