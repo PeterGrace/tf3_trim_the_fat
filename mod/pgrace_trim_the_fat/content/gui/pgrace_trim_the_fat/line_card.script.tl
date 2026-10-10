@@ -220,7 +220,6 @@ local function buildCardData(line : Engine.Entity) : CardData
 		return { error = true, generation = generation }
 	end
 	local data = dataOrError as CardData
-	line_data.probe(line, data.snapshot, data.assessment) -- PROBE (remove before release)
 	return data
 end
 

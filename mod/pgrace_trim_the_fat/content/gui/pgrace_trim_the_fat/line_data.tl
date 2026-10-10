@@ -2,8 +2,6 @@ local metrics = ug_require "pgrace_trim_the_fat::/gui/pgrace_trim_the_fat/metric
 
 local line_data : PgraceTrimTheFatLineData = {}
 
-local LOG_PREFIX = "[trim_the_fat] "
-
 local type VehicleRow = PgraceTrimTheFatLineData.VehicleRow
 local type Noun = PgraceTrimTheFatLineData.Noun
 
@@ -183,55 +181,6 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 		signature = line_data.vehicleSignature(line),
 		noun = nounFor(carrier, passengers),
 	}
-end
-
--- PROBE (remove before release): the raw inputs, to check units and calibrate the targets in-game.
-function line_data.probe(line : Engine.Entity, snap : PgraceTrimTheFatLineData.LineSnapshot, assessment : PgraceTrimTheFatMetrics.Assessment)
-	local ok, err = pcall(function() : boolean
-		local i = snap.input
-		local __, capacityAll, cargoTypesAll = capacityTotals(line, true)
-		local now = nowMs()
-		local from = math.max(now - i.yearMs, 0) as integer
-		local oldestPurchase = (now - i.dataMs) as integer
-		local balanceBeforeOldest : number = nil
-		if oldestPurchase > from then
-			balanceBeforeOldest = api.engine.util.finance.calculateBalance({ line }, from, oldestPurchase, true)
-		end
-		debugPrint(LOG_PREFIX .. "probe line " .. tostring(line)
-			.. " name=" .. tostring(api.engine.util.getEntityName(line))
-			.. " frequency=" .. tostring(api.engine.util.line.getMaxFrequency(line))
-			.. " intervalMs=" .. tostring(i.intervalMs)
-			.. " stops=" .. tostring(i.stopCount)
-			.. " vehicles=" .. tostring(i.vehicleCount)
-			.. " capacity=" .. tostring(i.totalCapacity)
-			.. " cargoTypes=" .. tostring(i.cargoTypeCount)
-			.. " capacityAll=" .. tostring(capacityAll)
-			.. " cargoTypesAll=" .. tostring(cargoTypesAll)
-			.. " oldestPurchase=" .. tostring(oldestPurchase)
-			.. " balanceBeforeOldest=" .. tostring(balanceBeforeOldest)
-			.. " items=" .. tostring(i.itemsTransported)
-			.. " dataMs=" .. tostring(i.dataMs)
-			.. " yearMs=" .. tostring(i.yearMs)
-			.. " balance=" .. tostring(i.balance)
-			.. " loadA=" .. tostring(assessment.load)
-			.. " loadNow=" .. tostring(line_data.lineLoadNow(line))
-			.. " verdict=" .. tostring(assessment.verdict)
-			.. " noun=" .. tostring(snap.noun))
-		for __, row in ipairs(snap.vehicles) do
-			local logOk, items = pcall(api.engine.util.logbook.getLogValuePerYear, row.entity, "itemsTransported")
-			debugPrint(LOG_PREFIX .. "probe vehicle " .. tostring(row.entity)
-				.. " itemsTransportedOk=" .. tostring(logOk)
-				.. " itemsTransported=" .. tostring(items)
-				.. " bought=" .. tostring(now - row.ageMs)
-				.. " now=" .. tostring(now)
-				.. " ageMs=" .. tostring(row.ageMs)
-				.. " balancePerYear=" .. tostring(row.balancePerYear))
-		end
-		return true
-	end)
-	if not ok then
-		debugPrint(LOG_PREFIX .. "probe failed: " .. tostring(err))
-	end
 end
 
 return line_data

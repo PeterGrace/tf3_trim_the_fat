@@ -44,6 +44,4 @@ global record PgraceTrimTheFatLineData
 	-- The line's vehicles and their purchase times; differs from snapshot.signature once vehicles are bought, sold
 	-- or replaced.
 	vehicleSignature : function(line : Engine.Entity) : string
-	-- PROBE (remove before release): logs the raw inputs for calibration.
-	probe : function(line : Engine.Entity, snap : LineSnapshot, assessment : PgraceTrimTheFatMetrics.Assessment)
 end
