@@ -1,1 +1,1 @@
-require "gui.pgrace_trim_the_fat.util"
+require "gui.pgrace_trim_the_fat.metrics"
