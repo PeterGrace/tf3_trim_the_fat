@@ -48,4 +48,23 @@ function metrics.pluralCategory(language : string, count : integer) : string
 	return count == 1 and "one" or "other"
 end
 
+function metrics.averageLoad(input : PgraceTrimTheFatMetrics.LineInput) : number
+	if input.vehicleCount == nil or input.vehicleCount <= 0
+		or input.totalCapacity == nil or input.totalCapacity <= 0
+		or input.intervalMs == nil or input.intervalMs <= 0
+		or input.dataMs == nil or input.dataMs <= 0 then
+		return nil
+	end
+	local departures = input.dataMs / input.intervalMs
+	local offered = departures * (input.totalCapacity / input.vehicleCount)
+	return (input.itemsTransported or 0) / offered
+end
+
+function metrics.annualise(amount : number, spanMs : number, yearMs : number) : number, boolean
+	if spanMs == nil or spanMs <= 0 or spanMs >= yearMs then
+		return amount, false
+	end
+	return amount * yearMs / spanMs, true
+end
+
 return metrics

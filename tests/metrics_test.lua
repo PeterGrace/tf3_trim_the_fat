@@ -39,3 +39,66 @@ t.test("pluralCategory: CLDR integer rules", function()
 	t.eq(metrics.pluralCategory("zh_TW", 3), "other")
 	t.eq(metrics.pluralCategory(nil, 1), "one")
 end)
+
+-- A line of 8 vehicles × 100 capacity, a departure every 100 ms, a full year of 1200 ms of data:
+-- 12 departures × 100 per vehicle = 1200 capacity offered.
+-- pairs() skips nil values, so an override of NIL clears the field.
+local NIL = {}
+
+local function line(overrides)
+	local input = {
+		vehicleCount = 8,
+		balance = 400,
+		itemsTransported = 408,
+		totalCapacity = 800,
+		intervalMs = 100,
+		dataMs = 1200,
+		yearMs = 1200,
+		cargoTypeCount = 1,
+	}
+	for k, v in pairs(overrides or {}) do
+		if v == NIL then
+			v = nil
+		end
+		input[k] = v
+	end
+	return input
+end
+
+local function near(actual, expected, label)
+	if actual == nil or math.abs(actual - expected) > 1e-9 then
+		error(("%s: expected %s, got %s"):format(label or "near", tostring(expected), tostring(actual)), 2)
+	end
+end
+
+t.test("averageLoad: carried ÷ offered", function()
+	near(metrics.averageLoad(line({ itemsTransported = 600 })), 0.5)
+	near(metrics.averageLoad(line()), 0.34)
+end)
+
+t.test("averageLoad: a young line is measured over its own data window", function()
+	near(metrics.averageLoad(line({ dataMs = 600, itemsTransported = 300 })), 0.5)
+end)
+
+t.test("averageLoad: nil when it can't be known", function()
+	t.eq(metrics.averageLoad(line({ intervalMs = 0 })), nil, "interval 0")
+	t.eq(metrics.averageLoad(line({ intervalMs = NIL })), nil, "interval nil")
+	t.eq(metrics.averageLoad(line({ totalCapacity = 0 })), nil, "no capacity")
+	t.eq(metrics.averageLoad(line({ vehicleCount = 0 })), nil, "no vehicles")
+	t.eq(metrics.averageLoad(line({ dataMs = 0 })), nil, "no data")
+end)
+
+t.test("annualise: scales partial years up and flags it", function()
+	local amount, scaled = metrics.annualise(100, 300, 1200)
+	t.eq(amount, 400)
+	t.eq(scaled, true)
+	amount, scaled = metrics.annualise(100, 1200, 1200)
+	t.eq(amount, 100)
+	t.eq(scaled, false)
+	amount, scaled = metrics.annualise(100, 5000, 1200)
+	t.eq(amount, 100, "older than a year")
+	t.eq(scaled, false)
+	amount, scaled = metrics.annualise(-50, 0, 1200)
+	t.eq(amount, -50, "no span")
+	t.eq(scaled, false)
+end)
