@@ -23,6 +23,7 @@ global record PgraceTrimTheFatMetrics
 		intervalMs : number
 		-- Length of the data window: min(one year, time since the oldest vehicle was bought).
 		dataMs : number
+		-- Length of a game year in ms. Required (never nil).
 		yearMs : number
 		-- Cargo types the vehicles currently carry (capacity > 0).
 		cargoTypeCount : integer
@@ -59,7 +60,8 @@ global record PgraceTrimTheFatMetrics
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
-	-- The verdict and the numbers behind it. See the spec §1 for the rules.
+	-- The verdict and the numbers behind it.
+	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion.
 	assess : function(input : LineInput) : Assessment
 	-- Whole percent, rounded half up (0.344 → 34); nil for nil.
 	percent : function(fraction : number) : integer
