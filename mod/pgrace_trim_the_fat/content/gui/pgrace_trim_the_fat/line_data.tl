@@ -104,25 +104,25 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
 		local tv = transportVehicle(vehicle)
 		if tv ~= nil then
-		local bought = purchaseTime(tv) or now
-		if oldest == nil or bought < oldest then
-			oldest = bought
-		end
-		if carrier == nil then
-			carrier = tv.carrier
-		end
-		local ageMs = now - bought
-		local balance = api.engine.util.finance.calculateBalance({ vehicle }, from, now, true)
-		local perYear, annualised = metrics.annualise(balance, ageMs, yearMs)
-		rows[#rows + 1] = {
-			entity = vehicle,
-			name = api.engine.util.getEntityName(vehicle),
-			ageText = api.engine.util.formatAge(bought, now),
-			ageMs = ageMs,
-			balancePerYear = perYear,
-			annualised = annualised,
-			loadNow = line_data.vehicleLoadNow(vehicle),
-		}
+			local bought = purchaseTime(tv) or now
+			if oldest == nil or bought < oldest then
+				oldest = bought
+			end
+			if carrier == nil then
+				carrier = tv.carrier
+			end
+			local ageMs = now - bought
+			local balance = api.engine.util.finance.calculateBalance({ vehicle }, from, now, true)
+			local perYear, annualised = metrics.annualise(balance, ageMs, yearMs)
+			rows[#rows + 1] = {
+				entity = vehicle,
+				name = api.engine.util.getEntityName(vehicle),
+				ageText = api.engine.util.formatAge(bought, now),
+				ageMs = ageMs,
+				balancePerYear = perYear,
+				annualised = annualised,
+				loadNow = line_data.vehicleLoadNow(vehicle),
+			}
 		end
 	end
 	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
