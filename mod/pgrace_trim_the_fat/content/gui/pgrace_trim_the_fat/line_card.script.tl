@@ -318,7 +318,7 @@ local NameCell = react.RegisterRecipe("PgraceTrimTheFatNameCell", function(param
 		return builtin.BoxLayout{ children = {} }
 	end
 	if not existsState:old() then
-		return textRow(row.name, "font-scale-body, secondary")
+		return textRow(row.name, "font-scale-body")
 	end
 	return builtin.BoxLayout{
 		orientation = builtin.type.Orientation.Horizontal,
