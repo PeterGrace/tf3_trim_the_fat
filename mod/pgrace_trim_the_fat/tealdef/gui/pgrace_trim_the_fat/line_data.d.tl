@@ -36,6 +36,14 @@ global record PgraceTrimTheFatLineData
 		noun : Noun
 	end
 
+	-- The line-level numbers without per-vehicle rows (what the overview needs).
+	record LineFacts
+		input : PgraceTrimTheFatMetrics.LineInput
+		-- Of the first vehicle; nil without vehicles.
+		carrier : Carrier
+		noun : Noun
+	end
+
 	snapshot : function(line : Engine.Entity) : LineSnapshot
 	-- Cargo on board ÷ capacity across the line's vehicles right now; nil without capacity.
 	lineLoadNow : function(line : Engine.Entity) : number
@@ -46,4 +54,8 @@ global record PgraceTrimTheFatLineData
 	-- The line's vehicles and their purchase times; differs from snapshot.signature once vehicles are bought, sold
 	-- or replaced.
 	vehicleSignature : function(line : Engine.Entity) : string
+	-- As snapshot, without the per-vehicle rows, names, ages and live loads.
+	lineInput : function(line : Engine.Entity) : LineFacts
+	-- The player's lines, as the F2 Lines table lists them.
+	playerLines : function() : {Engine.Entity}
 end
