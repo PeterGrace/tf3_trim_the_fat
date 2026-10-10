@@ -59,6 +59,9 @@ Line ↕                     Verdict ↕                  Per year ↕   Load �
 - **Filters:** five toggles with the F2 icons (`::/gui/statistics/icons/vehicle_{bus,tram,train,ship,airplane}_18.tga`
   and F2's tooltips), all off at first (every line shown); turning some on shows only those, as in F2 (`line_util.filterLine(allowedCarriers, line)`). Rows are
   hidden with `fnUserFilter`; `rowKeys` only changes on ⟳.
+- **Verdict filters:** text toggles "Losing" (all three losing kinds), "Too many", "Busy", "OK" in the verdict
+  colours, left of the transport icons, with the same rule (none on shows all); both filters apply together. Too new
+  and No vehicles have no toggle and show only while no verdict filter is on.
 - **Summary line:** follows the filters (only shown lines count). Parts with a zero count are left out; with nothing
   to report it reads "No lines are losing money or have too many vehicles."
 - **Columns** (`builtin.DataTable`):

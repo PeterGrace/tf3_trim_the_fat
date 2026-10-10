@@ -49,6 +49,8 @@ local record Row
 	vehicleCount : integer
 	-- matches[i]: the line belongs to categories()[i].
 	matches : {integer : boolean}
+	-- nil for errors.
+	kind : VerdictKind
 	verdictText : string
 	verdictClass : string
 	-- Severity, then balance per year (lower first); errors last.
@@ -69,6 +71,28 @@ local record OverviewData
 	sortAscending : boolean
 	-- Differs per build, so a refresh remounts the table (cells keep their first userParam).
 	generation : integer
+end
+
+-- The verdict filters. TooNew and NoVehicles have none: there's nothing to act on, and they show while no verdict
+-- filter is on.
+local record VerdictGroup
+	label : string
+	tooltip : string
+	class : string
+	kinds : {VerdictKind : boolean}
+end
+
+local function verdictGroups() : {VerdictGroup}
+	return {
+		{ label = _("Losing"), tooltip = _("Show lines losing money"), class = "font-scale-body, negative",
+			kinds = { Losing = true, LosingTrim = true, LosingStuck = true } },
+		{ label = _("Too many"), tooltip = _("Show profitable lines that could run with fewer vehicles"),
+			class = "font-scale-body, warning", kinds = { TooMany = true } },
+		{ label = _("Busy"), tooltip = _("Show lines that may need more vehicles"), class = "font-scale-body, warning",
+			kinds = { Busy = true } },
+		{ label = _("OK"), tooltip = _("Show profitable lines with a good load"), class = "font-scale-body, positive",
+			kinds = { Ok = true } },
+	}
 end
 
 local function verdictText(kind : VerdictKind, a : Assessment) : string, string
@@ -109,6 +133,7 @@ local function buildRow(line : Engine.Entity, cats : {Category}) : Row
 		local kind = metrics.verdictKind(a)
 		row.assessment = a
 		row.vehicleCount = facts.input.vehicleCount
+		row.kind = kind
 		row.verdictText, row.verdictClass = verdictText(kind, a)
 		row.verdictSort = metrics.severity(kind) * SEVERITY_SCALE + (a.balancePerYear or 0)
 		row.balanceText = ui.moneyText(a.balancePerYear, a.annualised)
@@ -272,8 +297,16 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 		end
 		return enabled
 	end)
+	local groups = react.useStateLazy(function() : {VerdictGroup}
+		return verdictGroups()
+	end):old()
+	-- verdictEnabled[i] for groups[i], with the same rule as the transport filters.
+	local verdictState = react.useStateLazy(function() : {integer : boolean}
+		return {}
+	end)
 	local data = dataState:old()
 	local enabled = enabledState:old()
+	local verdictEnabled = verdictState:old()
 
 	local function onSort(column : integer, ascending : boolean)
 		data.sortColumn, data.sortAscending = column, ascending
@@ -289,6 +322,24 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	-- class "category", inside a box of class "filter".
 	local filterButtons : {TreeNodeId} = {}
 	local filterKey = ""
+	local verdictButtons : {TreeNodeId} = {}
+	for i, group in ipairs(groups) do
+		filterKey = filterKey .. (verdictEnabled[i] and "1" or "0")
+		verdictButtons[#verdictButtons + 1] = builtin.ToggleButton{
+			meta = { class = "verdict", tooltip = group.tooltip },
+			value = verdictEnabled[i] and 1 or 0,
+			content = builtin.TextView{ meta = { class = group.class }, text = group.label },
+			onValueChange = function(value : integer)
+				local next : {integer : boolean} = {}
+				for j = 1, #groups do
+					next[j] = verdictEnabled[j] == true
+				end
+				next[i] = value == 1
+				verdictState:set(next)
+			end,
+		}
+	end
+	filterKey = filterKey .. "_"
 	for i, cat in ipairs(cats) do
 		filterKey = filterKey .. (enabled[i] and "1" or "0")
 		filterButtons[#filterButtons + 1] = builtin.ToggleButton{
@@ -343,6 +394,11 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 					builtin.BoxLayout{
 						meta = { class = "filter" },
 						orientation = builtin.type.Orientation.Horizontal,
+						children = verdictButtons,
+					},
+					builtin.BoxLayout{
+						meta = { class = "filter" },
+						orientation = builtin.type.Orientation.Horizontal,
 						children = filterButtons,
 					},
 					gui_react_util.makeHorizontalSpacer(),
@@ -369,11 +425,21 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 		for i = 1, #cats do
 			anyEnabled = anyEnabled or enabled[i]
 		end
+		local anyVerdict = false
+		for i = 1, #groups do
+			anyVerdict = anyVerdict or verdictEnabled[i] == true
+		end
 		for line, row in pairs(data.rows) do
 			local match = not anyEnabled
 			for i = 1, #cats do
 				match = match or (enabled[i] and row.matches[i])
 			end
+			-- Both filters apply: a transport type and a verdict.
+			local verdictMatch = not anyVerdict
+			for i = 1, #groups do
+				verdictMatch = verdictMatch or (verdictEnabled[i] == true and row.kind ~= nil and groups[i].kinds[row.kind] == true)
+			end
+			match = match and verdictMatch
 			visible[line] = match
 			if match and not row.error then
 				shown[#shown + 1] = row.assessment

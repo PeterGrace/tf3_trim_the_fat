@@ -84,6 +84,10 @@ function data()
 	a(root .. " !filter ImageView!category", {
 		padding = { 6, 6, 6, 6 },
 	})
+	-- Text toggles for the verdict filters: as tall as the icon toggles (6 + 18 + 6).
+	a(root .. " !filter ToggleButton!verdict", {
+		padding = { 4, 8, 4, 8 },
+	})
 	-- Spaced off the filters as F2's eye toggle.
 	a(root .. " !filter !refresh", {
 		margin = { 0, 0, 0, 12 },
