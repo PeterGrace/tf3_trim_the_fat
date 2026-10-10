@@ -79,6 +79,13 @@ function ui.stopsText(count : integer) : string
 	})
 end
 
+function ui.linesText(count : integer) : string
+	return ui.countText(count, {
+		one = _("{count} lines|one"), few = _("{count} lines|few"),
+		many = _("{count} lines|many"), other = _("{count} lines|other"),
+	})
+end
+
 function ui.vehiclesText(noun : Noun, count : integer) : string
 	if noun == "train" then
 		return ui.countText(count, {

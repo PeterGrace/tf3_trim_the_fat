@@ -24,6 +24,7 @@ global record PgraceTrimTheFatUi
 	formatOneDecimal : function(value : number) : string
 	countText : function(count : integer, forms : PluralForms) : string
 	stopsText : function(count : integer) : string
+	linesText : function(count : integer) : string
 	vehiclesText : function(noun : PgraceTrimTheFatLineData.Noun, count : integer) : string
 	-- A layout holding one TextView (a recipe must return a layout).
 	textRow : function(text : string, class : string) : TreeNodeId
