@@ -62,7 +62,8 @@ global record PgraceTrimTheFatMetrics
 	BUSY_LOAD : number
 	-- Below this share of a year of data the verdict is TooNew.
 	MIN_DATA_FRACTION : number
-	-- At or above this current load (line-wide, right now), with a low average, the line is not delivering.
+	-- At or above this current load (line-wide, right now), with a low average, the line is not delivering. Well
+	-- below "full", because one part-loaded vehicle on a small line moves the snapshot a lot.
 	STUCK_LOAD_NOW : number
 	-- Below this average load, with full vehicles now, the line is not delivering.
 	STUCK_AVERAGE_LOAD : number

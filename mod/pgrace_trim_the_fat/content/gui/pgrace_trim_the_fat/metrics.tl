@@ -4,7 +4,7 @@ metrics.TARGET_DEFAULT = 0.70
 metrics.TARGET_SINGLE_CARGO = 0.50
 metrics.BUSY_LOAD = 0.95
 metrics.MIN_DATA_FRACTION = 1 / 12
-metrics.STUCK_LOAD_NOW = 0.90
+metrics.STUCK_LOAD_NOW = 0.75
 metrics.STUCK_AVERAGE_LOAD = 0.25
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number

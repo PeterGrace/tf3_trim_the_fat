@@ -216,7 +216,7 @@ t.test("assess: exactly a month of data is enough", function()
 end)
 
 t.test("constants: not-delivering thresholds", function()
-	t.eq(metrics.STUCK_LOAD_NOW, 0.90)
+	t.eq(metrics.STUCK_LOAD_NOW, 0.75)
 	t.eq(metrics.STUCK_AVERAGE_LOAD, 0.25)
 end)
 
@@ -237,9 +237,16 @@ t.test("assess: not delivering keeps the Losing verdict", function()
 end)
 
 t.test("assess: below the load-now threshold still trims", function()
-	local a = metrics.assess(line({ loadNow = 0.85, itemsTransported = 70 }))
+	local a = metrics.assess(line({ loadNow = 0.70, itemsTransported = 70 }))
 	t.eq(a.notDelivering, false)
 	t.eq(a.trim > 0, true, "trim suggested")
+end)
+
+-- Seen in-game: two trucks at 100% and 70% on a line averaging 7%.
+t.test("assess: one of two vehicles part-loaded is still not delivering", function()
+	local a = metrics.assess(line({ loadNow = 0.85, itemsTransported = 70 }))
+	t.eq(a.notDelivering, true)
+	t.eq(a.trim, 0)
 end)
 
 t.test("assess: full now with a decent average is delivering", function()
