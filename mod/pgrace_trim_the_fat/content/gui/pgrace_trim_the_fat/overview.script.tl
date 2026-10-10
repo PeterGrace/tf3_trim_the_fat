@@ -71,6 +71,12 @@ local record OverviewData
 	sortAscending : boolean
 	-- Differs per build, so a refresh remounts the table (cells keep their first userParam).
 	generation : integer
+	-- The rows shown at the last render, for the scroll after a sort.
+	visible : {integer : boolean}
+	-- Frames left until the table scrolls to its first row after a header click (0: nothing pending). A re-sorting
+	-- table keeps its current row (the last row clicked, else the first) in view, which leaves the list scrolled
+	-- partway down; Commuter Compass had the same.
+	scrollSteps : integer
 end
 
 -- The verdict filters. TooNew and NoVehicles have none: there's nothing to act on, and they show while no verdict
@@ -160,7 +166,7 @@ local nextGeneration = 0
 local function buildOverview(cats : {Category}) : OverviewData
 	nextGeneration = nextGeneration + 1
 	local data : OverviewData = { error = false, rows = {}, keys = {}, sortColumn = 3, sortAscending = true,
-		generation = nextGeneration }
+		generation = nextGeneration, visible = {}, scrollSteps = 0 }
 	local start = os.clock() -- PROBE (remove before release)
 	local ok, err = pcall(function() : boolean
 		for __, line in ipairs(line_data.playerLines()) do
@@ -220,35 +226,72 @@ local VehiclesCell = makeNumberCell("PgraceTrimTheFatOverviewVehiclesCell", func
 	return row.vehiclesText
 end, nil)
 
-local function makeTable(data : OverviewData, visible : {integer : boolean}, filterKey : string,
-		onSort : function(integer, boolean)) : TreeNodeId
-	local function number(rowKey : integer, field : function(Row) : number, missing : number) : number
-		local row = data.rows[rowKey]
-		local value = (row ~= nil and not row.error) and field(row) or nil
+-- What each column sorts on; the table and the scroll-to-top after a sort both use it.
+local function compareValue(data : OverviewData, column : integer, rowKey : integer) : any
+	local row = data.rows[rowKey]
+	if row == nil then
+		return nil
+	end
+	local function number(field : function(Row) : number, missing : number) : number
+		local value = (not row.error) and field(row) or nil
 		return value or missing
 	end
-	return builtin.DataTable{
+	if column == 1 then
+		return row.name
+	elseif column == 2 then
+		return row.verdictSort
+	elseif column == 3 then
+		return number(function(r : Row) : number return r.assessment.balancePerYear end, math.huge)
+	elseif column == 4 then
+		return number(function(r : Row) : number return r.assessment.load end, -1)
+	end
+	return number(function(r : Row) : number return r.vehicleCount end, -1)
+end
+
+-- The visible row that sorts first under the current sort, or nil.
+local function firstRow(data : OverviewData, visible : {integer : boolean}) : integer
+	local best : integer = nil
+	local bestValue : any = nil
+	for __, key in ipairs(data.keys) do
+		if visible[key] then
+			local value = compareValue(data, data.sortColumn, key)
+			if best == nil then
+				best, bestValue = key, value
+			else
+				local ok, before = pcall(function() : boolean
+					if data.sortAscending then
+						return (value as number) < (bestValue as number)
+					end
+					return (value as number) > (bestValue as number)
+				end)
+				if ok and before then
+					best, bestValue = key, value
+				end
+			end
+		end
+	end
+	return best
+end
+
+local function makeTable(data : OverviewData, visible : {integer : boolean}, filterKey : string,
+		onSort : function(integer, boolean),
+		tableRef : ReactRefWrapApiT<Builtin.DataTableParam, Builtin.DataTableApi>) : TreeNodeId
+	local function column(index : integer) : function(integer) : any
+		return function(rowKey : integer) : any
+			return compareValue(data, index, rowKey)
+		end
+	end
+	return builtin.DataTable(react.ref(tableRef), {
 		meta = { localKey = "lines_" .. tostring(data.generation) .. "_" .. filterKey },
 		columns = {
-			builtin.ColumnDesc{ name = _("Line"), recipe = LineCell, weight = 3,
-				getCompareValue = function(rowKey : integer) : any return data.rows[rowKey].name end },
-			builtin.ColumnDesc{ name = _("Verdict"), recipe = VerdictCell, weight = 2,
-				getCompareValue = function(rowKey : integer) : any return data.rows[rowKey].verdictSort end },
+			builtin.ColumnDesc{ name = _("Line"), recipe = LineCell, weight = 3, getCompareValue = column(1) },
+			builtin.ColumnDesc{ name = _("Verdict"), recipe = VerdictCell, weight = 2, getCompareValue = column(2) },
 			builtin.ColumnDesc{ name = _("Per year"), tooltip = _("Balance per year"), recipe = BalanceCell, weight = 1.2,
-				headerStyleClass = RIGHT_ALIGNED,
-				getCompareValue = function(rowKey : integer) : any
-					return number(rowKey, function(r : Row) : number return r.assessment.balancePerYear end, math.huge)
-				end },
+				headerStyleClass = RIGHT_ALIGNED, getCompareValue = column(3) },
 			builtin.ColumnDesc{ name = _("Load"), tooltip = _("Average load over the last 12 months"), recipe = LoadCell, weight = 0.8,
-				headerStyleClass = RIGHT_ALIGNED,
-				getCompareValue = function(rowKey : integer) : any
-					return number(rowKey, function(r : Row) : number return r.assessment.load end, -1)
-				end },
+				headerStyleClass = RIGHT_ALIGNED, getCompareValue = column(4) },
 			builtin.ColumnDesc{ name = _("Vehicles"), recipe = VehiclesCell, weight = 1.2,
-				headerStyleClass = RIGHT_ALIGNED,
-				getCompareValue = function(rowKey : integer) : any
-					return number(rowKey, function(r : Row) : number return r.vehicleCount end, -1)
-				end },
+				headerStyleClass = RIGHT_ALIGNED, getCompareValue = column(5) },
 		},
 		rowKeys = data.keys,
 		userParam = data,
@@ -257,7 +300,7 @@ local function makeTable(data : OverviewData, visible : {integer : boolean}, fil
 		fnUserFilter = function(rowKey : integer) : boolean
 			return visible[rowKey] or false
 		end,
-	}
+	})
 end
 
 local function summaryText(s : PgraceTrimTheFatMetrics.Summary) : string
@@ -307,8 +350,29 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	local data = dataState:old()
 	local enabled = enabledState:old()
 	local verdictEnabled = verdictState:old()
+	local tableRef = react.useNodeRef(builtin.DataTable)
+
+	-- After a sort, scroll the table to its new first row, a few frames later so it has re-sorted.
+	react.onStep(function()
+		if data.scrollSteps <= 0 then
+			return
+		end
+		data.scrollSteps = data.scrollSteps - 1
+		if data.scrollSteps == 0 then
+			local key = firstRow(data, data.visible)
+			if key ~= nil and not tableRef:hasExpired() then
+				pcall(function() : boolean
+					tableRef:get():getApi().scrollToRowKey(key, true)
+					return true
+				end)
+			end
+		end
+	end)
 
 	local function onSort(column : integer, ascending : boolean)
+		if column ~= data.sortColumn or ascending ~= data.sortAscending then
+			data.scrollSteps = 3
+		end
 		data.sortColumn, data.sortAscending = column, ascending
 	end
 
@@ -447,7 +511,8 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			end
 		end
 		body[#body + 1] = ui.textRow(summaryText(metrics.summarise(shown)), "font-scale-annotation")
-		body[#body + 1] = makeTable(data, visible, filterKey, onSort)
+		data.visible = visible
+		body[#body + 1] = makeTable(data, visible, filterKey, onSort, tableRef)
 		if anyAnnualised then
 			body[#body + 1] = ui.textRow(_("* scaled up to a full year from less than a year of data"), "font-scale-annotation")
 		end
