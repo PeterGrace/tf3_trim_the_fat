@@ -126,6 +126,23 @@ local function dataSpan(entities : {Engine.Entity}, bought : integer, now : inte
 	end, bought, now, yearMs)
 end
 
+-- The most passengers waiting for the line at one of its stops (as Commuter Compass counts them); nil when the
+-- count fails.
+local function waitingMax(line : Engine.Entity, stopCount : integer) : integer
+	local ok, result = pcall(function() : integer
+		local passenger = api.res.cargoTypeRep.getPassengerCargoTypeId()
+		local most = 0
+		for stop = 0, stopCount - 1 do
+			local waiting = api.engine.system.simEntityAtTerminalSystem.getLineStopSimEntitiesCount(line, stop, passenger)
+			if waiting > most then
+				most = waiting
+			end
+		end
+		return most
+	end)
+	return ok and result as integer or nil
+end
+
 -- The line-level numbers, and the vehicle rows when withRows is set (the overview skips them).
 local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimTheFatLineData.LineFacts, {VehicleRow}
 	local now = nowMs()
@@ -182,6 +199,7 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			cargoTypeCount = cargoTypes,
 			loadNow = line_data.lineLoadNow(line),
 			carriesPassengers = passengers,
+			waitingMax = (passengers and lineComponent ~= nil) and waitingMax(line, #lineComponent.stops) or nil,
 		},
 		noun = nounFor(carrier, passengers),
 	}

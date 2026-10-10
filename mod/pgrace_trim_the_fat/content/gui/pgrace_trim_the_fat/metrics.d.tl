@@ -48,6 +48,9 @@ global record PgraceTrimTheFatMetrics
 		carriesPassengers : boolean
 		-- Line-wide cargo on board ÷ capacity at snapshot time; nil when unknown.
 		loadNow : number
+		-- The most passengers waiting for the line at any one of its stops right now; nil when unknown or not a
+		-- passenger line.
+		waitingMax : integer
 	end
 
 	record Assessment
@@ -67,6 +70,9 @@ global record PgraceTrimTheFatMetrics
 		-- True when the vehicles are full now but carried little over the window: cargo is on board but not being
 		-- unloaded. No trim is suggested then.
 		notDelivering : boolean
+		-- True when waitingMax is at least BACKLOG_VEHICLES vehicles' worth of capacity: no trim, and Busy unless
+		-- Losing.
+		backlog : boolean
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -94,6 +100,8 @@ global record PgraceTrimTheFatMetrics
 	STUCK_LOAD_NOW : number
 	-- Below this average load, with full vehicles now, the line is not delivering.
 	STUCK_AVERAGE_LOAD : number
+	-- Passengers waiting at one stop, in vehicles' worth of capacity, that count as a backlog.
+	BACKLOG_VEHICLES : number
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
@@ -111,7 +119,7 @@ global record PgraceTrimTheFatMetrics
 	dataSpan : function(balanceBetween : function(integer, integer) : number, bought : integer, now : integer,
 		yearMs : integer) : integer
 	-- The verdict and the numbers behind it.
-	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
+	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), Busy (backlog), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
 	assess : function(input : LineInput) : Assessment
 	-- Whole percent, rounded half up (0.344 → 34); nil for nil.
 	percent : function(fraction : number) : integer

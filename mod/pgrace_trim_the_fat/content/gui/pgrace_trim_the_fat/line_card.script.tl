@@ -16,6 +16,13 @@ local type Assessment = PgraceTrimTheFatMetrics.Assessment
 local type LineSnapshot = PgraceTrimTheFatLineData.LineSnapshot
 local type VehicleRow = PgraceTrimTheFatLineData.VehicleRow
 
+local function passengersText(count : integer) : string
+	return ui.countText(count, {
+		one = _("{count} passengers|one"), few = _("{count} passengers|few"),
+		many = _("{count} passengers|many"), other = _("{count} passengers|other"),
+	})
+end
+
 -- Card data ----------------------------------------------------------------------------------------------------
 
 -- Built once when the window opens and handed to the table as userParam (cells keep their first userParam).
@@ -115,7 +122,9 @@ local function verdictTooltip(data : CardData) : string
 		})
 		parts[#parts + 1] = _("Fewer vehicles means a longer wait, which can cost passengers or cargo.")
 	end
-	if a.verdict == "Busy" then
+	if a.backlog then
+		parts[#parts + 1] = _("Passengers are piling up at a stop, so the line needs more vehicles, whatever the average load says.")
+	elseif a.verdict == "Busy" then
 		parts[#parts + 1] = ui.fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
 			{ busy = ui.formatPercent(metrics.BUSY_LOAD) })
 	end
@@ -343,6 +352,10 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 				},
 			},
 		})
+	end
+	if a.backlog then
+		add(ui.textRow(ui.fill(_("{passengers} waiting at one stop: fewer vehicles would leave more behind."),
+			{ passengers = passengersText(input.waitingMax) }), "font-scale-body, warning"))
 	end
 	if a.notDelivering then
 		add(ui.textRow(_("Vehicles are full but deliver little: check where the cargo is unloaded."),

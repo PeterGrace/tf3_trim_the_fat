@@ -201,3 +201,8 @@ overview later.
 - **Selling a vehicle** with the card open: the row's locate button disappeared, then came back seconds later
   (presumably its ID was reused), so the row checks that the vehicle is still listed on the line, not only that
   the entity exists.
+- **Backlog** (2026-10-10): a 7-stop bus line with 290 passengers waiting at its hub read an average load of 35% and
+  got "Too many vehicles". The average undercounts on lines with many stops, and it never looked at waiting
+  passengers. `line_data` now reads the most passengers waiting at any of the line's stops
+  (`getLineStopSimEntitiesCount`), and `assess` treats a busload or more (`BACKLOG_VEHICLES = 1` × capacity per
+  vehicle) as a backlog: no trim, verdict Busy unless Losing, and the card shows how many are waiting.
