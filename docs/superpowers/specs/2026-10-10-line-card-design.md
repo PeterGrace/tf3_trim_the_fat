@@ -170,9 +170,22 @@ overview later.
 - `getMaxFrequency` is departures per second: 0.01094 → an interval of 91 s (the line window showed 97 s, read at a
   different moment).
 - The line balance from `calculateBalance({line})` equals the sum of the per-vehicle balances (2 258 769). The base
-  Balance card's "Last Year" (2 418 472) is a different window, probably the previous calendar year.
+  Balance card's "Last Year" (2 418 472) is a different window: the previous calendar year, like the chart's bars.
+  That difference is the "lifetime or per year?" confusion this mod started from.
 - Vehicles have an `itemsTransported` log, but it reads 0, so per-vehicle average load isn't available.
 - On bus lines, capacity with `allCapacities` true equals capacity with it false.
 - Load A first ignored the stop count and read 180% on a 2-stop bus line. With × stops, the same line (574 items,
   interval 91 384 ms, year 1 461 000 ms, capacity 140, 7 vehicles, 2 stops) reads about 90%, matching the live load
   of 89–100%.
+- **Not delivering.** A freight line can lose money while its vehicles sit full (cargo loaded but never unloaded,
+  e.g. no acceptor at the far end): average load 5–9%, load now 85–100%. Removing vehicles is the wrong advice
+  there, so `assess` sets `notDelivering` (load now ≥ `STUCK_LOAD_NOW = 0.75` and average load <
+  `STUCK_AVERAGE_LOAD = 0.25`), the card shows a hint instead of the trim suggestion, and the verdict is unchanged.
+  The cut-off started at 90%, but a two-truck line at 100% + 70% read 85% and the advice flipped between visits.
+- **Replacing a vehicle** keeps its entity, name and balance history and resets only `purchaseTime`. Annualising
+  from the purchase time turned a full year's −323k into −1.2M. The data span is now measured from the first
+  month in the last year with any money booked (`dataSpan` in `line_data.tl`), for vehicles and the line alike, so
+  a replaced vehicle's "Per year" covers the slot, not the body. Age still shows the body's age, as the base game.
+  The card's refresh row watches each vehicle's purchase time as well as the count, so it also offers a refresh
+  after a replacement.
+- **German pass:** "Macht Verlust", "6 Lkws · 2 Halte", "Ø Auslastung 2 % (Ziel 70 %)", header widths all fit.
