@@ -120,7 +120,7 @@ if strings_path.exists():
     used = set()
     for tl in (MOD / "content").rglob("*.tl"):
         if not tl.name.endswith(".d.tl"):
-            used |= {m.encode().decode("unicode_escape") for m in re.findall(r'_\("((?:[^"\\]|\\.)*)"\)', tl.read_text(encoding="utf-8"))}
+            used |= {m.encode("latin-1", "backslashreplace").decode("unicode_escape") for m in re.findall(r'_\("((?:[^"\\]|\\.)*)"\)', tl.read_text(encoding="utf-8"))}
     plural_keys = {k for k in used if re.search(r"\|(one|few|many|other)$", k)}
     for lang in sorted(set(PLURAL_FORMS) - set(translations)):
         if lang != "en" or plural_keys:  # English needs entries only for plural keys
