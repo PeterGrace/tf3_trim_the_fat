@@ -306,8 +306,16 @@ end)
 local NameCell = react.RegisterRecipe("PgraceTrimTheFatNameCell", function(params : Builtin.TableCellParam) : TreeNodeId
 	local data = params.userParam as CardData
 	local row = data.rows[params.rowKey]
+	-- A sold vehicle's row stays until the player refreshes; its buttons would act on a missing entity.
+	local existsState = engine_react_util.useStepStateTimer(function() : boolean
+		local ok, existsOrError = pcall(api.engine.entityExists, params.rowKey)
+		return ok and existsOrError as boolean
+	end, 1.0)
 	if row == nil then
 		return builtin.BoxLayout{ children = {} }
+	end
+	if not existsState:old() then
+		return textRow(row.name, "font-scale-body, secondary")
 	end
 	return builtin.BoxLayout{
 		orientation = builtin.type.Orientation.Horizontal,
