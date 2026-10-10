@@ -889,7 +889,31 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function() : T
 end)
 ```
 
-The window recipe from Task 4 stays (`content = Overview()`).
+The window recipe from Task 4 stays (`content = Overview()`), with two additions found in in-game round 1 (the window
+opened tiny at the screen's top-left, over the game bar's buttons):
+
+- `initialX = 0.5, initialY = 0.5` in its `builtin.Window{...}` (screen fractions, as the base mod manager uses);
+- a stylesheet `content/gui/pgrace_trim_the_fat/overview.css.lua` sizing it the way F2's `statistics.css.lua` does:
+
+```lua
+local ssu = require "::/gui/main/stylesheetutil.lua"
+
+function data()
+	local result = {}
+	local a = ssu.makeAdder(result)
+
+	a("#pgrace_trim_the_fat.overview Window::Content", {
+		padding = { 8, 8, 12, 8 },
+	})
+	a("#pgrace_trim_the_fat.overview", {
+		size = { "70vw", "75vh" },
+	})
+
+	return result
+end
+```
+
+Round 1 measured 116 lines in 45 ms, so computing everything on open (no batching) stays.
 
 Notes for type-check failures: `match = match or (enabled[i] and row.matches[i])` may need `== true` on each side; `ColorWidget`/`NameTextView` params are in `gui/line_vehicle_mgmt/line_react_util.d.tl` of the game source; `line_util.filterLine(allowedCarriers : {Carrier}, lineEntity) : boolean` is in `line_util.d.tl`. If `"vehicle"` isn't accepted as `Noun`, declare `local VEHICLE : PgraceTrimTheFatLineData.Noun = "vehicle"`.
 

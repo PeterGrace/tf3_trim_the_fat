@@ -109,3 +109,11 @@ content/gui/pgrace_trim_the_fat/
 - **In-game round 1:** the §1 probe.
 - **In-game round 2:** filters and summary, sorting, locate and opening a line, ⟳, German, and the window's verdict
   matching the line card on two or three lines.
+
+## Findings (in-game)
+
+- **Round 1:** the `MainModButtonAreaExtension` button shows at the screen's top left, next to the map-layers button
+  (not in the bottom bar). Pushing a mod tool on the default tool stack with a `gameCtx` built from
+  `game_react_globals` works; the button shows pressed while the window is open. 116 lines took 45 ms, so the
+  window computes everything on open. Without a size the window shrinks to its content at the top left: give it
+  `initialX/Y` and a stylesheet size.
