@@ -479,6 +479,10 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 			},
 		})
 	end
+	if a.notDelivering then
+		add(textRow(_("Vehicles are full but deliver little: check where the cargo is unloaded."),
+			"font-scale-body, warning"))
+	end
 	if a.verdict == "NoVehicles" then
 		return builtin.BoxLayout{ orientation = builtin.type.Orientation.Vertical, children = children }
 	end

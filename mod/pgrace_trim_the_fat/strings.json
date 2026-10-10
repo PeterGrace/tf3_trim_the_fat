@@ -62,7 +62,8 @@
         "Load when you last clicked a column header. Click any header to update it.": "Auslastung beim letzten Klick auf eine Spaltenüberschrift. Zum Aktualisieren eine Überschrift anklicken.",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} pro Jahr · {profit} pro Fahrzeug · {vehicles} · {stops}",
         "{count} stops|one": "{count} Halt",
-        "{count} stops|other": "{count} Halte"
+        "{count} stops|other": "{count} Halte",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "Fahrzeuge sind voll, liefern aber wenig: Entladeort der Güter prüfen."
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -109,7 +110,8 @@
         "Load when you last clicked a column header. Click any header to update it.": "Utilización al hacer clic por última vez en un encabezado de columna. Haz clic en cualquier encabezado para actualizarla.",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} al año · {profit} por vehículo · {vehicles} · {stops}",
         "{count} stops|one": "{count} parada",
-        "{count} stops|other": "{count} paradas"
+        "{count} stops|other": "{count} paradas",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "Los vehículos van llenos pero entregan poco: comprueba dónde se descarga el cargamento."
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -156,7 +158,8 @@
         "Load when you last clicked a column header. Click any header to update it.": "Utilisation lors du dernier clic sur un en-tête de colonne. Cliquez sur un en-tête pour l’actualiser.",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} par an · {profit} par véhicule · {vehicles} · {stops}",
         "{count} stops|one": "{count} arrêt",
-        "{count} stops|other": "{count} arrêts"
+        "{count} stops|other": "{count} arrêts",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "Les véhicules sont pleins mais livrent peu : vérifiez où le fret est déchargé."
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -203,7 +206,8 @@
         "Load when you last clicked a column header. Click any header to update it.": "Utilizzo all'ultimo clic su un'intestazione di colonna. Clicca su un'intestazione qualsiasi per aggiornarlo.",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} all'anno · {profit} per veicolo · {vehicles} · {stops}",
         "{count} stops|one": "{count} fermata",
-        "{count} stops|other": "{count} fermate"
+        "{count} stops|other": "{count} fermate",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "I veicoli sono pieni ma consegnano poco: controlla dove vengono scaricate le merci."
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -242,7 +246,8 @@
         "{count} vehicles|other": "車両{count}台",
         "Load when you last clicked a column header. Click any header to update it.": "最後に列見出しをクリックした時点の利用率です。見出しをクリックすると更新されます。",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "年間{balance} · 車両あたり{profit} · {vehicles} · {stops}",
-        "{count} stops|other": "停留所{count}か所"
+        "{count} stops|other": "停留所{count}か所",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "車両は満載ですが、ほとんど輸送できていません。貨物の荷降ろし先を確認してください。"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -281,7 +286,8 @@
         "{count} vehicles|other": "운송 수단 {count}대",
         "Load when you last clicked a column header. Click any header to update it.": "마지막으로 열 머리글을 클릭했을 때의 이용도입니다. 머리글을 클릭하면 갱신됩니다.",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "연간 {balance} · 대당 {profit} · {vehicles} · {stops}",
-        "{count} stops|other": "정류장 {count}곳"
+        "{count} stops|other": "정류장 {count}곳",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "운송 수단이 가득 찼지만 거의 배송하지 못합니다. 화물을 내리는 곳을 확인하세요."
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -328,7 +334,8 @@
         "Load when you last clicked a column header. Click any header to update it.": "Bezetting bij de laatste klik op een kolomkop. Klik op een kolomkop om bij te werken.",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} per jaar · {profit} per voertuig · {vehicles} · {stops}",
         "{count} stops|one": "{count} halte",
-        "{count} stops|other": "{count} haltes"
+        "{count} stops|other": "{count} haltes",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "Voertuigen zijn vol maar leveren weinig af: controleer waar de vracht wordt gelost."
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -383,7 +390,8 @@
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} rocznie · {profit} na pojazd · {vehicles} · {stops}",
         "{count} stops|one": "{count} przystanek",
         "{count} stops|few": "{count} przystanki",
-        "{count} stops|many": "{count} przystanków"
+        "{count} stops|many": "{count} przystanków",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "Pojazdy są pełne, ale dostarczają niewiele: sprawdź, gdzie towar jest rozładowywany."
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -430,7 +438,8 @@
         "Load when you last clicked a column header. Click any header to update it.": "Utilização no último clique em um cabeçalho de coluna. Clique em qualquer cabeçalho para atualizar.",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} por ano · {profit} por veículo · {vehicles} · {stops}",
         "{count} stops|one": "{count} parada",
-        "{count} stops|other": "{count} paradas"
+        "{count} stops|other": "{count} paradas",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "Os veículos estão cheios, mas entregam pouco: verifique onde a carga é descarregada."
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -485,7 +494,8 @@
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} в год · {profit} на единицу · {vehicles} · {stops}",
         "{count} stops|one": "{count} остановка",
         "{count} stops|few": "{count} остановки",
-        "{count} stops|many": "{count} остановок"
+        "{count} stops|many": "{count} остановок",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "Транспорт загружен полностью, но доставляет мало: проверьте, где выгружается груз."
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -524,7 +534,8 @@
         "{count} vehicles|other": "{count} 辆载具",
         "Load when you last clicked a column header. Click any header to update it.": "上次点击列标题时的利用率。点击任意标题即可更新。",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "每年 {balance} · 每个载具 {profit} · {vehicles} · {stops}",
-        "{count} stops|other": "{count} 个站点"
+        "{count} stops|other": "{count} 个站点",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "载具已满载，但送达很少：请检查货物在哪里卸货。"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -563,6 +574,7 @@
         "{count} vehicles|other": "{count} 輛車",
         "Load when you last clicked a column header. Click any header to update it.": "上次點擊欄標題時的使用率。點擊任一標題即可更新。",
         "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "每年 {balance} · 每輛 {profit} · {vehicles} · {stops}",
-        "{count} stops|other": "{count} 個站點"
+        "{count} stops|other": "{count} 個站點",
+        "Vehicles are full but deliver little: check where the cargo is unloaded.": "車輛已滿載，但送達很少：請檢查貨物在哪裡卸貨。"
     }
 }
