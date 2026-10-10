@@ -304,3 +304,70 @@ end)
 t.test("dataSpan: a year too short to slice falls back to the purchase time", function()
 	t.eq(metrics.dataSpan(moneyFrom(0), 7, 10, 6), 3)
 end)
+
+local function assessment(fields)
+	local a = { verdict = "Ok", trim = 0, notDelivering = false, balancePerYear = 0 }
+	for k, v in pairs(fields) do
+		a[k] = v
+	end
+	return a
+end
+
+t.test("verdictKind: one kind per verdict", function()
+	t.eq(metrics.verdictKind(assessment({ verdict = "Ok" })), "Ok")
+	t.eq(metrics.verdictKind(assessment({ verdict = "Busy" })), "Busy")
+	t.eq(metrics.verdictKind(assessment({ verdict = "TooNew" })), "TooNew")
+	t.eq(metrics.verdictKind(assessment({ verdict = "NoVehicles" })), "NoVehicles")
+	t.eq(metrics.verdictKind(assessment({ verdict = "TooMany", trim = 2 })), "TooMany")
+	t.eq(metrics.verdictKind(assessment({ verdict = "Losing" })), "Losing")
+end)
+
+t.test("verdictKind: losing with a trim or not delivering", function()
+	t.eq(metrics.verdictKind(assessment({ verdict = "Losing", trim = 3 })), "LosingTrim")
+	t.eq(metrics.verdictKind(assessment({ verdict = "Losing", notDelivering = true })), "LosingStuck")
+end)
+
+t.test("severity: losing first, OK last", function()
+	local order = { "LosingStuck", "TooMany", "Busy", "TooNew", "NoVehicles", "Ok" }
+	for i = 2, #order do
+		t.eq(metrics.severity(order[i - 1]) < metrics.severity(order[i]), true, order[i - 1] .. " < " .. order[i])
+	end
+	t.eq(metrics.severity("Losing"), metrics.severity("LosingTrim"))
+	t.eq(metrics.severity("Losing"), metrics.severity("LosingStuck"))
+end)
+
+t.test("summarise: counts and sums", function()
+	local s = metrics.summarise({
+		assessment({ verdict = "Losing", balancePerYear = -100, trim = 2 }),
+		assessment({ verdict = "Losing", balancePerYear = -50 }),
+		assessment({ verdict = "TooMany", balancePerYear = 30, trim = 3 }),
+		assessment({ verdict = "Ok", balancePerYear = 500 }),
+	})
+	t.eq(s.losingCount, 2)
+	t.eq(s.losingPerYear, -150)
+	t.eq(s.tooManyCount, 2, "lines with a trim, losing or not")
+	t.eq(s.trimTotal, 5)
+end)
+
+t.test("summarise: empty", function()
+	local s = metrics.summarise({})
+	t.eq(s.losingCount, 0)
+	t.eq(s.losingPerYear, 0)
+	t.eq(s.tooManyCount, 0)
+	t.eq(s.trimTotal, 0)
+end)
+
+t.test("vehiclePerYear: nil under a month of data", function()
+	local perYear, annualised = metrics.vehiclePerYear(-100, 99, 1200)
+	t.eq(perYear, nil)
+	t.eq(annualised, false)
+end)
+
+t.test("vehiclePerYear: scaled from a month on", function()
+	local perYear, annualised = metrics.vehiclePerYear(-100, 100, 1200)
+	near(perYear, -1200)
+	t.eq(annualised, true)
+	perYear, annualised = metrics.vehiclePerYear(50, 1200, 1200)
+	t.eq(perYear, 50)
+	t.eq(annualised, false)
+end)

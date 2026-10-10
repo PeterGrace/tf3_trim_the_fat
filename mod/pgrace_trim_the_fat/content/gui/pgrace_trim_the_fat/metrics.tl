@@ -99,6 +99,13 @@ function metrics.dataSpan(balanceBetween : function(integer, integer) : number, 
 	return now - start
 end
 
+function metrics.vehiclePerYear(balance : number, spanMs : number, yearMs : number) : number, boolean
+	if spanMs == nil or spanMs < yearMs * metrics.MIN_DATA_FRACTION then
+		return nil, false
+	end
+	return metrics.annualise(balance, spanMs, yearMs)
+end
+
 -- Guards ceil() against float noise: 8 × 0.25 ÷ 0.5 may come out as 4.000000001.
 local EPSILON = 1e-9
 
@@ -139,6 +146,42 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		a.verdict = "Busy"
 	end
 	return a
+end
+
+function metrics.verdictKind(a : PgraceTrimTheFatMetrics.Assessment) : PgraceTrimTheFatMetrics.VerdictKind
+	if a.verdict == "Losing" then
+		if a.notDelivering then
+			return "LosingStuck"
+		elseif a.trim > 0 then
+			return "LosingTrim"
+		end
+		return "Losing"
+	end
+	return a.verdict as PgraceTrimTheFatMetrics.VerdictKind
+end
+
+local SEVERITY : {PgraceTrimTheFatMetrics.VerdictKind : integer} = {
+	Losing = 1, LosingTrim = 1, LosingStuck = 1,
+	TooMany = 2, Busy = 3, TooNew = 4, NoVehicles = 5, Ok = 6,
+}
+
+function metrics.severity(kind : PgraceTrimTheFatMetrics.VerdictKind) : integer
+	return SEVERITY[kind] or 6
+end
+
+function metrics.summarise(assessments : {PgraceTrimTheFatMetrics.Assessment}) : PgraceTrimTheFatMetrics.Summary
+	local s : PgraceTrimTheFatMetrics.Summary = { losingCount = 0, losingPerYear = 0, tooManyCount = 0, trimTotal = 0 }
+	for __, a in ipairs(assessments) do
+		if a.verdict == "Losing" then
+			s.losingCount = s.losingCount + 1
+			s.losingPerYear = s.losingPerYear + (a.balancePerYear or 0)
+		end
+		if a.trim > 0 then
+			s.tooManyCount = s.tooManyCount + 1
+			s.trimTotal = s.trimTotal + a.trim
+		end
+	end
+	return s
 end
 
 return metrics

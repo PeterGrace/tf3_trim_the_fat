@@ -21,6 +21,7 @@ global record PgraceTrimTheFatLineData
 		-- a replaced vehicle keeps its history but its age restarts).
 		-- Per-vehicle journal (the statistics window's convention); rows need not sum to the line's balance, which
 		-- uses the line's own journal like the line window.
+		-- nil under a month of data (metrics.vehiclePerYear).
 		balancePerYear : number
 		annualised : boolean
 		-- Cargo on board ÷ capacity when the snapshot was taken; nil without capacity.
@@ -36,6 +37,12 @@ global record PgraceTrimTheFatLineData
 		noun : Noun
 	end
 
+	-- The line-level numbers without per-vehicle rows (what the overview needs).
+	record LineFacts
+		input : PgraceTrimTheFatMetrics.LineInput
+		noun : Noun
+	end
+
 	snapshot : function(line : Engine.Entity) : LineSnapshot
 	-- Cargo on board ÷ capacity across the line's vehicles right now; nil without capacity.
 	lineLoadNow : function(line : Engine.Entity) : number
@@ -46,4 +53,8 @@ global record PgraceTrimTheFatLineData
 	-- The line's vehicles and their purchase times; differs from snapshot.signature once vehicles are bought, sold
 	-- or replaced.
 	vehicleSignature : function(line : Engine.Entity) : string
+	-- As snapshot, without the per-vehicle rows, names, ages and live loads.
+	lineInput : function(line : Engine.Entity) : LineFacts
+	-- The player's lines, as the F2 Lines table lists them.
+	playerLines : function() : {Engine.Entity}
 end

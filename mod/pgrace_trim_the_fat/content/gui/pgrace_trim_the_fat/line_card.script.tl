@@ -6,163 +6,15 @@ local line_react_util = ug_require "::/gui/line_vehicle_mgmt/line_react_util.tl"
 local line_eow = ug_require "::/gui/entity_window/line/line_eow.script.tl" as LineEow
 local metrics = ug_require "pgrace_trim_the_fat::/gui/pgrace_trim_the_fat/metrics.tl" as PgraceTrimTheFatMetrics
 local line_data = ug_require "pgrace_trim_the_fat::/gui/pgrace_trim_the_fat/line_data.tl" as PgraceTrimTheFatLineData
+local ui = ug_require "pgrace_trim_the_fat::/gui/pgrace_trim_the_fat/ui.tl" as PgraceTrimTheFatUi
 
 local LOG_PREFIX = "[trim_the_fat] "
 -- Live loads poll this often (AGENTS.md: useStepState runs every frame in every cell).
 local LIVE_POLL_SECONDS = 0.25
-local UNKNOWN = "—"
 
 local type Assessment = PgraceTrimTheFatMetrics.Assessment
 local type LineSnapshot = PgraceTrimTheFatLineData.LineSnapshot
 local type VehicleRow = PgraceTrimTheFatLineData.VehicleRow
-local type Noun = PgraceTrimTheFatLineData.Noun
-
--- Text helpers ---------------------------------------------------------------------------------------------------
-
--- Replaces {name} placeholders; unknown names are left as they are.
-local function fill(template : string, values : {string : string}) : string
-	return (template:gsub("{(%w+)}", function(key : string) : string
-		return values[key] or ("{" .. key .. "}")
-	end))
-end
-
-local function currentLanguage() : string
-	local ok, code = pcall(function() : string
-		return app.getUserProfile():getLanguage().code
-	end)
-	return ok and code as string or "en"
-end
-
-local function formatCount(count : integer) : string
-	local ok, text = pcall(api.util.lang.formatInt, count)
-	if ok and text ~= nil then
-		return text as string
-	end
-	return tostring(count)
-end
-
-local function formatMoney(amount : number) : string
-	if amount == nil then
-		return UNKNOWN
-	end
-	local rounded = math.floor(amount + 0.5)
-	local ok, text = pcall(api.util.formatMoney, rounded)
-	if ok and text ~= nil then
-		return text as string
-	end
-	return tostring(rounded)
-end
-
--- Money with "*" when it was scaled up from less than a year (see the table footnote).
-local function moneyText(amount : number, annualised : boolean) : string
-	return formatMoney(amount) .. (annualised and "*" or "")
-end
-
--- "34%", or as the player's language writes it (German "34 %"); UNKNOWN for nil.
-local function formatPercent(fraction : number) : string
-	local whole = metrics.percent(fraction)
-	if whole == nil then
-		return UNKNOWN
-	end
-	return fill(_("{percent}%"), { percent = tostring(whole) })
-end
-
--- "5.4", with the language's decimal separator.
-local function formatOneDecimal(value : number) : string
-	local tenths = math.floor(value * 10 + 0.5)
-	return fill(_("{integer}.{decimal}"), {
-		integer = string.format("%d", math.floor(tenths / 10)),
-		decimal = string.format("%d", math.floor(tenths % 10)),
-	})
-end
-
--- A count with its noun, in the form the player's language uses for that count. Each form is its own key; mods get
--- no plural-aware gettext, so the rule is ours (metrics.pluralCategory). Copied from Commuter Compass.
-local record PluralForms
-	one : string
-	few : string
-	many : string
-	other : string
-end
-
-local function countText(count : integer, forms : PluralForms) : string
-	local category = metrics.pluralCategory(currentLanguage(), count)
-	local template = (forms as {string : string})[category] or forms.other
-	return fill(template, { count = formatCount(count) })
-end
-
-local function stopsText(count : integer) : string
-	return countText(count, {
-		one = _("{count} stops|one"), few = _("{count} stops|few"),
-		many = _("{count} stops|many"), other = _("{count} stops|other"),
-	})
-end
-
-local function vehiclesText(noun : Noun, count : integer) : string
-	if noun == "train" then
-		return countText(count, {
-			one = _("{count} trains|one"), few = _("{count} trains|few"),
-			many = _("{count} trains|many"), other = _("{count} trains|other"),
-		})
-	elseif noun == "bus" then
-		return countText(count, {
-			one = _("{count} buses|one"), few = _("{count} buses|few"),
-			many = _("{count} buses|many"), other = _("{count} buses|other"),
-		})
-	elseif noun == "truck" then
-		return countText(count, {
-			one = _("{count} trucks|one"), few = _("{count} trucks|few"),
-			many = _("{count} trucks|many"), other = _("{count} trucks|other"),
-		})
-	elseif noun == "tram" then
-		return countText(count, {
-			one = _("{count} trams|one"), few = _("{count} trams|few"),
-			many = _("{count} trams|many"), other = _("{count} trams|other"),
-		})
-	elseif noun == "ship" then
-		return countText(count, {
-			one = _("{count} ships|one"), few = _("{count} ships|few"),
-			many = _("{count} ships|many"), other = _("{count} ships|other"),
-		})
-	elseif noun == "aircraft" then
-		return countText(count, {
-			one = _("{count} aircraft|one"), few = _("{count} aircraft|few"),
-			many = _("{count} aircraft|many"), other = _("{count} aircraft|other"),
-		})
-	end
-	return countText(count, {
-		one = _("{count} vehicles|one"), few = _("{count} vehicles|few"),
-		many = _("{count} vehicles|many"), other = _("{count} vehicles|other"),
-	})
-end
-
--- Small widgets -------------------------------------------------------------------------------------------------
-
--- A recipe must return a layout; a bare TextView crashes the whole UI ("Recipe child must be a layout").
-local function textRow(text : string, class : string) : TreeNodeId
-	return builtin.BoxLayout{
-		children = {
-			builtin.TextView{ meta = { class = class or "font-scale-body" }, text = text },
-		},
-	}
-end
-
--- Tooltips only show on buttons, not on a BoxLayout. The click does nothing.
-local function tooltipRow(text : string, class : string, tooltip : string) : TreeNodeId
-	return builtin.BoxLayout{
-		children = {
-			builtin.Button{
-				meta = { tooltip = tooltip },
-				content = builtin.BoxLayout{
-					children = {
-						builtin.TextView{ meta = { class = class or "font-scale-body" }, text = text },
-					},
-				},
-				onClick = function() end,
-			},
-		},
-	}
-end
 
 -- Card data ----------------------------------------------------------------------------------------------------
 
@@ -212,8 +64,9 @@ local function buildCardData(line : Engine.Entity) : CardData
 		for __, row in ipairs(snap.vehicles) do
 			data.rows[row.entity] = row
 			data.sortLoad[row.entity] = row.loadNow
-			data.loadText[row.entity] = formatPercent(row.loadNow)
-			data.balanceText[row.entity] = moneyText(row.balancePerYear, row.annualised)
+			data.loadText[row.entity] = ui.formatPercent(row.loadNow)
+			data.balanceText[row.entity] = row.balancePerYear ~= nil
+				and ui.moneyText(row.balancePerYear, row.annualised) or _("Too new")
 		end
 		return data
 	end)
@@ -253,18 +106,18 @@ local function verdictTooltip(data : CardData) : string
 		parts[#parts + 1] = _("The balance over the last 12 months is negative: income minus running and maintenance costs, without the purchase price.")
 	end
 	if a.trim > 0 then
-		parts[#parts + 1] = fill(_("{count} × {load} ÷ {target} = {exact}, so keep {keep}."), {
-			count = formatCount(count),
-			load = formatPercent(a.load),
-			target = formatPercent(a.target),
-			exact = formatOneDecimal(count * a.load / a.target),
-			keep = formatCount(a.keep),
+		parts[#parts + 1] = ui.fill(_("{count} × {load} ÷ {target} = {exact}, so keep {keep}."), {
+			count = ui.formatCount(count),
+			load = ui.formatPercent(a.load),
+			target = ui.formatPercent(a.target),
+			exact = ui.formatOneDecimal(count * a.load / a.target),
+			keep = ui.formatCount(a.keep),
 		})
 		parts[#parts + 1] = _("Fewer vehicles means a longer wait, which can cost passengers or cargo.")
 	end
 	if a.verdict == "Busy" then
-		parts[#parts + 1] = fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
-			{ busy = formatPercent(metrics.BUSY_LOAD) })
+		parts[#parts + 1] = ui.fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
+			{ busy = ui.formatPercent(metrics.BUSY_LOAD) })
 	end
 	if a.verdict == "Ok" then
 		parts[#parts + 1] = _("Profitable, and the average load is close to or above the target.")
@@ -283,19 +136,19 @@ end
 local LoadLine = react.RegisterRecipe("PgraceTrimTheFatLoadLine", function(params : LoadLineParams) : TreeNodeId
 	local nowState = engine_react_util.useStepStateTimer(function() : string
 		local ok, loadOrError = pcall(line_data.lineLoadNow, params.line)
-		return ok and formatPercent(loadOrError as number) or UNKNOWN
+		return ok and ui.formatPercent(loadOrError as number) or ui.UNKNOWN
 	end, LIVE_POLL_SECONDS)
 	-- A load just under the target can round to the same whole percent ("50% (target 50%)") and contradict a
 	-- "too many" verdict; show one decimal then.
-	local loadText = formatPercent(params.load)
+	local loadText = ui.formatPercent(params.load)
 	if params.load ~= nil and params.target ~= nil and params.load < params.target
 		and metrics.percent(params.load) == metrics.percent(params.target) then
-		loadText = fill(_("{percent}%"), { percent = formatOneDecimal(params.load * 100) })
+		loadText = ui.fill(_("{percent}%"), { percent = ui.formatOneDecimal(params.load * 100) })
 	end
-	return tooltipRow(
-		fill(_("Average load {load} (target {target}) · now {now}"), {
+	return ui.tooltipRow(
+		ui.fill(_("Average load {load} (target {target}) · now {now}"), {
 			load = loadText,
-			target = formatPercent(params.target),
+			target = ui.formatPercent(params.target),
 			now = nowState:old(),
 		}),
 		"font-scale-body",
@@ -318,7 +171,7 @@ local NameCell = react.RegisterRecipe("PgraceTrimTheFatNameCell", function(param
 		return builtin.BoxLayout{ children = {} }
 	end
 	if not existsState:old() then
-		return textRow(row.name, "font-scale-body")
+		return ui.textRow(row.name, "font-scale-body")
 	end
 	return builtin.BoxLayout{
 		orientation = builtin.type.Orientation.Horizontal,
@@ -334,7 +187,7 @@ local function makeTextCell(name : string, textOf : function(VehicleRow) : strin
 	return react.RegisterRecipe(name, function(params : Builtin.TableCellParam) : TreeNodeId
 		local data = params.userParam as CardData
 		local row = data.rows[params.rowKey]
-		return textRow(row ~= nil and textOf(row) or "", "font-scale-body")
+		return ui.textRow(row ~= nil and textOf(row) or "", "font-scale-body")
 	end)
 end
 
@@ -344,7 +197,7 @@ end)
 
 local BalanceCell = react.RegisterRecipe("PgraceTrimTheFatBalanceCell", function(params : Builtin.TableCellParam) : TreeNodeId
 	local data = params.userParam as CardData
-	return textRow(data.balanceText[params.rowKey] or "", "font-scale-body")
+	return ui.textRow(data.balanceText[params.rowKey] or "", "font-scale-body")
 end)
 
 local LoadCell = react.RegisterRecipe("PgraceTrimTheFatLoadCell", function(params : Builtin.TableCellParam) : TreeNodeId
@@ -353,9 +206,9 @@ local LoadCell = react.RegisterRecipe("PgraceTrimTheFatLoadCell", function(param
 	-- A plain table read (no engine calls, no formatting): cells keep their first userParam and may not re-render
 	-- on a re-sort, so this picks up the values frozen at the last header click.
 	local textState = engine_react_util.useStepStateTimer(function() : string
-		return data.loadText[entity] or UNKNOWN
+		return data.loadText[entity] or ui.UNKNOWN
 	end, LIVE_POLL_SECONDS)
-	return textRow(textState:old(), "font-scale-body")
+	return ui.textRow(textState:old(), "font-scale-body")
 end)
 
 -- Starts sorted by balance per year, lowest first: the vehicles to look at first are on top.
@@ -390,7 +243,8 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 				recipe = BalanceCell,
 				weight = 1.1,
 				getCompareValue = function(rowKey : integer) : any
-					return data.rows[rowKey].balancePerYear
+					-- Too new to judge sorts after every amount.
+					return data.rows[rowKey].balancePerYear or math.huge
 				end,
 			},
 			builtin.ColumnDesc{
@@ -446,14 +300,14 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 			local ok, loadOrError = pcall(line_data.vehicleLoadNow, entity)
 			local load = ok and loadOrError as number or nil
 			sortLoad[entity] = load
-			loadText[entity] = formatPercent(load)
+			loadText[entity] = ui.formatPercent(load)
 		end
 		data.sortLoad, data.loadText = sortLoad, loadText
 		sortVersion:set(sortVersion:old() + 1)
 	end
 
 	if data.error then
-		return textRow(_("Error (see log)"), "font-scale-body, negative")
+		return ui.textRow(_("Error (see log)"), "font-scale-body, negative")
 	end
 	local a = data.assessment
 	local input = data.snapshot.input
@@ -464,7 +318,7 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 
 	local label, class = verdictLabel(a.verdict)
 	local tooltip = verdictTooltip(data)
-	add(tooltip ~= "" and tooltipRow(label, class, tooltip) or textRow(label, class))
+	add(tooltip ~= "" and ui.tooltipRow(label, class, tooltip) or ui.textRow(label, class))
 	local signature = signatureState:old()
 	if signature ~= nil and signature ~= data.snapshot.signature then
 		add(builtin.BoxLayout{
@@ -491,32 +345,32 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 		})
 	end
 	if a.notDelivering then
-		add(textRow(_("Vehicles are full but deliver little: check where the cargo is unloaded."),
+		add(ui.textRow(_("Vehicles are full but deliver little: check where the cargo is unloaded."),
 			"font-scale-body, warning"))
 	end
 	if a.verdict == "NoVehicles" then
 		return builtin.BoxLayout{ orientation = builtin.type.Orientation.Vertical, children = children }
 	end
 	if a.trim > 0 then
-		add(textRow(fill(_("Suggestion: remove {vehicles}, one at a time."),
-			{ vehicles = vehiclesText(data.snapshot.noun, a.trim) }), "font-scale-body"))
+		add(ui.textRow(ui.fill(_("Suggestion: remove {vehicles}, one at a time."),
+			{ vehicles = ui.vehiclesText(data.snapshot.noun, a.trim) }), "font-scale-body"))
 	end
 	-- A few weeks of money scaled up to a year would mislead, so TooNew lines skip the money row.
 	if a.verdict ~= "TooNew" then
 		local values : {string : string} = {
-			balance = moneyText(a.balancePerYear, a.annualised),
-			profit = moneyText(a.profitPerVehicle, a.annualised),
-			vehicles = vehiclesText(data.snapshot.noun, input.vehicleCount),
+			balance = ui.moneyText(a.balancePerYear, a.annualised),
+			profit = ui.moneyText(a.profitPerVehicle, a.annualised),
+			vehicles = ui.vehiclesText(data.snapshot.noun, input.vehicleCount),
 		}
 		-- Both keys stay literal, so both stay translated; the shorter one when the stop count is unknown.
 		local template : string
 		if input.stopCount ~= nil then
-			values.stops = stopsText(input.stopCount)
+			values.stops = ui.stopsText(input.stopCount)
 			template = _("{balance} per year · {profit} per vehicle · {vehicles} · {stops}")
 		else
 			template = _("{balance} per year · {profit} per vehicle · {vehicles}")
 		end
-		add(textRow(fill(template, values), "font-scale-body"))
+		add(ui.textRow(ui.fill(template, values), "font-scale-body"))
 	end
 	add(LoadLine{ line = params.line, load = a.load, target = a.target })
 	add(makeVehicleTable(data, onSort))
@@ -526,7 +380,7 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 		anyAnnualised = anyAnnualised or row.annualised
 	end
 	if anyAnnualised then
-		add(textRow(_("* scaled up to a full year from less than a year of data"), "font-scale-annotation"))
+		add(ui.textRow(_("* scaled up to a full year from less than a year of data"), "font-scale-annotation"))
 	end
 	return builtin.BoxLayout{ orientation = builtin.type.Orientation.Vertical, children = children }
 end)

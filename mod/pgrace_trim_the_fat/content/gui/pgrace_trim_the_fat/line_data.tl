@@ -126,17 +126,20 @@ local function dataSpan(entities : {Engine.Entity}, bought : integer, now : inte
 	end, bought, now, yearMs)
 end
 
-function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.LineSnapshot
+-- The line-level numbers, and the vehicle rows when withRows is set (the overview skips them).
+local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimTheFatLineData.LineFacts, {VehicleRow}
 	local now = nowMs()
 	local yearMs = api.util.getDefaultYearDuration()
 	local from = math.max(now - yearMs, 0)
 	local rows : {VehicleRow} = {}
+	local count = 0
 	local oldest : integer = nil
 	local vehicleDataMs = 0
 	local carrier : Carrier = nil
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
 		local tv = transportVehicle(vehicle)
 		if tv ~= nil then
+			count = count + 1
 			local bought = purchaseTime(tv) or now
 			if oldest == nil or bought < oldest then
 				oldest = bought
@@ -144,28 +147,29 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 			if carrier == nil then
 				carrier = tv.carrier
 			end
-			local ageMs = now - bought
-			local balance = api.engine.util.finance.calculateBalance({ vehicle }, from, now, true)
 			local spanMs = dataSpan({ vehicle }, bought, now, yearMs)
 			vehicleDataMs = vehicleDataMs + spanMs
-			local perYear, annualised = metrics.annualise(balance, spanMs, yearMs)
-			rows[#rows + 1] = {
-				entity = vehicle,
-				name = api.engine.util.getEntityName(vehicle),
-				ageText = api.engine.util.formatAge(bought, now),
-				ageMs = ageMs,
-				balancePerYear = perYear,
-				annualised = annualised,
-				loadNow = line_data.vehicleLoadNow(vehicle),
-			}
+			if withRows then
+				local balance = api.engine.util.finance.calculateBalance({ vehicle }, from, now, true)
+				local perYear, annualised = metrics.vehiclePerYear(balance, spanMs, yearMs)
+				rows[#rows + 1] = {
+					entity = vehicle,
+					name = api.engine.util.getEntityName(vehicle),
+					ageText = api.engine.util.formatAge(bought, now),
+					ageMs = now - bought,
+					balancePerYear = perYear,
+					annualised = annualised,
+					loadNow = line_data.vehicleLoadNow(vehicle),
+				}
+			end
 		end
 	end
 	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
 	local frequency = api.engine.util.line.getMaxFrequency(line)
 	local lineComponent = api.engine.getComponent(line, api.type.ComponentType.LINE) as Engine.Component.Line
-	return {
+	local facts : PgraceTrimTheFatLineData.LineFacts = {
 		input = {
-			vehicleCount = #rows,
+			vehicleCount = count,
 			balance = api.engine.util.finance.calculateBalance({ line }, from, now, true),
 			itemsTransported = api.engine.util.logbook.getLogValuePerYear(line, "itemsTransported"),
 			totalCapacity = capacity,
@@ -179,10 +183,28 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 			loadNow = line_data.lineLoadNow(line),
 			carriesPassengers = passengers,
 		},
-		vehicles = rows,
-		signature = line_data.vehicleSignature(line),
 		noun = nounFor(carrier, passengers),
 	}
+	return facts, rows
+end
+
+function line_data.lineInput(line : Engine.Entity) : PgraceTrimTheFatLineData.LineFacts
+	local facts = collect(line, false)
+	return facts
+end
+
+function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.LineSnapshot
+	local facts, rows = collect(line, true)
+	return {
+		input = facts.input,
+		vehicles = rows,
+		signature = line_data.vehicleSignature(line),
+		noun = facts.noun,
+	}
+end
+
+function line_data.playerLines() : {Engine.Entity}
+	return api.engine.system.lineSystem.getLinesForPlayer(api.engine.util.getPlayer())
 end
 
 return line_data

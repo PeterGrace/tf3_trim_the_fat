@@ -9,6 +9,18 @@ global record PgraceTrimTheFatMetrics
 		"Ok"
 	end
 
+	-- What the overview's verdict column shows: the verdict, split where the text differs.
+	enum VerdictKind
+		"Losing"
+		"LosingTrim"
+		"LosingStuck"
+		"TooMany"
+		"Busy"
+		"TooNew"
+		"NoVehicles"
+		"Ok"
+	end
+
 	-- What line_data.tl reads from the engine for one line. Times are game time in milliseconds.
 	record LineInput
 		vehicleCount : integer
@@ -57,6 +69,16 @@ global record PgraceTrimTheFatMetrics
 		notDelivering : boolean
 	end
 
+	-- Totals over a set of lines, for the overview's summary line.
+	record Summary
+		-- Lines whose verdict is Losing, and the sum of their balance per year.
+		losingCount : integer
+		losingPerYear : number
+		-- Lines with a trim suggestion (losing or not), and the sum of the trims.
+		tooManyCount : integer
+		trimTotal : integer
+	end
+
 	-- Target average load for passenger lines and lines carrying several cargo types.
 	TARGET_DEFAULT : number
 	-- Target for freight lines carrying one cargo type, which usually run empty one way.
@@ -78,6 +100,9 @@ global record PgraceTrimTheFatMetrics
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
+	-- A vehicle's balance per year: nil (and false) under MIN_DATA_FRACTION of a year of data, where a few days of
+	-- running costs scaled up to a year would mislead (a new bus showed -381k*); otherwise annualise.
+	vehiclePerYear : function(balance : number, spanMs : number, yearMs : number) : number, boolean
 	-- How long money has been booked on something within the last year, in ms, given balanceBetween(from, to).
 	-- Usually since `bought`, but replacing a vehicle resets its purchase time and keeps its balance history, so
 	-- this looks for money booked before `bought`, a twelfth of a year at a time.
@@ -91,4 +116,9 @@ global record PgraceTrimTheFatMetrics
 	-- The plural form a language uses for a count: "one", "few", "many" or "other" (CLDR integer rules).
 	-- The language is a TF3 code such as "de" or "pt_BR"; unknown ones get English's one/other.
 	pluralCategory : function(language : string, count : integer) : string
+	-- Losing becomes LosingStuck when not delivering, LosingTrim when it carries a trim; other verdicts map 1:1.
+	verdictKind : function(a : Assessment) : VerdictKind
+	-- Sort rank, lowest first: Losing kinds 1, TooMany 2, Busy 3, TooNew 4, NoVehicles 5, Ok 6.
+	severity : function(kind : VerdictKind) : integer
+	summarise : function(assessments : {Assessment}) : Summary
 end

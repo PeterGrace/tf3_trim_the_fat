@@ -1,4 +1,4 @@
-# Trim The Fat (Transport Fever 3 mod)
+# Trim the Fat (Transport Fever 3 mod)
 
 TODO: what the mod does.
 
