@@ -360,7 +360,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 			builtin.ColumnDesc{
 				name = _("Vehicle"),
 				recipe = NameCell,
-				weight = 2,
+				weight = 1.6,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].name
 				end,
@@ -368,7 +368,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 			builtin.ColumnDesc{
 				name = _("Age"),
 				recipe = AgeCell,
-				weight = 1.2,
+				weight = 1,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].ageMs
 				end,
@@ -386,7 +386,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 				name = _("Load now"),
 				tooltip = _("Load when you last clicked a column header. Click any header to update it."),
 				recipe = LoadCell,
-				weight = 1,
+				weight = 1.4,
 				getCompareValue = function(rowKey : integer) : any
 					return data.sortLoad[rowKey] or -1
 				end,
