@@ -67,4 +67,42 @@ function metrics.annualise(amount : number, spanMs : number, yearMs : number) : 
 	return amount * yearMs / spanMs, true
 end
 
+-- Guards ceil() against float noise: 8 × 0.25 ÷ 0.5 may come out as 4.000000001.
+local EPSILON = 1e-9
+
+function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimTheFatMetrics.Assessment
+	local a : PgraceTrimTheFatMetrics.Assessment = {
+		verdict = "Ok",
+		target = metrics.targetFor(input.cargoTypeCount),
+		trim = 0,
+	}
+	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
+	local count = input.vehicleCount or 0
+	if count <= 0 then
+		a.verdict = "NoVehicles"
+		return a
+	end
+	a.profitPerVehicle = a.balancePerYear / count
+	a.load = metrics.averageLoad(input)
+	if input.dataMs == nil or input.dataMs < input.yearMs * metrics.MIN_DATA_FRACTION then
+		a.verdict = "TooNew"
+		return a
+	end
+	if a.load ~= nil and a.load < a.target and count > 1 then
+		local keep = math.max(1, math.ceil(count * a.load / a.target - EPSILON))
+		if keep < count then
+			a.keep = keep
+			a.trim = count - keep
+		end
+	end
+	if a.balancePerYear < 0 then
+		a.verdict = "Losing"
+	elseif a.trim > 0 then
+		a.verdict = "TooMany"
+	elseif a.load ~= nil and a.load >= metrics.BUSY_LOAD then
+		a.verdict = "Busy"
+	end
+	return a
+end
+
 return metrics
