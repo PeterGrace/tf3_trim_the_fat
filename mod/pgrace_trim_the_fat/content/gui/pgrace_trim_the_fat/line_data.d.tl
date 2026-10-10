@@ -41,6 +41,8 @@ global record PgraceTrimTheFatLineData
 	lineLoadNow : function(line : Engine.Entity) : number
 	-- Cargo on board ÷ capacity of one vehicle right now; nil without capacity.
 	vehicleLoadNow : function(vehicle : Engine.Entity) : number
+	-- True while `vehicle` exists and runs on `line`; false once it's sold (its ID may be reused).
+	isOnLine : function(vehicle : Engine.Entity, line : Engine.Entity) : boolean
 	-- The line's vehicles and their purchase times; differs from snapshot.signature once vehicles are bought, sold
 	-- or replaced.
 	vehicleSignature : function(line : Engine.Entity) : string

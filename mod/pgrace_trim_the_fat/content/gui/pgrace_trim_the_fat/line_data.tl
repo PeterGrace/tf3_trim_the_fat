@@ -92,6 +92,19 @@ function line_data.vehicleLoadNow(vehicle : Engine.Entity) : number
 	return used / capacity
 end
 
+-- Listed on the line as vehicleSignature lists it, so the row and the refresh prompt agree.
+function line_data.isOnLine(vehicle : Engine.Entity, line : Engine.Entity) : boolean
+	if transportVehicle(vehicle) == nil then
+		return false
+	end
+	for __, listed in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
+		if listed == vehicle then
+			return true
+		end
+	end
+	return false
+end
+
 -- Which vehicles the line has and when each was bought. Changes when a vehicle is bought, sold or replaced
 -- (replacing keeps the entity but resets its purchase time).
 function line_data.vehicleSignature(line : Engine.Entity) : string

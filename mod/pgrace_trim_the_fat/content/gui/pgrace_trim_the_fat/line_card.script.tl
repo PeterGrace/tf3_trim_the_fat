@@ -169,6 +169,7 @@ end
 -- Built once when the window opens and handed to the table as userParam (cells keep their first userParam).
 local record CardData
 	error : boolean
+	line : Engine.Entity
 	snapshot : LineSnapshot
 	assessment : Assessment
 	-- Vehicle rows by entity, which are also the table's row keys.
@@ -197,6 +198,7 @@ local function buildCardData(line : Engine.Entity) : CardData
 		local snap = line_data.snapshot(line)
 		local data : CardData = {
 			error = false,
+			line = line,
 			snapshot = snap,
 			assessment = metrics.assess(snap.input),
 			rows = {},
@@ -306,10 +308,11 @@ end)
 local NameCell = react.RegisterRecipe("PgraceTrimTheFatNameCell", function(params : Builtin.TableCellParam) : TreeNodeId
 	local data = params.userParam as CardData
 	local row = data.rows[params.rowKey]
-	-- A sold vehicle's row stays until the player refreshes; its buttons would act on a missing entity.
+	-- A sold vehicle's row stays until the player refreshes; its buttons would act on a missing entity, or on
+	-- whatever reuses its ID (seen in-game: the locate button came back seconds after a sale).
 	local existsState = engine_react_util.useStepStateTimer(function() : boolean
-		local ok, existsOrError = pcall(api.engine.entityExists, params.rowKey)
-		return ok and existsOrError as boolean
+		local ok, onLineOrError = pcall(line_data.isOnLine, params.rowKey, data.line)
+		return ok and onLineOrError as boolean
 	end, 1.0)
 	if row == nil then
 		return builtin.BoxLayout{ children = {} }
