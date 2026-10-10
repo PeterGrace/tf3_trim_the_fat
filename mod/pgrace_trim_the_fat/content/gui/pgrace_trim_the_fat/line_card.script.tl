@@ -166,10 +166,11 @@ local record CardData
 	assessment : Assessment
 	-- Vehicle rows by entity, which are also the table's row keys.
 	rows : {integer : VehicleRow}
-	-- The latest polled load per vehicle, written by the Load cells.
-	liveLoad : {integer : number}
-	-- The copy the table sorts by, refreshed on a header click, so live updates don't reorder rows (AGENTS.md).
+	-- Each vehicle's load as of the card build or the last header click. Frozen in between, so the shown numbers
+	-- and the sort always agree (live values made a sorted column look out of order).
 	sortLoad : {integer : number}
+	-- sortLoad as text, by entity; the Load cells only read this.
+	loadText : {integer : string}
 	-- Balance per year as text, by entity: formatted once here, so cells don't call api.util.formatMoney.
 	balanceText : {integer : string}
 	-- The player's sort, kept across re-renders. Starts on Balance per year (column 3), lowest first.
@@ -192,8 +193,8 @@ local function buildCardData(line : Engine.Entity) : CardData
 			snapshot = snap,
 			assessment = metrics.assess(snap.input),
 			rows = {},
-			liveLoad = {},
 			sortLoad = {},
+			loadText = {},
 			balanceText = {},
 			sortColumn = 3,
 			sortAscending = true,
@@ -201,8 +202,8 @@ local function buildCardData(line : Engine.Entity) : CardData
 		}
 		for __, row in ipairs(snap.vehicles) do
 			data.rows[row.entity] = row
-			data.liveLoad[row.entity] = row.loadNow
-			data.sortLoad[row.entity] = row.loadNow or -1
+			data.sortLoad[row.entity] = row.loadNow
+			data.loadText[row.entity] = formatPercent(row.loadNow)
 			data.balanceText[row.entity] = moneyText(row.balancePerYear, row.annualised)
 		end
 		return data
@@ -331,11 +332,10 @@ end)
 local LoadCell = react.RegisterRecipe("PgraceTrimTheFatLoadCell", function(params : Builtin.TableCellParam) : TreeNodeId
 	local data = params.userParam as CardData
 	local entity = params.rowKey
+	-- A plain table read (no engine calls, no formatting): cells keep their first userParam and may not re-render
+	-- on a re-sort, so this picks up the values frozen at the last header click.
 	local textState = engine_react_util.useStepStateTimer(function() : string
-		local ok, loadOrError = pcall(line_data.vehicleLoadNow, entity)
-		local load = ok and loadOrError as number or nil
-		data.liveLoad[entity] = load
-		return formatPercent(load)
+		return data.loadText[entity] or UNKNOWN
 	end, LIVE_POLL_SECONDS)
 	return textRow(textState:old(), "font-scale-body")
 end)
@@ -377,6 +377,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 			},
 			builtin.ColumnDesc{
 				name = _("Load now"),
+				tooltip = _("Load when you last clicked a column header. Click any header to update it."),
 				recipe = LoadCell,
 				weight = 1,
 				getCompareValue = function(rowKey : integer) : any
@@ -419,11 +420,16 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 			return
 		end
 		data.sortColumn, data.sortAscending = column, ascending
-		local copy : {integer : number} = {}
-		for key, load in pairs(data.liveLoad) do
-			copy[key] = load
+		-- Any header click re-reads the loads, then the table re-sorts on them.
+		local sortLoad : {integer : number} = {}
+		local loadText : {integer : string} = {}
+		for entity in pairs(data.rows) do
+			local ok, loadOrError = pcall(line_data.vehicleLoadNow, entity)
+			local load = ok and loadOrError as number or nil
+			sortLoad[entity] = load
+			loadText[entity] = formatPercent(load)
 		end
-		data.sortLoad = copy
+		data.sortLoad, data.loadText = sortLoad, loadText
 		sortVersion:set(sortVersion:old() + 1)
 	end
 
