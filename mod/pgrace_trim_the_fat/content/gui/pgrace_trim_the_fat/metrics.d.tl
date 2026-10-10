@@ -21,6 +21,8 @@ global record PgraceTrimTheFatMetrics
 		totalCapacity : number
 		-- Time between departures at a stop; nil or <= 0 when unknown.
 		intervalMs : number
+		-- Stops on the line; each round trip runs one leg per stop.
+		stopCount : integer
 		-- Length of the data window: min(one year, time since the oldest vehicle was bought).
 		dataMs : number
 		-- Length of a game year in ms. Required (never nil).
@@ -31,7 +33,7 @@ global record PgraceTrimTheFatMetrics
 
 	record Assessment
 		verdict : Verdict
-		-- Average load over the data window, nil when unknown (no capacity, interval or data).
+		-- Average load over the data window, nil when unknown (no capacity, interval, stops or data).
 		load : number
 		target : number
 		-- Balance scaled to a full year; equal to the balance once the window is a full year.
@@ -56,7 +58,8 @@ global record PgraceTrimTheFatMetrics
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer) : number
-	-- itemsTransported / (departures in the window × capacity per vehicle); nil when unknown.
+	-- itemsTransported / (round trips in the window × capacity per vehicle × stops); nil when unknown
+	-- (no vehicles, capacity, interval, stops or data).
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean

@@ -40,8 +40,8 @@ t.test("pluralCategory: CLDR integer rules", function()
 	t.eq(metrics.pluralCategory(nil, 1), "one")
 end)
 
--- A line of 8 vehicles × 100 capacity, a departure every 100 ms, a full year of 1200 ms of data:
--- 12 departures × 100 per vehicle = 1200 capacity offered.
+-- A line of 8 vehicles × 100 capacity on 2 stops, a departure every 200 ms, a full year of 1200 ms of data:
+-- 6 round trips × 100 per vehicle × 2 legs = 1200 capacity offered.
 -- pairs() skips nil values, so an override of NIL clears the field.
 local NIL = {}
 
@@ -51,7 +51,8 @@ local function line(overrides)
 		balance = 400,
 		itemsTransported = 408,
 		totalCapacity = 800,
-		intervalMs = 100,
+		intervalMs = 200,
+		stopCount = 2,
 		dataMs = 1200,
 		yearMs = 1200,
 		cargoTypeCount = 1,
@@ -86,6 +87,13 @@ t.test("averageLoad: nil when it can't be known", function()
 	t.eq(metrics.averageLoad(line({ totalCapacity = 0 })), nil, "no capacity")
 	t.eq(metrics.averageLoad(line({ vehicleCount = 0 })), nil, "no vehicles")
 	t.eq(metrics.averageLoad(line({ dataMs = 0 })), nil, "no data")
+	t.eq(metrics.averageLoad(line({ stopCount = NIL })), nil, "stops nil")
+	t.eq(metrics.averageLoad(line({ stopCount = 0 })), nil, "no stops")
+end)
+
+t.test("averageLoad: every stop is a leg that offers the vehicle's capacity", function()
+	-- 6 round trips × 100 × 3 legs = 1800 offered.
+	near(metrics.averageLoad(line({ stopCount = 3, itemsTransported = 900 })), 0.5)
 end)
 
 t.test("annualise: scales partial years up and flags it", function()

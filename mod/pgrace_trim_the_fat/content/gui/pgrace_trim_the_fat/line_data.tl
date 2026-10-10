@@ -138,6 +138,7 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 	end
 	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
 	local frequency = api.engine.util.line.getMaxFrequency(line)
+	local lineComponent = api.engine.getComponent(line, api.type.ComponentType.LINE) as Engine.Component.Line
 	return {
 		input = {
 			vehicleCount = #rows,
@@ -146,6 +147,7 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 			totalCapacity = capacity,
 			-- getMaxFrequency is departures per second; the line window shows 1 / frequency seconds.
 			intervalMs = (frequency ~= nil and frequency > 0.0001) and 1000 / frequency or nil,
+			stopCount = lineComponent ~= nil and #lineComponent.stops or nil,
 			dataMs = oldest ~= nil and math.min(yearMs, now - oldest) or 0,
 			yearMs = yearMs,
 			cargoTypeCount = cargoTypes,
@@ -171,6 +173,7 @@ function line_data.probe(line : Engine.Entity, snap : PgraceTrimTheFatLineData.L
 			.. " name=" .. tostring(api.engine.util.getEntityName(line))
 			.. " frequency=" .. tostring(api.engine.util.line.getMaxFrequency(line))
 			.. " intervalMs=" .. tostring(i.intervalMs)
+			.. " stops=" .. tostring(i.stopCount)
 			.. " vehicles=" .. tostring(i.vehicleCount)
 			.. " capacity=" .. tostring(i.totalCapacity)
 			.. " cargoTypes=" .. tostring(i.cargoTypeCount)

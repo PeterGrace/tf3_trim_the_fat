@@ -52,11 +52,14 @@ function metrics.averageLoad(input : PgraceTrimTheFatMetrics.LineInput) : number
 	if input.vehicleCount == nil or input.vehicleCount <= 0
 		or input.totalCapacity == nil or input.totalCapacity <= 0
 		or input.intervalMs == nil or input.intervalMs <= 0
+		or input.stopCount == nil or input.stopCount < 1
 		or input.dataMs == nil or input.dataMs <= 0 then
 		return nil
 	end
-	local departures = input.dataMs / input.intervalMs
-	local offered = departures * (input.totalCapacity / input.vehicleCount)
+	-- intervalMs is the time between departures at one stop, so dataMs / intervalMs counts round trips; each round
+	-- trip runs one leg per stop, and every leg offers the vehicle's capacity.
+	local roundTrips = input.dataMs / input.intervalMs
+	local offered = roundTrips * (input.totalCapacity / input.vehicleCount) * input.stopCount
 	return (input.itemsTransported or 0) / offered
 end
 

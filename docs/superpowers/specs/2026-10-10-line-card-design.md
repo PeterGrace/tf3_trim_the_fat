@@ -33,7 +33,7 @@ Per line, over the last game year:
 |---|---|
 | Balance/yr | Sum of the line's vehicle balances (purchase price excluded, as in the base game) |
 | Profit per vehicle | Balance ÷ vehicle count |
-| Avg load (A) | `itemsTransported/yr ÷ (Σ vehicle capacity × round trips/yr)`. Round trips/yr comes from the line's interval / round-trip time; the exact API is confirmed by probe 2. Reads lower than seat occupancy on multi-stop lines, because a rider is counted once, not once per leg. |
+| Avg load (A) | `itemsTransported/yr ÷ (round trips/yr × Σ vehicle capacity ÷ vehicles × stops)`: each round trip runs one leg per stop, and every leg offers the vehicle's capacity. Round trips/yr is the data window ÷ the line's interval (`1 / getMaxFrequency`). Reads lower than seat occupancy on multi-stop lines, because a rider is counted once, not once per leg. |
 | Now load (C) | Σ cargo on board ÷ Σ capacity across all of the line's vehicles at this moment |
 | Target | `TARGET_SINGLE_CARGO = 0.50` if the line carries exactly one cargo type (empty backhaul), else `TARGET_DEFAULT = 0.70` (passengers, mixed cargo) |
 
@@ -46,7 +46,7 @@ Verdict (first match wins):
 4. **BUSY**: load A ≥ `BUSY_LOAD = 0.95`. Shows "may need more vehicles".
 5. **OK**.
 
-If capacity is 0 or the interval is unknown, load A is "—" and neither TOO_MANY nor BUSY can be the verdict.
+If capacity is 0, or the interval or stop count is unknown, load A is "—" and neither TOO_MANY nor BUSY can be the verdict.
 
 Frequency attracts riders, so fewer vehicles can mean less demand. The suggestion is an upper bound ("try removing up
 to N"), and the tooltip recommends trimming one vehicle at a time.
@@ -164,3 +164,15 @@ overview later.
     - one non-English language (German) for layout and plural forms.
   - Probes are marked `-- PROBE (remove before release)` and removed afterwards; findings go into this spec or
     AGENTS.md.
+
+## Findings (in-game, 2026-10-10)
+
+- `getMaxFrequency` is departures per second: 0.01094 → an interval of 91 s (the line window showed 97 s, read at a
+  different moment).
+- The line balance from `calculateBalance({line})` equals the sum of the per-vehicle balances (2 258 769). The base
+  Balance card's "Last Year" (2 418 472) is a different window, probably the previous calendar year.
+- Vehicles have an `itemsTransported` log, but it reads 0, so per-vehicle average load isn't available.
+- On bus lines, capacity with `allCapacities` true equals capacity with it false.
+- Load A first ignored the stop count and read 180% on a 2-stop bus line. With × stops, the same line (574 items,
+  interval 91 384 ms, year 1 461 000 ms, capacity 140, 7 vehicles, 2 stops) reads about 90%, matching the live load
+  of 89–100%.
