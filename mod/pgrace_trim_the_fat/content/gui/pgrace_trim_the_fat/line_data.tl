@@ -151,6 +151,7 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 			dataMs = oldest ~= nil and math.min(yearMs, now - oldest) or 0,
 			yearMs = yearMs,
 			cargoTypeCount = cargoTypes,
+			loadNow = line_data.lineLoadNow(line),
 			carriesPassengers = passengers,
 		},
 		vehicles = rows,

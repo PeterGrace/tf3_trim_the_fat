@@ -4,6 +4,8 @@ metrics.TARGET_DEFAULT = 0.70
 metrics.TARGET_SINGLE_CARGO = 0.50
 metrics.BUSY_LOAD = 0.95
 metrics.MIN_DATA_FRACTION = 1 / 12
+metrics.STUCK_LOAD_NOW = 0.90
+metrics.STUCK_AVERAGE_LOAD = 0.25
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -78,6 +80,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		verdict = "Ok",
 		target = metrics.targetFor(input.cargoTypeCount, input.carriesPassengers),
 		trim = 0,
+		notDelivering = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	local count = input.vehicleCount or 0
@@ -91,7 +94,10 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		a.verdict = "TooNew"
 		return a
 	end
-	if a.load ~= nil and a.load < a.target and count > 1 then
+	-- Full right now but little carried over the window: the cargo isn't being unloaded, so fewer vehicles won't help.
+	a.notDelivering = input.loadNow ~= nil and input.loadNow >= metrics.STUCK_LOAD_NOW
+		and a.load ~= nil and a.load < metrics.STUCK_AVERAGE_LOAD
+	if a.load ~= nil and a.load < a.target and count > 1 and not a.notDelivering then
 		local keep = math.max(1, math.ceil(count * a.load / a.target - EPSILON))
 		if keep < count then
 			a.keep = keep
