@@ -33,9 +33,9 @@ Per line, over the last game year:
 |---|---|
 | Balance/yr | Sum of the line's vehicle balances (purchase price excluded, as in the base game) |
 | Profit per vehicle | Balance ÷ vehicle count |
-| Avg load (A) | `itemsTransported/yr ÷ (Σ vehicle capacity × round trips/yr)`. Round trips/yr comes from the line's interval / round-trip time; the exact API is confirmed by probe 2. Reads lower than seat occupancy on multi-stop lines, because a rider is counted once, not once per leg. |
+| Avg load (A) | `itemsTransported/yr ÷ (round trips/yr × Σ vehicle capacity ÷ vehicles × stops)`: each round trip runs one leg per stop, and every leg offers the vehicle's capacity. Round trips/yr is the data window ÷ the line's interval (`1 / getMaxFrequency`). Reads lower than seat occupancy on multi-stop lines, because a rider is counted once, not once per leg. |
 | Now load (C) | Σ cargo on board ÷ Σ capacity across all of the line's vehicles at this moment |
-| Target | `TARGET_SINGLE_CARGO = 0.50` if the line carries exactly one cargo type (empty backhaul), else `TARGET_DEFAULT = 0.70` (passengers, mixed cargo) |
+| Target | `TARGET_SINGLE_CARGO = 0.50` only for freight lines carrying exactly one cargo type (empty backhaul); `TARGET_DEFAULT = 0.70` for passenger and mixed-cargo lines. Passengers are one cargo type, but riders travel both ways. |
 
 Verdict (first match wins):
 
@@ -46,7 +46,7 @@ Verdict (first match wins):
 4. **BUSY**: load A ≥ `BUSY_LOAD = 0.95`. Shows "may need more vehicles".
 5. **OK**.
 
-If capacity is 0 or the interval is unknown, load A is "—" and neither TOO_MANY nor BUSY can be the verdict.
+If capacity is 0, or the interval or stop count is unknown, load A is "—" and neither TOO_MANY nor BUSY can be the verdict.
 
 Frequency attracts riders, so fewer vehicles can mean less demand. The suggestion is an upper bound ("try removing up
 to N"), and the tooltip recommends trimming one vehicle at a time.
@@ -76,9 +76,10 @@ test.
 └──────────────────────────────────────────────────┘
 ```
 
-- `content_card.ContentCard` wrapper, as in the base cards.
-- **Verdict:** a coloured dot (red LOSING; amber TOO MANY / BUSY; green OK; neutral TOO NEW) plus text. The
-  dot/text sits in a button, so it can have a tooltip that shows the calculation
+- `content_card.ContentCard` wrapper, as in the base cards. Card title: "Line efficiency".
+- **Verdict:** the verdict text in the game's colour classes: `negative` (LOSING), `warning` (TOO MANY / BUSY),
+  `positive` (OK), default (TOO NEW / no vehicles). The base UI has text colour classes but no dot widget. The
+  text sits in a button, so it can have a tooltip that shows the calculation
   (e.g. "8 × 34% ÷ 50% = 5.4 → keep 6").
 - **Vehicle table:** `builtin.DataTable`, click-to-sort headers, initially sorted by $/yr ascending (worst first).
   - Name column: `line_react_util.makeEntityWindowButton` (opens the vehicle window, where the base sell button is).
@@ -89,8 +90,7 @@ test.
   - The headline and table data are computed once per mount (`react.useStateLazy` + `pcall`).
   - "Now" loads poll with `engine_react_util.useStepStateTimer(fn, 0.25)`.
   - Sorting reads a snapshot refreshed in `onSortColumnChange`, so rows don't re-sort on live updates.
-- **Placement:** `order` is chosen next to the line window's balance/transported cards (value taken from
-  `line_eow.script.tl` during planning).
+- **Placement:** `order = 55`, between the line's vehicle list (50) and income graph (60).
 
 ## §3 Localisation
 
@@ -101,7 +101,8 @@ Following the Commuter Compass approach (see AGENTS.md "Translations"):
 - **`mod/pgrace_trim_the_fat/strings.json`:** contains all 12 TF3 languages (de, es, fr, it, ja, ko, nl, pl, pt_BR,
   ru, zh_CN, zh_TW). Wording follows the base game's terms; look them up in `base/strings/<lang>/LC_MESSAGES/base.mo`
   (Balance, Utilization, Load, Train, Bus, ...).
-- **Plurals:** "{count} vehicles", "remove up to {count} …" and age units use one key per plural form
+- **Plurals:** "{count} vehicles" and the trim suggestion use one key per plural form. Ages come from
+  `api.engine.util.formatAge`, which is already localised
   (`|one`, `|few`, `|many`, `|other`). `metrics.pluralCategory(languageCode, count)` (ported from Commuter Compass
   `rank.pluralCategory`, unit-tested) picks the form for `app.getUserProfile():getLanguage().code`. English has
   `strings.json` entries for the plural keys.
@@ -110,7 +111,8 @@ Following the Commuter Compass approach (see AGENTS.md "Translations"):
 - **Numbers:**
   - money: `api.util.formatMoney`;
   - integers: `api.util.lang.formatInt`;
-  - percentages: `_("{percent}%")` (German `"{percent} %"`).
+  - percentages: `_("{percent}%")` (German `"{percent} %"`);
+  - decimals: the key `{integer}.{decimal}`, so each language picks its decimal separator.
   Format at compute time and store the text; the 0.25 s poll formats only its own percentage.
 - **Mod Hub text:** `_metadata/modinfo.json` gets `localization` for all 12 languages (name, summary, description).
   `description.html` stays English.
@@ -120,7 +122,7 @@ Following the Commuter Compass approach (see AGENTS.md "Translations"):
 ## §4 Structure
 
 ```
-content/gui/trim_the_fat/
+content/gui/pgrace_trim_the_fat/
 ├── metrics.tl              # pure: targets, load, verdict, trim, annualise, explanation, pluralCategory
 ├── line_data.tl            # api.engine only here: builds a plain LineSnapshot record
 ├── line_card.script.tl     # UI
@@ -144,7 +146,7 @@ overview later.
 - `tests/metrics_test.lua` covers:
   - every verdict branch, including the LOSING + trim combination;
   - trim rounding (keep never below 1, trim 0 falls through to OK);
-  - single-cargo vs default target;
+  - single-cargo freight vs default target (passenger lines get the default);
   - annualising below / above one year;
   - zero capacity and unknown interval;
   - `pluralCategory` for en/fr/pl/ja.
@@ -162,3 +164,40 @@ overview later.
     - one non-English language (German) for layout and plural forms.
   - Probes are marked `-- PROBE (remove before release)` and removed afterwards; findings go into this spec or
     AGENTS.md.
+
+## Findings (in-game, 2026-10-10)
+
+- `getMaxFrequency` is departures per second: 0.01094 → an interval of 91 s (the line window showed 97 s, read at a
+  different moment).
+- The line balance from `calculateBalance({line})` equals the sum of the per-vehicle balances (2 258 769). The base
+  Balance card's "Last Year" (2 418 472) is a different window: the previous calendar year, like the chart's bars.
+  That difference is the "lifetime or per year?" confusion this mod started from.
+- Vehicles have an `itemsTransported` log, but it reads 0, so per-vehicle average load isn't available.
+- On bus lines, capacity with `allCapacities` true equals capacity with it false.
+- Load A first ignored the stop count and read 180% on a 2-stop bus line. With × stops, the same line (574 items,
+  interval 91 384 ms, year 1 461 000 ms, capacity 140, 7 vehicles, 2 stops) reads about 90%, matching the live load
+  of 89–100%.
+- **Not delivering.** A freight line can lose money while its vehicles sit full (cargo loaded but never unloaded,
+  e.g. no acceptor at the far end): average load 5–9%, load now 85–100%. Removing vehicles is the wrong advice
+  there, so `assess` sets `notDelivering` (load now ≥ `STUCK_LOAD_NOW = 0.75` and average load <
+  `STUCK_AVERAGE_LOAD = 0.25`), the card shows a hint instead of the trim suggestion, and the verdict is unchanged.
+  The cut-off started at 90%, but a two-truck line at 100% + 70% read 85% and the advice flipped between visits.
+- **Replacing a vehicle** keeps its entity, name and balance history and resets only `purchaseTime`. Annualising
+  from the purchase time turned a full year's −323k into −1.2M. The data span is now measured from the first
+  month in the last year with any money booked (`dataSpan` in `line_data.tl`), for vehicles and the line alike, so
+  a replaced vehicle's "Per year" covers the slot, not the body. Age still shows the body's age, as the base game.
+  The card's refresh row watches each vehicle's purchase time as well as the count, so it also offers a refresh
+  after a replacement.
+- **German pass:** "Macht Verlust", "6 Lkws · 2 Halte", "Ø Auslastung 2 % (Ziel 70 %)", header widths all fit.
+- **Average load uses vehicle-time** (from the final review). The interval is today's, but the items cover the
+  year, so buying vehicles made the year look underused ("remove 4 buses" right after adding them). Offered
+  capacity is now Σ each vehicle's own data span ÷ round-trip time (interval × vehicles) × capacity per vehicle ×
+  stops. Sold vehicles' time can't be counted, so right after a trim the load reads a little high until their
+  months roll out of the year.
+- **Many stops** (the review's concern that × stops undercounts riders who travel several legs): a 7-stop bus line
+  with 16 buses read an average load of 19% while the live load was 24–30% across three looks, so riders average
+  about 1.5 legs and the average reads roughly a third low there. Not enough to flip its verdict; revisit if a long
+  line with visibly full vehicles gets "Too many".
+- **Selling a vehicle** with the card open: the row's locate button disappeared, then came back seconds later
+  (presumably its ID was reused), so the row checks that the vehicle is still listed on the line, not only that
+  the entity exists.

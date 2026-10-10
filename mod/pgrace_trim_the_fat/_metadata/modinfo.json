@@ -6,8 +6,70 @@
         }
     ],
     "name": "Trim The Fat",
-    "summary": "TODO: one line, at most 100 characters.",
-    "description": "TODO: plain-text description (description.html is what mod.io shows).",
+    "summary": "Shows which lines lose money or run too many vehicles, with a per-vehicle breakdown.",
+    "description": "Adds a Line efficiency card to every line window. It compares each line's balance with its average load over the same 12 months, gives a verdict (losing money, too many vehicles, busy, OK) with a suggestion of how many vehicles to remove, and lists every vehicle with its age, balance per year and current load. Cosmetic: achievements stay available, and you can add or remove it from existing saves.",
+    "localization": {
+        "de": {
+            "name": "Trim The Fat",
+            "summary": "Zeigt, welche Linien Verlust machen oder zu viele Fahrzeuge haben, mit Aufschlüsselung je Fahrzeug.",
+            "description": "Fügt jedem Linienfenster eine Karte „Linieneffizienz“ hinzu. Sie vergleicht den Ertrag jeder Linie mit ihrer durchschnittlichen Auslastung über dieselben 12 Monate, gibt eine Bewertung ab („Macht Verlust“, „Zu viele Fahrzeuge“, „Ausgelastet“, „OK“) samt Vorschlag, wie viele Fahrzeuge entfernt werden können, und listet jedes Fahrzeug mit Alter, Ertrag pro Jahr und aktueller Auslastung auf. Kosmetisch: Errungenschaften bleiben verfügbar, und die Mod kann bestehenden Spielständen hinzugefügt oder daraus entfernt werden."
+        },
+        "es": {
+            "name": "Trim The Fat",
+            "summary": "Muestra qué líneas pierden dinero o tienen demasiados vehículos, con un desglose por vehículo.",
+            "description": "Añade una tarjeta «Eficiencia de la línea» a cada ventana de línea. Compara el saldo de cada línea con su utilización media durante los mismos 12 meses, da una valoración («Pierde dinero», «Demasiados vehículos», «Saturada», «OK») con una sugerencia de cuántos vehículos retirar, y muestra cada vehículo con su edad, saldo por año y utilización actual. Cosmético: los logros siguen disponibles y puedes añadirlo a partidas existentes o quitarlo de ellas."
+        },
+        "fr": {
+            "name": "Trim The Fat",
+            "summary": "Montre quelles lignes perdent de l’argent ou ont trop de véhicules, avec un détail par véhicule.",
+            "description": "Ajoute une carte « Efficacité de la ligne » à chaque fenêtre de ligne. Elle compare le solde de chaque ligne à son utilisation moyenne sur les mêmes 12 mois, donne un verdict (« Perd de l’argent », « Trop de véhicules », « Saturée », « OK ») avec une suggestion du nombre de véhicules à retirer, et liste chaque véhicule avec son âge, son solde par an et son utilisation actuelle. Cosmétique : les succès restent disponibles, et le mod peut être ajouté à des parties existantes ou en être retiré."
+        },
+        "it": {
+            "name": "Trim The Fat",
+            "summary": "Mostra quali linee sono in perdita o hanno troppi veicoli, con un dettaglio per ogni veicolo.",
+            "description": "Aggiunge una scheda \"Efficienza della linea\" a ogni finestra di linea. Confronta il saldo di ogni linea con il suo utilizzo medio negli stessi 12 mesi, dà un giudizio (\"In perdita\", \"Troppi veicoli\", \"Satura\", \"OK\") con un suggerimento su quanti veicoli rimuovere, ed elenca ogni veicolo con età, saldo annuo e utilizzo attuale. Cosmetica: gli obiettivi restano disponibili e la mod può essere aggiunta o rimossa dai salvataggi esistenti."
+        },
+        "ja": {
+            "name": "Trim The Fat",
+            "summary": "赤字の路線や車両が多すぎる路線を、車両ごとの内訳とともに表示します。",
+            "description": "すべての路線ウィンドウに「路線効率」カードを追加します。各路線の収支と、同じ12か月間の平均利用率を比べて評価（「赤字」「車両が多すぎます」「混雑」「良好」）を示し、削除できる車両の数を提案します。さらに、すべての車両を年数、年間収支、現在の利用率とともに一覧表示します。外観のみのMOD：実績は引き続き解除でき、既存のセーブデータに追加することも削除することもできます。"
+        },
+        "ko": {
+            "name": "Trim The Fat",
+            "summary": "적자 노선이나 운송 수단이 과다한 노선을 운송 수단별 내역과 함께 보여줍니다.",
+            "description": "모든 노선 창에 '노선 효율' 카드를 추가합니다. 각 노선의 잔액을 같은 12개월 동안의 평균 이용도와 비교해 판정('적자', '운송 수단 과다', '혼잡', '양호')을 내리고, 제거할 운송 수단 수를 제안하며, 모든 운송 수단을 연식, 연간 잔액, 현재 이용도와 함께 보여줍니다. 외형 전용 모드: 업적을 계속 달성할 수 있으며, 기존 저장 파일에 추가하거나 제거할 수 있습니다."
+        },
+        "nl": {
+            "name": "Trim The Fat",
+            "summary": "Toont welke lijnen verlies maken of te veel voertuigen hebben, met een overzicht per voertuig.",
+            "description": "Voegt een kaart ‘Lijnefficiëntie’ toe aan elk lijnvenster. Die vergelijkt het saldo van elke lijn met de gemiddelde bezetting over dezelfde 12 maanden, geeft een oordeel (‘Verliesgevend’, ‘Te veel voertuigen’, ‘Druk’, ‘OK’) met een suggestie hoeveel voertuigen je kunt verwijderen, en toont elk voertuig met leeftijd, saldo per jaar en huidige bezetting. Cosmetisch: prestaties blijven beschikbaar, en de mod kan aan bestaande spellen worden toegevoegd of eruit worden verwijderd."
+        },
+        "pl": {
+            "name": "Trim The Fat",
+            "summary": "Pokazuje, które linie przynoszą straty lub mają za dużo pojazdów, z podziałem na pojazdy.",
+            "description": "Dodaje do każdego okna linii kartę „Efektywność linii”. Porównuje bilans każdej linii z jej średnim wykorzystaniem w tych samych 12 miesiącach, wystawia ocenę („Przynosi straty”, „Za dużo pojazdów”, „Obłożona”, „OK”) z sugestią, ile pojazdów usunąć, i wymienia każdy pojazd z wiekiem, bilansem rocznym i bieżącym wykorzystaniem. Kosmetyczny: osiągnięcia pozostają dostępne, a mod można dodać do istniejących zapisów gry lub z nich usunąć."
+        },
+        "pt_BR": {
+            "name": "Trim The Fat",
+            "summary": "Mostra quais linhas dão prejuízo ou têm veículos demais, com um detalhamento por veículo.",
+            "description": "Adiciona um cartão \"Eficiência da linha\" a cada janela de linha. Ele compara o saldo de cada linha com sua utilização média nos mesmos 12 meses, dá um veredito (\"Dando prejuízo\", \"Veículos demais\", \"Lotada\", \"OK\") com uma sugestão de quantos veículos remover e lista cada veículo com idade, saldo por ano e utilização atual. Cosmético: as conquistas continuam disponíveis, e o mod pode ser adicionado a jogos salvos existentes ou removido deles."
+        },
+        "ru": {
+            "name": "Trim The Fat",
+            "summary": "Показывает убыточные маршруты и маршруты, где слишком много транспорта, с разбивкой по единицам.",
+            "description": "Добавляет в каждое окно маршрута карточку «Эффективность маршрута». Она сравнивает баланс каждого маршрута с его средней загрузкой за те же 12 месяцев, выносит оценку («Убыточный», «Слишком много транспорта», «Загружен», «OK») с советом, сколько транспорта убрать, и показывает каждую единицу транспорта с возрастом, балансом за год и текущей загрузкой. Косметический мод: достижения остаются доступными, его можно добавить в существующие сохранения или удалить из них."
+        },
+        "zh_CN": {
+            "name": "Trim The Fat",
+            "summary": "显示哪些线路亏损或载具过多，并按载具逐一列出明细。",
+            "description": "在每个线路窗口中添加“线路效率”卡片。它将每条线路的结余与同一 12 个月内的平均利用率进行比较，给出评估（“亏损”“载具过多”“繁忙”“良好”）并建议移除多少载具，同时列出每个载具的年龄、每年结余和当前利用率。外观模组：成就仍可获得，并且可以添加到现有存档或从中移除。"
+        },
+        "zh_TW": {
+            "name": "Trim The Fat",
+            "summary": "顯示哪些路線虧損或車輛過多，並逐一列出每輛車的明細。",
+            "description": "在每個路線視窗中新增「路線效率」卡片。它會將每條路線的收支與同一 12 個月內的平均使用率進行比較，給出評估（「虧損」「車輛過多」「繁忙」「良好」）並建議移除多少車輛，同時列出每輛車的年份、每年收支與目前使用率。外觀模組：成就仍可取得，並可加入現有存檔或從中移除。"
+        }
+    },
     "tags": [
         "Script Mod"
     ],

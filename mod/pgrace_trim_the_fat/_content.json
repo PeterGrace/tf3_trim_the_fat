@@ -1,9 +1,11 @@
 {
     "archives": null,
     "files": [
-        "gui/pgrace_trim_the_fat/industry_plugin.res.lua",
-        "gui/pgrace_trim_the_fat/pgrace_trim_the_fat.script.tl",
-        "gui/pgrace_trim_the_fat/util.d.tl",
-        "gui/pgrace_trim_the_fat/util.tl"
+        "gui/pgrace_trim_the_fat/line_card.res.lua",
+        "gui/pgrace_trim_the_fat/line_card.script.tl",
+        "gui/pgrace_trim_the_fat/line_data.d.tl",
+        "gui/pgrace_trim_the_fat/line_data.tl",
+        "gui/pgrace_trim_the_fat/metrics.d.tl",
+        "gui/pgrace_trim_the_fat/metrics.tl"
     ]
 }
