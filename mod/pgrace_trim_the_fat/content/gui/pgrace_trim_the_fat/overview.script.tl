@@ -161,7 +161,6 @@ local function buildOverview(cats : {Category}) : OverviewData
 	nextGeneration = nextGeneration + 1
 	local data : OverviewData = { error = false, rows = {}, keys = {}, sortColumn = 3, sortAscending = true,
 		generation = nextGeneration }
-	local start = os.clock() -- PROBE (remove before release)
 	local ok, err = pcall(function() : boolean
 		for __, line in ipairs(line_data.playerLines()) do
 			data.rows[line] = buildRow(line, cats)
@@ -169,8 +168,6 @@ local function buildOverview(cats : {Category}) : OverviewData
 		end
 		return true
 	end)
-	debugPrint(LOG_PREFIX .. "probe overview " .. tostring(#data.keys) .. " lines in " -- PROBE (remove before release)
-		.. tostring(math.floor((os.clock() - start) * 1000 + 0.5)) .. " ms") -- PROBE (remove before release)
 	if not ok then
 		debugPrint(LOG_PREFIX .. "overview error: " .. tostring(err))
 		data.error = true
