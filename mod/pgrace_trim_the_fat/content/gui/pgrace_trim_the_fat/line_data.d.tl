@@ -38,6 +38,8 @@ global record PgraceTrimTheFatLineData
 	lineLoadNow : function(line : Engine.Entity) : number
 	-- Cargo on board ÷ capacity of one vehicle right now; nil without capacity.
 	vehicleLoadNow : function(vehicle : Engine.Entity) : number
+	-- Vehicles on the line that still exist, counted as snapshot counts them (#snapshot.vehicles).
+	vehicleCount : function(line : Engine.Entity) : integer
 	-- PROBE (remove before release): logs the raw inputs for calibration.
 	probe : function(line : Engine.Entity, snap : LineSnapshot, assessment : PgraceTrimTheFatMetrics.Assessment)
 end

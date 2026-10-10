@@ -94,6 +94,17 @@ function line_data.vehicleLoadNow(vehicle : Engine.Entity) : number
 	return used / capacity
 end
 
+-- Counts like snapshot: vehicles listed on the line that still exist.
+function line_data.vehicleCount(line : Engine.Entity) : integer
+	local count = 0
+	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
+		if transportVehicle(vehicle) ~= nil then
+			count = count + 1
+		end
+	end
+	return count
+end
+
 function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.LineSnapshot
 	local now = nowMs()
 	local yearMs = api.util.getDefaultYearDuration()

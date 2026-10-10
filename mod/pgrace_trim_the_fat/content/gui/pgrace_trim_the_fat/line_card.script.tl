@@ -42,6 +42,9 @@ local function formatCount(count : integer) : string
 end
 
 local function formatMoney(amount : number) : string
+	if amount == nil then
+		return UNKNOWN
+	end
 	local rounded = math.floor(amount + 0.5)
 	local ok, text = pcall(api.util.formatMoney, rounded)
 	if ok and text ~= nil then
@@ -167,29 +170,49 @@ local record CardData
 	liveLoad : {integer : number}
 	-- The copy the table sorts by, refreshed on a header click, so live updates don't reorder rows (AGENTS.md).
 	sortLoad : {integer : number}
+	-- Balance per year as text, by entity: formatted once here, so cells don't call api.util.formatMoney.
+	balanceText : {integer : string}
+	-- The player's sort, kept across re-renders. Starts on Balance per year (column 3), lowest first.
+	sortColumn : integer
+	sortAscending : boolean
+	-- Differs for every build, so a refresh remounts the table with fresh cells (cells keep their first userParam).
+	generation : integer
 end
 
+local nextGeneration = 0
+
+-- Never throws: everything that reads the engine or formats runs inside the pcall.
 local function buildCardData(line : Engine.Entity) : CardData
-	local ok, snapOrError = pcall(line_data.snapshot, line)
+	nextGeneration = nextGeneration + 1
+	local generation = nextGeneration
+	local ok, dataOrError = pcall(function() : CardData
+		local snap = line_data.snapshot(line)
+		local data : CardData = {
+			error = false,
+			snapshot = snap,
+			assessment = metrics.assess(snap.input),
+			rows = {},
+			liveLoad = {},
+			sortLoad = {},
+			balanceText = {},
+			sortColumn = 3,
+			sortAscending = true,
+			generation = generation,
+		}
+		for __, row in ipairs(snap.vehicles) do
+			data.rows[row.entity] = row
+			data.liveLoad[row.entity] = row.loadNow
+			data.sortLoad[row.entity] = row.loadNow or -1
+			data.balanceText[row.entity] = moneyText(row.balancePerYear, row.annualised)
+		end
+		return data
+	end)
 	if not ok then
-		debugPrint(LOG_PREFIX .. "error for line " .. tostring(line) .. ": " .. tostring(snapOrError))
-		return { error = true }
+		debugPrint(LOG_PREFIX .. "error for line " .. tostring(line) .. ": " .. tostring(dataOrError))
+		return { error = true, generation = generation }
 	end
-	local snap = snapOrError as LineSnapshot
-	local data : CardData = {
-		error = false,
-		snapshot = snap,
-		assessment = metrics.assess(snap.input),
-		rows = {},
-		liveLoad = {},
-		sortLoad = {},
-	}
-	for __, row in ipairs(snap.vehicles) do
-		data.rows[row.entity] = row
-		data.liveLoad[row.entity] = row.loadNow
-		data.sortLoad[row.entity] = row.loadNow or -1
-	end
-	line_data.probe(line, snap, data.assessment) -- PROBE (remove before release)
+	local data = dataOrError as CardData
+	line_data.probe(line, data.snapshot, data.assessment) -- PROBE (remove before release)
 	return data
 end
 
@@ -300,8 +323,9 @@ local AgeCell = makeTextCell("PgraceTrimTheFatAgeCell", function(row : VehicleRo
 	return row.ageText
 end)
 
-local BalanceCell = makeTextCell("PgraceTrimTheFatBalanceCell", function(row : VehicleRow) : string
-	return moneyText(row.balancePerYear, row.annualised)
+local BalanceCell = react.RegisterRecipe("PgraceTrimTheFatBalanceCell", function(params : Builtin.TableCellParam) : TreeNodeId
+	local data = params.userParam as CardData
+	return textRow(data.balanceText[params.rowKey] or "", "font-scale-body")
 end)
 
 local LoadCell = react.RegisterRecipe("PgraceTrimTheFatLoadCell", function(params : Builtin.TableCellParam) : TreeNodeId
@@ -317,17 +341,19 @@ local LoadCell = react.RegisterRecipe("PgraceTrimTheFatLoadCell", function(param
 end)
 
 -- Starts sorted by balance per year, lowest first: the vehicles to look at first are on top.
-local function makeVehicleTable(data : CardData) : TreeNodeId
+-- onSort refreshes the sort values and re-renders, so the table re-sorts on them (as Commuter Compass).
+local function makeVehicleTable(data : CardData, onSort : function(integer, boolean)) : TreeNodeId
 	local rowKeys : {integer} = {}
 	for i, row in ipairs(data.snapshot.vehicles) do
 		rowKeys[i] = row.entity
 	end
 	return builtin.DataTable{
+		meta = { localKey = "vehicles_" .. tostring(data.generation) },
 		columns = {
 			builtin.ColumnDesc{
 				name = _("Vehicle"),
 				recipe = NameCell,
-				weight = 1,
+				weight = 2,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].name
 				end,
@@ -335,6 +361,7 @@ local function makeVehicleTable(data : CardData) : TreeNodeId
 			builtin.ColumnDesc{
 				name = _("Age"),
 				recipe = AgeCell,
+				weight = 1.2,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].ageMs
 				end,
@@ -342,6 +369,7 @@ local function makeVehicleTable(data : CardData) : TreeNodeId
 			builtin.ColumnDesc{
 				name = _("Balance per year"),
 				recipe = BalanceCell,
+				weight = 1.2,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].balancePerYear
 				end,
@@ -349,6 +377,7 @@ local function makeVehicleTable(data : CardData) : TreeNodeId
 			builtin.ColumnDesc{
 				name = _("Load now"),
 				recipe = LoadCell,
+				weight = 1,
 				getCompareValue = function(rowKey : integer) : any
 					return data.sortLoad[rowKey] or -1
 				end,
@@ -356,14 +385,8 @@ local function makeVehicleTable(data : CardData) : TreeNodeId
 		},
 		rowKeys = rowKeys,
 		userParam = data,
-		initialSortColumn = { 3, true },
-		onSortColumnChange = function(_column : integer, _ascending : boolean)
-			local copy : {integer : number} = {}
-			for key, load in pairs(data.liveLoad) do
-				copy[key] = load
-			end
-			data.sortLoad = copy
-		end,
+		initialSortColumn = { data.sortColumn, data.sortAscending },
+		onSortColumnChange = onSort,
 	}
 end
 
@@ -379,6 +402,30 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 		return buildCardData(params.line)
 	end)
 	local data = dataState:old()
+	-- Hooks run before any early return, so their order never changes.
+	-- Polls the vehicle count, so the card can offer a refresh after vehicles are bought or sold. -1 on error.
+	local countState = engine_react_util.useStepStateTimer(function() : integer
+		local ok, countOrError = pcall(line_data.vehicleCount, params.line)
+		return ok and countOrError as integer or -1
+	end, 1.0)
+	-- Bumped on a header click, so the table re-sorts on the fresh sort values right away (as Commuter Compass).
+	local sortVersion = react.useStateLazy(function() : integer
+		return 0
+	end)
+
+	local function onSort(column : integer, ascending : boolean)
+		if column == data.sortColumn and ascending == data.sortAscending then
+			return
+		end
+		data.sortColumn, data.sortAscending = column, ascending
+		local copy : {integer : number} = {}
+		for key, load in pairs(data.liveLoad) do
+			copy[key] = load
+		end
+		data.sortLoad = copy
+		sortVersion:set(sortVersion:old() + 1)
+	end
+
 	if data.error then
 		return textRow(_("Error (see log)"), "font-scale-body, negative")
 	end
@@ -392,6 +439,31 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 	local label, class = verdictLabel(a.verdict)
 	local tooltip = verdictTooltip(data)
 	add(tooltip ~= "" and tooltipRow(label, class, tooltip) or textRow(label, class))
+	local count = countState:old()
+	if count ~= -1 and count ~= #data.snapshot.vehicles then
+		add(builtin.BoxLayout{
+			children = {
+				builtin.Button{
+					content = builtin.BoxLayout{
+						children = {
+							builtin.TextView{
+								meta = { class = "font-scale-body, warning" },
+								text = _("Vehicles changed: click to refresh"),
+							},
+						},
+					},
+					onClick = function()
+						local fresh = buildCardData(params.line)
+						-- Keep the player's sort across the refresh.
+						if not fresh.error then
+							fresh.sortColumn, fresh.sortAscending = data.sortColumn, data.sortAscending
+						end
+						dataState:set(fresh)
+					end,
+				},
+			},
+		})
+	end
 	if a.verdict == "NoVehicles" then
 		return builtin.BoxLayout{ orientation = builtin.type.Orientation.Vertical, children = children }
 	end
@@ -408,7 +480,7 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 		}), "font-scale-body"))
 	end
 	add(LoadLine{ line = params.line, load = a.load, target = a.target })
-	add(makeVehicleTable(data))
+	add(makeVehicleTable(data, onSort))
 
 	local anyAnnualised = a.annualised
 	for __, row in ipairs(data.snapshot.vehicles) do
