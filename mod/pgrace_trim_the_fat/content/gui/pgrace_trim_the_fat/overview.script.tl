@@ -264,11 +264,11 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	local dataState = react.useStateLazy(function() : OverviewData
 		return buildOverview(cats)
 	end)
-	-- enabled[i] for categories()[i]; all on at first, as F2.
+	-- enabled[i] for categories()[i]. As F2: none on shows every line; turning some on shows only those.
 	local enabledState = react.useStateLazy(function() : {integer : boolean}
 		local enabled : {integer : boolean} = {}
 		for i = 1, #cats do
-			enabled[i] = true
+			enabled[i] = false
 		end
 		return enabled
 	end)
@@ -365,8 +365,12 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 		local visible : {integer : boolean} = {}
 		local shown : {Assessment} = {}
 		local anyAnnualised = false
+		local anyEnabled = false
+		for i = 1, #cats do
+			anyEnabled = anyEnabled or enabled[i]
+		end
 		for line, row in pairs(data.rows) do
-			local match = false
+			local match = not anyEnabled
 			for i = 1, #cats do
 				match = match or (enabled[i] and row.matches[i])
 			end
