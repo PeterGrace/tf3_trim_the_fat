@@ -1,0 +1,9 @@
+{
+    "archives": null,
+    "files": [
+        "gui/pgrace_trim_the_fat/industry_plugin.res.lua",
+        "gui/pgrace_trim_the_fat/pgrace_trim_the_fat.script.tl",
+        "gui/pgrace_trim_the_fat/util.d.tl",
+        "gui/pgrace_trim_the_fat/util.tl"
+    ]
+}
