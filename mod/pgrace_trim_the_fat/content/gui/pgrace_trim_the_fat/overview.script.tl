@@ -10,7 +10,7 @@ local line_react_util = ug_require "::/gui/line_vehicle_mgmt/line_react_util.tl"
 local line_util = ug_require "::/gui/line_vehicle_mgmt/line_util.tl" as LineUtil
 
 local LOG_PREFIX = "[trim_the_fat] "
-local WINDOW_ID = "pgrace_trim_the_fat.overview"
+local WINDOW_ID = "pgrace_trim_the_fat_overview"
 local BUTTON_ICON = "::/gui/statistics/icons/symbol_configure_line.tga"
 
 local type ToolParam = ToolReactUtil.IToolParam
@@ -232,7 +232,13 @@ local function summaryText(s : PgraceTrimTheFatMetrics.Summary) : string
 	return table.concat(parts, " · ")
 end
 
-local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function() : TreeNodeId
+local record OverviewParams
+	-- The window's expanded (maximised) state, owned by the window recipe, as F2.
+	expanded : boolean
+	setExpanded : function(boolean)
+end
+
+local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(params : OverviewParams) : TreeNodeId
 	local cats = react.useStateLazy(function() : {Category}
 		return categories()
 	end):old()
@@ -283,6 +289,19 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function() : T
 		content = builtin.BoxLayout{ children = { builtin.TextView{ meta = { class = "font-scale-body" }, text = _("Refresh") } } },
 		onClick = refresh,
 	}
+	-- F2's expand button: the stylesheet gives the expanded window nearly the whole screen.
+	filterButtons[#filterButtons + 1] = builtin.ToggleButton{
+		meta = { tooltip = params.expanded and _("Shrink") or _("Expand") },
+		value = params.expanded and 1 or 0,
+		content = builtin.ImageView{
+			path = params.expanded and "::/gui/builtin/window/icons/symbol_minimize_18.tga"
+				or "::/gui/builtin/window/icons/symbol_maximize_18.tga",
+			scaling = builtin.type.ImageViewScaling.AutoFit,
+		},
+		onValueChange = function(value : integer)
+			params.setExpanded(value == 1)
+		end,
+	}
 
 	local children : {TreeNodeId} = {
 		builtin.BoxLayout{ orientation = builtin.type.Orientation.Horizontal, children = filterButtons },
@@ -319,14 +338,21 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function() : T
 end)
 
 local OverviewWindow = react.RegisterWrapperRecipe("PgraceTrimTheFatOverviewWindow", builtin.Window, function(params : ToolReactUtil.IToolWindowParam<ToolParam>) : TreeNodeId
+	local expandedState = react.useState(false) as ReactStateT<boolean>
+	-- Size and position come from overview.css.lua, by this class (as the base map editor window).
 	return builtin.Window{
+		meta = { class = "pgrace-trim-the-fat-overview" },
 		id = WINDOW_ID,
 		title = _("Trim the Fat"),
 		closable = true,
-		initialX = 0.5,
-		initialY = 0.5,
 		onClose = params.onClose,
-		content = Overview(),
+		expanded = expandedState:old(),
+		content = Overview{
+			expanded = expandedState:old(),
+			setExpanded = function(expanded : boolean)
+				expandedState:set(expanded)
+			end,
+		},
 	}
 end)
 
