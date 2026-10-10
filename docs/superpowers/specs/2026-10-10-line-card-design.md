@@ -35,7 +35,7 @@ Per line, over the last game year:
 | Profit per vehicle | Balance ÷ vehicle count |
 | Avg load (A) | `itemsTransported/yr ÷ (round trips/yr × Σ vehicle capacity ÷ vehicles × stops)`: each round trip runs one leg per stop, and every leg offers the vehicle's capacity. Round trips/yr is the data window ÷ the line's interval (`1 / getMaxFrequency`). Reads lower than seat occupancy on multi-stop lines, because a rider is counted once, not once per leg. |
 | Now load (C) | Σ cargo on board ÷ Σ capacity across all of the line's vehicles at this moment |
-| Target | `TARGET_SINGLE_CARGO = 0.50` if the line carries exactly one cargo type (empty backhaul), else `TARGET_DEFAULT = 0.70` (passengers, mixed cargo) |
+| Target | `TARGET_SINGLE_CARGO = 0.50` only for freight lines carrying exactly one cargo type (empty backhaul); `TARGET_DEFAULT = 0.70` for passenger and mixed-cargo lines. Passengers are one cargo type, but riders travel both ways. |
 
 Verdict (first match wins):
 
@@ -146,7 +146,7 @@ overview later.
 - `tests/metrics_test.lua` covers:
   - every verdict branch, including the LOSING + trim combination;
   - trim rounding (keep never below 1, trim 0 falls through to OK);
-  - single-cargo vs default target;
+  - single-cargo freight vs default target (passenger lines get the default);
   - annualising below / above one year;
   - zero capacity and unknown interval;
   - `pluralCategory` for en/fr/pl/ja.

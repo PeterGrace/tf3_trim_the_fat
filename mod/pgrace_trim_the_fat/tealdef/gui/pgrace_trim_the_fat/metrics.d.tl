@@ -29,6 +29,8 @@ global record PgraceTrimTheFatMetrics
 		yearMs : number
 		-- Cargo types the vehicles currently carry (capacity > 0).
 		cargoTypeCount : integer
+		-- True when passengers are among those cargo types.
+		carriesPassengers : boolean
 	end
 
 	record Assessment
@@ -47,17 +49,17 @@ global record PgraceTrimTheFatMetrics
 		trim : integer
 	end
 
-	-- Target average load for lines carrying several cargo types or passengers.
+	-- Target average load for passenger lines and lines carrying several cargo types.
 	TARGET_DEFAULT : number
-	-- Target for single-cargo lines, which usually run empty one way.
+	-- Target for freight lines carrying one cargo type, which usually run empty one way.
 	TARGET_SINGLE_CARGO : number
 	-- At or above this average load the verdict is Busy.
 	BUSY_LOAD : number
 	-- Below this share of a year of data the verdict is TooNew.
 	MIN_DATA_FRACTION : number
 
-	-- TARGET_SINGLE_CARGO for exactly one cargo type, TARGET_DEFAULT otherwise.
-	targetFor : function(cargoTypeCount : integer) : number
+	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
+	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	-- itemsTransported / (round trips in the window × capacity per vehicle × stops); nil when unknown
 	-- (no vehicles, capacity, interval, stops or data).
 	averageLoad : function(input : LineInput) : number

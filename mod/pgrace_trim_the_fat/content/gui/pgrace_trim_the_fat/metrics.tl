@@ -5,8 +5,8 @@ metrics.TARGET_SINGLE_CARGO = 0.50
 metrics.BUSY_LOAD = 0.95
 metrics.MIN_DATA_FRACTION = 1 / 12
 
-function metrics.targetFor(cargoTypeCount : integer) : number
-	if cargoTypeCount == 1 then
+function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
+	if cargoTypeCount == 1 and not carriesPassengers then
 		return metrics.TARGET_SINGLE_CARGO
 	end
 	return metrics.TARGET_DEFAULT
@@ -76,7 +76,7 @@ local EPSILON = 1e-9
 function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimTheFatMetrics.Assessment
 	local a : PgraceTrimTheFatMetrics.Assessment = {
 		verdict = "Ok",
-		target = metrics.targetFor(input.cargoTypeCount),
+		target = metrics.targetFor(input.cargoTypeCount, input.carriesPassengers),
 		trim = 0,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
