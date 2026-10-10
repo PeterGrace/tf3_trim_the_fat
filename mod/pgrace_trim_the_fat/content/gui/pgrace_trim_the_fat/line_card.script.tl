@@ -65,7 +65,8 @@ local function buildCardData(line : Engine.Entity) : CardData
 			data.rows[row.entity] = row
 			data.sortLoad[row.entity] = row.loadNow
 			data.loadText[row.entity] = ui.formatPercent(row.loadNow)
-			data.balanceText[row.entity] = ui.moneyText(row.balancePerYear, row.annualised)
+			data.balanceText[row.entity] = row.balancePerYear ~= nil
+				and ui.moneyText(row.balancePerYear, row.annualised) or _("Too new")
 		end
 		return data
 	end)
@@ -242,7 +243,8 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 				recipe = BalanceCell,
 				weight = 1.1,
 				getCompareValue = function(rowKey : integer) : any
-					return data.rows[rowKey].balancePerYear
+					-- Too new to judge sorts after every amount.
+					return data.rows[rowKey].balancePerYear or math.huge
 				end,
 			},
 			builtin.ColumnDesc{

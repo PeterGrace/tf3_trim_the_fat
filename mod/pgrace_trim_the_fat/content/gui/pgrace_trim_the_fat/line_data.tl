@@ -151,7 +151,7 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			vehicleDataMs = vehicleDataMs + spanMs
 			if withRows then
 				local balance = api.engine.util.finance.calculateBalance({ vehicle }, from, now, true)
-				local perYear, annualised = metrics.annualise(balance, spanMs, yearMs)
+				local perYear, annualised = metrics.vehiclePerYear(balance, spanMs, yearMs)
 				rows[#rows + 1] = {
 					entity = vehicle,
 					name = api.engine.util.getEntityName(vehicle),

@@ -99,6 +99,13 @@ function metrics.dataSpan(balanceBetween : function(integer, integer) : number, 
 	return now - start
 end
 
+function metrics.vehiclePerYear(balance : number, spanMs : number, yearMs : number) : number, boolean
+	if spanMs == nil or spanMs < yearMs * metrics.MIN_DATA_FRACTION then
+		return nil, false
+	end
+	return metrics.annualise(balance, spanMs, yearMs)
+end
+
 -- Guards ceil() against float noise: 8 × 0.25 ÷ 0.5 may come out as 4.000000001.
 local EPSILON = 1e-9
 

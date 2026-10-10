@@ -100,6 +100,9 @@ global record PgraceTrimTheFatMetrics
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
+	-- A vehicle's balance per year: nil (and false) under MIN_DATA_FRACTION of a year of data, where a few days of
+	-- running costs scaled up to a year would mislead (a new bus showed -381k*); otherwise annualise.
+	vehiclePerYear : function(balance : number, spanMs : number, yearMs : number) : number, boolean
 	-- How long money has been booked on something within the last year, in ms, given balanceBetween(from, to).
 	-- Usually since `bought`, but replacing a vehicle resets its purchase time and keeps its balance history, so
 	-- this looks for money booked before `bought`, a twelfth of a year at a time.
