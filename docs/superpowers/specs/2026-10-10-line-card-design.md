@@ -194,3 +194,10 @@ overview later.
   capacity is now Σ each vehicle's own data span ÷ round-trip time (interval × vehicles) × capacity per vehicle ×
   stops. Sold vehicles' time can't be counted, so right after a trim the load reads a little high until their
   months roll out of the year.
+- **Many stops** (the review's concern that × stops undercounts riders who travel several legs): a 7-stop bus line
+  with 16 buses read an average load of 19% while the live load was 24–30% across three looks, so riders average
+  about 1.5 legs and the average reads roughly a third low there. Not enough to flip its verdict; revisit if a long
+  line with visibly full vehicles gets "Too many".
+- **Selling a vehicle** with the card open: the row's locate button disappeared, then came back seconds later
+  (presumably its ID was reused), so the row checks that the vehicle is still listed on the line, not only that
+  the entity exists.
