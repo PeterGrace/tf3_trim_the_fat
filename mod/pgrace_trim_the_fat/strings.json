@@ -84,7 +84,7 @@
         "Busy": "Ausgelastet",
         "Too new": "Zu neu",
         "No vehicles": "Keine Fahrzeuge",
-        "Error": "Error",
+        "Error": "Fehler",
         "{lines} losing money: {money} per year": "{lines} mit Verlust: {money} pro Jahr",
         "{lines} with too many vehicles: up to {vehicles} to remove": "{lines} mit zu vielen Fahrzeugen: bis zu {vehicles} entfernen",
         "No lines are losing money or have too many vehicles.": "Keine Linie macht Verlust oder hat zu viele Fahrzeuge.",

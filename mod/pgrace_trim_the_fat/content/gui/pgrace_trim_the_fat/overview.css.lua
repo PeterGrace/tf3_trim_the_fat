@@ -11,5 +11,13 @@ function data()
 		size = { "70vw", "75vh" },
 	})
 
+	-- Let the table fill the window, as F2 does (R::StatisticsContainer Table).
+	a("R::PgraceTrimTheFatOverview Table", {
+		gravity = { -1, -1 },
+	})
+	a("R::PgraceTrimTheFatOverview Table::Layout", {
+		gravity = { -1, -1 },
+	})
+
 	return result
 end
