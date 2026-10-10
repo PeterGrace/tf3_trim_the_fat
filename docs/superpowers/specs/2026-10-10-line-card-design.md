@@ -76,9 +76,10 @@ test.
 └──────────────────────────────────────────────────┘
 ```
 
-- `content_card.ContentCard` wrapper, as in the base cards.
-- **Verdict:** a coloured dot (red LOSING; amber TOO MANY / BUSY; green OK; neutral TOO NEW) plus text. The
-  dot/text sits in a button, so it can have a tooltip that shows the calculation
+- `content_card.ContentCard` wrapper, as in the base cards. Card title: "Line efficiency".
+- **Verdict:** the verdict text in the game's colour classes: `negative` (LOSING), `warning` (TOO MANY / BUSY),
+  `positive` (OK), default (TOO NEW / no vehicles). The base UI has text colour classes but no dot widget. The
+  text sits in a button, so it can have a tooltip that shows the calculation
   (e.g. "8 × 34% ÷ 50% = 5.4 → keep 6").
 - **Vehicle table:** `builtin.DataTable`, click-to-sort headers, initially sorted by $/yr ascending (worst first).
   - Name column: `line_react_util.makeEntityWindowButton` (opens the vehicle window, where the base sell button is).
@@ -89,8 +90,7 @@ test.
   - The headline and table data are computed once per mount (`react.useStateLazy` + `pcall`).
   - "Now" loads poll with `engine_react_util.useStepStateTimer(fn, 0.25)`.
   - Sorting reads a snapshot refreshed in `onSortColumnChange`, so rows don't re-sort on live updates.
-- **Placement:** `order` is chosen next to the line window's balance/transported cards (value taken from
-  `line_eow.script.tl` during planning).
+- **Placement:** `order = 55`, between the line's vehicle list (50) and income graph (60).
 
 ## §3 Localisation
 
@@ -101,7 +101,8 @@ Following the Commuter Compass approach (see AGENTS.md "Translations"):
 - **`mod/pgrace_trim_the_fat/strings.json`:** contains all 12 TF3 languages (de, es, fr, it, ja, ko, nl, pl, pt_BR,
   ru, zh_CN, zh_TW). Wording follows the base game's terms; look them up in `base/strings/<lang>/LC_MESSAGES/base.mo`
   (Balance, Utilization, Load, Train, Bus, ...).
-- **Plurals:** "{count} vehicles", "remove up to {count} …" and age units use one key per plural form
+- **Plurals:** "{count} vehicles" and the trim suggestion use one key per plural form. Ages come from
+  `api.engine.util.formatAge`, which is already localised
   (`|one`, `|few`, `|many`, `|other`). `metrics.pluralCategory(languageCode, count)` (ported from Commuter Compass
   `rank.pluralCategory`, unit-tested) picks the form for `app.getUserProfile():getLanguage().code`. English has
   `strings.json` entries for the plural keys.
@@ -110,7 +111,8 @@ Following the Commuter Compass approach (see AGENTS.md "Translations"):
 - **Numbers:**
   - money: `api.util.formatMoney`;
   - integers: `api.util.lang.formatInt`;
-  - percentages: `_("{percent}%")` (German `"{percent} %"`).
+  - percentages: `_("{percent}%")` (German `"{percent} %"`);
+  - decimals: the key `{integer}.{decimal}`, so each language picks its decimal separator.
   Format at compute time and store the text; the 0.25 s poll formats only its own percentage.
 - **Mod Hub text:** `_metadata/modinfo.json` gets `localization` for all 12 languages (name, summary, description).
   `description.html` stays English.
@@ -120,7 +122,7 @@ Following the Commuter Compass approach (see AGENTS.md "Translations"):
 ## §4 Structure
 
 ```
-content/gui/trim_the_fat/
+content/gui/pgrace_trim_the_fat/
 ├── metrics.tl              # pure: targets, load, verdict, trim, annualise, explanation, pluralCategory
 ├── line_data.tl            # api.engine only here: builds a plain LineSnapshot record
 ├── line_card.script.tl     # UI
