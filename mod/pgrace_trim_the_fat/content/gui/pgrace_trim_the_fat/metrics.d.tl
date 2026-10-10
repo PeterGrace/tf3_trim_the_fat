@@ -9,6 +9,18 @@ global record PgraceTrimTheFatMetrics
 		"Ok"
 	end
 
+	-- What the overview's verdict column shows: the verdict, split where the text differs.
+	enum VerdictKind
+		"Losing"
+		"LosingTrim"
+		"LosingStuck"
+		"TooMany"
+		"Busy"
+		"TooNew"
+		"NoVehicles"
+		"Ok"
+	end
+
 	-- What line_data.tl reads from the engine for one line. Times are game time in milliseconds.
 	record LineInput
 		vehicleCount : integer
@@ -57,6 +69,16 @@ global record PgraceTrimTheFatMetrics
 		notDelivering : boolean
 	end
 
+	-- Totals over a set of lines, for the overview's summary line.
+	record Summary
+		-- Lines whose verdict is Losing, and the sum of their balance per year.
+		losingCount : integer
+		losingPerYear : number
+		-- Lines with a trim suggestion (losing or not), and the sum of the trims.
+		tooManyCount : integer
+		trimTotal : integer
+	end
+
 	-- Target average load for passenger lines and lines carrying several cargo types.
 	TARGET_DEFAULT : number
 	-- Target for freight lines carrying one cargo type, which usually run empty one way.
@@ -91,4 +113,9 @@ global record PgraceTrimTheFatMetrics
 	-- The plural form a language uses for a count: "one", "few", "many" or "other" (CLDR integer rules).
 	-- The language is a TF3 code such as "de" or "pt_BR"; unknown ones get English's one/other.
 	pluralCategory : function(language : string, count : integer) : string
+	-- Losing becomes LosingStuck when not delivering, LosingTrim when it carries a trim; other verdicts map 1:1.
+	verdictKind : function(a : Assessment) : VerdictKind
+	-- Sort rank, lowest first: Losing kinds 1, TooMany 2, Busy 3, TooNew 4, NoVehicles 5, Ok 6.
+	severity : function(kind : VerdictKind) : integer
+	summarise : function(assessments : {Assessment}) : Summary
 end
