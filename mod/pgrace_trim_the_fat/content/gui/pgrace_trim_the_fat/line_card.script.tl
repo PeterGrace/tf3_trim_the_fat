@@ -91,6 +91,13 @@ local function countText(count : integer, forms : PluralForms) : string
 	return fill(template, { count = formatCount(count) })
 end
 
+local function stopsText(count : integer) : string
+	return countText(count, {
+		one = _("{count} stops|one"), few = _("{count} stops|few"),
+		many = _("{count} stops|many"), other = _("{count} stops|other"),
+	})
+end
+
 local function vehiclesText(noun : Noun, count : integer) : string
 	if noun == "train" then
 		return countText(count, {
@@ -480,11 +487,20 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 	end
 	-- A few weeks of money scaled up to a year would mislead, so TooNew lines skip the money row.
 	if a.verdict ~= "TooNew" then
-		add(textRow(fill(_("{balance} per year · {profit} per vehicle · {vehicles}"), {
+		local values : {string : string} = {
 			balance = moneyText(a.balancePerYear, a.annualised),
 			profit = moneyText(a.profitPerVehicle, a.annualised),
 			vehicles = vehiclesText(data.snapshot.noun, input.vehicleCount),
-		}), "font-scale-body"))
+		}
+		-- Both keys stay literal, so both stay translated; the shorter one when the stop count is unknown.
+		local template : string
+		if input.stopCount ~= nil then
+			values.stops = stopsText(input.stopCount)
+			template = _("{balance} per year · {profit} per vehicle · {vehicles} · {stops}")
+		else
+			template = _("{balance} per year · {profit} per vehicle · {vehicles}")
+		end
+		add(textRow(fill(template, values), "font-scale-body"))
 	end
 	add(LoadLine{ line = params.line, load = a.load, target = a.target })
 	add(makeVehicleTable(data, onSort))

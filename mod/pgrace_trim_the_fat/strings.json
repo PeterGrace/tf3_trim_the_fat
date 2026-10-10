@@ -13,7 +13,9 @@
         "{count} aircraft|one": "{count} aircraft",
         "{count} aircraft|other": "{count} aircraft",
         "{count} vehicles|one": "{count} vehicle",
-        "{count} vehicles|other": "{count} vehicles"
+        "{count} vehicles|other": "{count} vehicles",
+        "{count} stops|one": "{count} stop",
+        "{count} stops|other": "{count} stops"
     },
     "de": {
         "Line efficiency": "Linieneffizienz",
@@ -57,7 +59,10 @@
         "{count} aircraft|other": "{count} Flugzeuge",
         "{count} vehicles|one": "{count} Fahrzeug",
         "{count} vehicles|other": "{count} Fahrzeuge",
-        "Load when you last clicked a column header. Click any header to update it.": "Auslastung beim letzten Klick auf eine Spaltenüberschrift. Zum Aktualisieren eine Überschrift anklicken."
+        "Load when you last clicked a column header. Click any header to update it.": "Auslastung beim letzten Klick auf eine Spaltenüberschrift. Zum Aktualisieren eine Überschrift anklicken.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} pro Jahr · {profit} pro Fahrzeug · {vehicles} · {stops}",
+        "{count} stops|one": "{count} Halt",
+        "{count} stops|other": "{count} Halte"
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -101,7 +106,10 @@
         "{count} aircraft|other": "{count} aviones",
         "{count} vehicles|one": "{count} vehículo",
         "{count} vehicles|other": "{count} vehículos",
-        "Load when you last clicked a column header. Click any header to update it.": "Utilización al hacer clic por última vez en un encabezado de columna. Haz clic en cualquier encabezado para actualizarla."
+        "Load when you last clicked a column header. Click any header to update it.": "Utilización al hacer clic por última vez en un encabezado de columna. Haz clic en cualquier encabezado para actualizarla.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} al año · {profit} por vehículo · {vehicles} · {stops}",
+        "{count} stops|one": "{count} parada",
+        "{count} stops|other": "{count} paradas"
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -145,7 +153,10 @@
         "{count} aircraft|other": "{count} avions",
         "{count} vehicles|one": "{count} véhicule",
         "{count} vehicles|other": "{count} véhicules",
-        "Load when you last clicked a column header. Click any header to update it.": "Utilisation lors du dernier clic sur un en-tête de colonne. Cliquez sur un en-tête pour l’actualiser."
+        "Load when you last clicked a column header. Click any header to update it.": "Utilisation lors du dernier clic sur un en-tête de colonne. Cliquez sur un en-tête pour l’actualiser.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} par an · {profit} par véhicule · {vehicles} · {stops}",
+        "{count} stops|one": "{count} arrêt",
+        "{count} stops|other": "{count} arrêts"
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -189,7 +200,10 @@
         "{count} aircraft|other": "{count} aerei",
         "{count} vehicles|one": "{count} veicolo",
         "{count} vehicles|other": "{count} veicoli",
-        "Load when you last clicked a column header. Click any header to update it.": "Utilizzo all'ultimo clic su un'intestazione di colonna. Clicca su un'intestazione qualsiasi per aggiornarlo."
+        "Load when you last clicked a column header. Click any header to update it.": "Utilizzo all'ultimo clic su un'intestazione di colonna. Clicca su un'intestazione qualsiasi per aggiornarlo.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} all'anno · {profit} per veicolo · {vehicles} · {stops}",
+        "{count} stops|one": "{count} fermata",
+        "{count} stops|other": "{count} fermate"
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -226,7 +240,9 @@
         "{count} ships|other": "船舶{count}隻",
         "{count} aircraft|other": "飛行機{count}機",
         "{count} vehicles|other": "車両{count}台",
-        "Load when you last clicked a column header. Click any header to update it.": "最後に列見出しをクリックした時点の利用率です。見出しをクリックすると更新されます。"
+        "Load when you last clicked a column header. Click any header to update it.": "最後に列見出しをクリックした時点の利用率です。見出しをクリックすると更新されます。",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "年間{balance} · 車両あたり{profit} · {vehicles} · {stops}",
+        "{count} stops|other": "停留所{count}か所"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -263,7 +279,9 @@
         "{count} ships|other": "선박 {count}척",
         "{count} aircraft|other": "비행기 {count}대",
         "{count} vehicles|other": "운송 수단 {count}대",
-        "Load when you last clicked a column header. Click any header to update it.": "마지막으로 열 머리글을 클릭했을 때의 이용도입니다. 머리글을 클릭하면 갱신됩니다."
+        "Load when you last clicked a column header. Click any header to update it.": "마지막으로 열 머리글을 클릭했을 때의 이용도입니다. 머리글을 클릭하면 갱신됩니다.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "연간 {balance} · 대당 {profit} · {vehicles} · {stops}",
+        "{count} stops|other": "정류장 {count}곳"
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -307,7 +325,10 @@
         "{count} aircraft|other": "{count} vliegtuigen",
         "{count} vehicles|one": "{count} voertuig",
         "{count} vehicles|other": "{count} voertuigen",
-        "Load when you last clicked a column header. Click any header to update it.": "Bezetting bij de laatste klik op een kolomkop. Klik op een kolomkop om bij te werken."
+        "Load when you last clicked a column header. Click any header to update it.": "Bezetting bij de laatste klik op een kolomkop. Klik op een kolomkop om bij te werken.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} per jaar · {profit} per voertuig · {vehicles} · {stops}",
+        "{count} stops|one": "{count} halte",
+        "{count} stops|other": "{count} haltes"
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -358,7 +379,11 @@
         "{count} vehicles|one": "{count} pojazd",
         "{count} vehicles|few": "{count} pojazdy",
         "{count} vehicles|many": "{count} pojazdów",
-        "Load when you last clicked a column header. Click any header to update it.": "Wykorzystanie z chwili ostatniego kliknięcia nagłówka kolumny. Kliknij dowolny nagłówek, aby odświeżyć."
+        "Load when you last clicked a column header. Click any header to update it.": "Wykorzystanie z chwili ostatniego kliknięcia nagłówka kolumny. Kliknij dowolny nagłówek, aby odświeżyć.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} rocznie · {profit} na pojazd · {vehicles} · {stops}",
+        "{count} stops|one": "{count} przystanek",
+        "{count} stops|few": "{count} przystanki",
+        "{count} stops|many": "{count} przystanków"
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -402,7 +427,10 @@
         "{count} aircraft|other": "{count} aviões",
         "{count} vehicles|one": "{count} veículo",
         "{count} vehicles|other": "{count} veículos",
-        "Load when you last clicked a column header. Click any header to update it.": "Utilização no último clique em um cabeçalho de coluna. Clique em qualquer cabeçalho para atualizar."
+        "Load when you last clicked a column header. Click any header to update it.": "Utilização no último clique em um cabeçalho de coluna. Clique em qualquer cabeçalho para atualizar.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} por ano · {profit} por veículo · {vehicles} · {stops}",
+        "{count} stops|one": "{count} parada",
+        "{count} stops|other": "{count} paradas"
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -453,7 +481,11 @@
         "{count} vehicles|one": "{count} транспортное средство",
         "{count} vehicles|few": "{count} транспортных средства",
         "{count} vehicles|many": "{count} транспортных средств",
-        "Load when you last clicked a column header. Click any header to update it.": "Загрузка на момент последнего нажатия на заголовок столбца. Нажмите на любой заголовок, чтобы обновить."
+        "Load when you last clicked a column header. Click any header to update it.": "Загрузка на момент последнего нажатия на заголовок столбца. Нажмите на любой заголовок, чтобы обновить.",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "{balance} в год · {profit} на единицу · {vehicles} · {stops}",
+        "{count} stops|one": "{count} остановка",
+        "{count} stops|few": "{count} остановки",
+        "{count} stops|many": "{count} остановок"
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -490,7 +522,9 @@
         "{count} ships|other": "{count} 艘船只",
         "{count} aircraft|other": "{count} 架飞机",
         "{count} vehicles|other": "{count} 辆载具",
-        "Load when you last clicked a column header. Click any header to update it.": "上次点击列标题时的利用率。点击任意标题即可更新。"
+        "Load when you last clicked a column header. Click any header to update it.": "上次点击列标题时的利用率。点击任意标题即可更新。",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "每年 {balance} · 每个载具 {profit} · {vehicles} · {stops}",
+        "{count} stops|other": "{count} 个站点"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -527,6 +561,8 @@
         "{count} ships|other": "{count} 艘船舶",
         "{count} aircraft|other": "{count} 架飛機",
         "{count} vehicles|other": "{count} 輛車",
-        "Load when you last clicked a column header. Click any header to update it.": "上次點擊欄標題時的使用率。點擊任一標題即可更新。"
+        "Load when you last clicked a column header. Click any header to update it.": "上次點擊欄標題時的使用率。點擊任一標題即可更新。",
+        "{balance} per year · {profit} per vehicle · {vehicles} · {stops}": "每年 {balance} · 每輛 {profit} · {vehicles} · {stops}",
+        "{count} stops|other": "{count} 個站點"
     }
 }
