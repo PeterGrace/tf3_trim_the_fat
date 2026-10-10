@@ -18,9 +18,12 @@ global record PgraceTrimTheFatLineData
 		ageText : string
 		ageMs : number
 		-- Last 12 months' balance, scaled to a year when the vehicle is younger than that.
+		-- Per-vehicle journal (the statistics window's convention); rows need not sum to the line's balance, which
+		-- uses the line's own journal like the line window.
 		balancePerYear : number
 		annualised : boolean
 		-- Cargo on board ÷ capacity when the snapshot was taken; nil without capacity.
+		-- Value at snapshot time; the UI seeds its cell with it, then polls vehicleLoadNow.
 		loadNow : number
 	end
 

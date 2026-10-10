@@ -12,7 +12,11 @@ local function nowMs() : integer
 	return gameTime.gameTime
 end
 
+-- nil when the vehicle no longer exists (sold, replaced) or has no vehicle component.
 local function transportVehicle(vehicle : Engine.Entity) : Engine.Component.TransportVehicle
+	if not api.engine.entityExists(vehicle) then
+		return nil
+	end
 	return api.engine.getComponent(vehicle, api.type.ComponentType.TRANSPORT_VEHICLE) as Engine.Component.TransportVehicle
 end
 
@@ -45,10 +49,11 @@ end
 
 -- Used and total capacity over the cargo types the vehicles currently carry, how many such types, and whether
 -- passengers are among them.
-local function capacityTotals(line : Engine.Entity) : number, number, integer, boolean
-	local usages = api.engine.util.line.getLineCapacityUsages(line, false)
+local function capacityTotals(line : Engine.Entity, allCapacities : boolean) : number, number, integer, boolean
+	local usages = api.engine.util.line.getLineCapacityUsages(line, allCapacities)
 	local passengerIndex = api.res.cargoTypeRep.getPassengerCargoTypeId() + 1
 	local used, capacity, types, passengers = 0.0, 0.0, 0, false
+	-- Keys are cargoTypeId + 1 (as in the base cargo_util), despite the tealdef's key type.
 	for index, usage in pairs(usages or {}) do
 		if usage.capacity > 0 then
 			used = used + usage.used
@@ -63,7 +68,7 @@ local function capacityTotals(line : Engine.Entity) : number, number, integer, b
 end
 
 function line_data.lineLoadNow(line : Engine.Entity) : number
-	local used, capacity = capacityTotals(line)
+	local used, capacity = capacityTotals(line, false)
 	if capacity <= 0 then
 		return nil
 	end
@@ -72,6 +77,9 @@ end
 
 function line_data.vehicleLoadNow(vehicle : Engine.Entity) : number
 	local tv = transportVehicle(vehicle)
+	if tv == nil then
+		return nil
+	end
 	local used, capacity = 0, 0
 	-- capacities[i] is the capacity for cargo type i - 1 in the current load configuration.
 	for i, cap in ipairs(tv.config.capacities) do
@@ -95,6 +103,7 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 	local carrier : Carrier = nil
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
 		local tv = transportVehicle(vehicle)
+		if tv ~= nil then
 		local bought = purchaseTime(tv) or now
 		if oldest == nil or bought < oldest then
 			oldest = bought
@@ -114,8 +123,9 @@ function line_data.snapshot(line : Engine.Entity) : PgraceTrimTheFatLineData.Lin
 			annualised = annualised,
 			loadNow = line_data.vehicleLoadNow(vehicle),
 		}
+		end
 	end
-	local __, capacity, cargoTypes, passengers = capacityTotals(line)
+	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
 	local frequency = api.engine.util.line.getMaxFrequency(line)
 	return {
 		input = {
@@ -138,6 +148,14 @@ end
 function line_data.probe(line : Engine.Entity, snap : PgraceTrimTheFatLineData.LineSnapshot, assessment : PgraceTrimTheFatMetrics.Assessment)
 	local ok, err = pcall(function() : boolean
 		local i = snap.input
+		local __, capacityAll, cargoTypesAll = capacityTotals(line, true)
+		local now = nowMs()
+		local from = math.max(now - i.yearMs, 0) as integer
+		local oldestPurchase = (now - i.dataMs) as integer
+		local balanceBeforeOldest : number = nil
+		if oldestPurchase > from then
+			balanceBeforeOldest = api.engine.util.finance.calculateBalance({ line }, from, oldestPurchase, true)
+		end
 		debugPrint(LOG_PREFIX .. "probe line " .. tostring(line)
 			.. " name=" .. tostring(api.engine.util.getEntityName(line))
 			.. " frequency=" .. tostring(api.engine.util.line.getMaxFrequency(line))
@@ -145,6 +163,10 @@ function line_data.probe(line : Engine.Entity, snap : PgraceTrimTheFatLineData.L
 			.. " vehicles=" .. tostring(i.vehicleCount)
 			.. " capacity=" .. tostring(i.totalCapacity)
 			.. " cargoTypes=" .. tostring(i.cargoTypeCount)
+			.. " capacityAll=" .. tostring(capacityAll)
+			.. " cargoTypesAll=" .. tostring(cargoTypesAll)
+			.. " oldestPurchase=" .. tostring(oldestPurchase)
+			.. " balanceBeforeOldest=" .. tostring(balanceBeforeOldest)
 			.. " items=" .. tostring(i.itemsTransported)
 			.. " dataMs=" .. tostring(i.dataMs)
 			.. " yearMs=" .. tostring(i.yearMs)
@@ -158,6 +180,8 @@ function line_data.probe(line : Engine.Entity, snap : PgraceTrimTheFatLineData.L
 			debugPrint(LOG_PREFIX .. "probe vehicle " .. tostring(row.entity)
 				.. " itemsTransportedOk=" .. tostring(logOk)
 				.. " itemsTransported=" .. tostring(items)
+				.. " bought=" .. tostring(now - row.ageMs)
+				.. " now=" .. tostring(now)
 				.. " ageMs=" .. tostring(row.ageMs)
 				.. " balancePerYear=" .. tostring(row.balancePerYear))
 		end
