@@ -17,7 +17,8 @@ global record PgraceTrimTheFatLineData
 		-- Localised age ("2 years 3 months"), from api.engine.util.formatAge.
 		ageText : string
 		ageMs : number
-		-- Last 12 months' balance, scaled to a year when the vehicle is younger than that.
+		-- Last 12 months' balance, scaled to a year when it has less than a year of history (not the same as age:
+		-- a replaced vehicle keeps its history but its age restarts).
 		-- Per-vehicle journal (the statistics window's convention); rows need not sum to the line's balance, which
 		-- uses the line's own journal like the line window.
 		balancePerYear : number
@@ -30,6 +31,8 @@ global record PgraceTrimTheFatLineData
 	record LineSnapshot
 		input : PgraceTrimTheFatMetrics.LineInput
 		vehicles : {VehicleRow}
+		-- vehicleSignature at snapshot time.
+		signature : string
 		noun : Noun
 	end
 
@@ -38,8 +41,9 @@ global record PgraceTrimTheFatLineData
 	lineLoadNow : function(line : Engine.Entity) : number
 	-- Cargo on board ÷ capacity of one vehicle right now; nil without capacity.
 	vehicleLoadNow : function(vehicle : Engine.Entity) : number
-	-- Vehicles on the line that still exist, counted as snapshot counts them (#snapshot.vehicles).
-	vehicleCount : function(line : Engine.Entity) : integer
+	-- The line's vehicles and their purchase times; differs from snapshot.signature once vehicles are bought, sold
+	-- or replaced.
+	vehicleSignature : function(line : Engine.Entity) : string
 	-- PROBE (remove before release): logs the raw inputs for calibration.
 	probe : function(line : Engine.Entity, snap : LineSnapshot, assessment : PgraceTrimTheFatMetrics.Assessment)
 end

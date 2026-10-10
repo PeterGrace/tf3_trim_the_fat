@@ -413,10 +413,11 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 	end)
 	local data = dataState:old()
 	-- Hooks run before any early return, so their order never changes.
-	-- Polls the vehicle count, so the card can offer a refresh after vehicles are bought or sold. -1 on error.
-	local countState = engine_react_util.useStepStateTimer(function() : integer
-		local ok, countOrError = pcall(line_data.vehicleCount, params.line)
-		return ok and countOrError as integer or -1
+	-- Polls the line's vehicles, so the card can offer a refresh after vehicles are bought, sold or replaced.
+	-- nil on error.
+	local signatureState = engine_react_util.useStepStateTimer(function() : string
+		local ok, signatureOrError = pcall(line_data.vehicleSignature, params.line)
+		return ok and signatureOrError as string or nil
 	end, 1.0)
 	-- Bumped on a header click, so the table re-sorts on the fresh sort values right away (as Commuter Compass).
 	local sortVersion = react.useStateLazy(function() : integer
@@ -454,8 +455,8 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 	local label, class = verdictLabel(a.verdict)
 	local tooltip = verdictTooltip(data)
 	add(tooltip ~= "" and tooltipRow(label, class, tooltip) or textRow(label, class))
-	local count = countState:old()
-	if count ~= -1 and count ~= #data.snapshot.vehicles then
+	local signature = signatureState:old()
+	if signature ~= nil and signature ~= data.snapshot.signature then
 		add(builtin.BoxLayout{
 			children = {
 				builtin.Button{
