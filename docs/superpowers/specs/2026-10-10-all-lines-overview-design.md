@@ -47,7 +47,7 @@ fixed lists in `gui/statistics/` with no extension point.
 ```
 Trim the Fat                                                              [⟳] [✕]
 [Road] [Tram] [Rail] [Ship] [Air]
-23 losing money: $-4,812,330 per year · 17 with too many vehicles: up to 58 to remove
+23 losing money: $-4,812,330 per year · 17 could run with fewer vehicles: up to 58 to remove
 ──────────────────────────────────────────────────────────────────────────────────
 Line ↕                     Verdict ↕                  Per year ↕   Load ↕  Vehicles ↕
 ▌⌖ RC Fertilizer…          Losing · not delivering    $-627,335     9%     2 trucks
