@@ -10,6 +10,8 @@ local ui = ug_require "pgrace_trim_the_fat::/gui/pgrace_trim_the_fat/ui.tl" as P
 local line_react_util = ug_require "::/gui/line_vehicle_mgmt/line_react_util.tl" as LineReactUtil
 local line_util = ug_require "::/gui/line_vehicle_mgmt/line_util.tl" as LineUtil
 local gui_react_util = ug_require "::/gui/main/gui_react_util.tl" as GuiReactUtil
+local statistics_react_util = ug_require "::/gui/statistics/statistics_react_util.tl" as StatisticsReactUtil
+local lang_util = ug_require "::/scripts/lang_util.tl" as LangUtil
 
 local LOG_PREFIX = "[trim_the_fat] "
 local WINDOW_ID = "pgrace_trim_the_fat_overview"
@@ -339,6 +341,11 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	local data = dataState:old()
 	local enabled = enabledState:old()
 	local verdictEnabled = verdictState:old()
+	-- F2's search: lines whose name contains the text (lang_util.stringContains, as F2's Lines table).
+	local searchState = react.useStateLazy(function() : string
+		return ""
+	end)
+	local search = searchState:old()
 
 	local function refresh(column : integer, ascending : boolean)
 		local fresh = buildOverview(cats)
@@ -376,7 +383,8 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			end,
 		}
 	end
-	filterKey = filterKey .. "_"
+	-- The search text is part of the table's key, so typing remounts it with the matching rows.
+	filterKey = filterKey .. "_" .. search .. "_"
 	for i, cat in ipairs(cats) do
 		filterKey = filterKey .. (enabled[i] and "1" or "0")
 		filterButtons[#filterButtons + 1] = builtin.ToggleButton{
@@ -441,6 +449,11 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 						children = filterButtons,
 					},
 					gui_react_util.makeHorizontalSpacer(),
+					statistics_react_util.createSearchField(search, function(text : string)
+						if text ~= searchState:old() then
+							searchState:set(text)
+						end
+					end, nil),
 					builtin.BoxLayout{
 						meta = { class = "filter" },
 						orientation = builtin.type.Orientation.Horizontal,
@@ -480,6 +493,10 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 				verdictMatch = verdictMatch or (verdictEnabled[i] == true and row.kind ~= nil and groups[i].kinds[row.kind] == true)
 			end
 			match = match and verdictMatch
+			if match and search ~= "" then
+				local ok, found = pcall(lang_util.stringContains, row.name, search)
+				match = ok and found as boolean
+			end
 			visible[line] = match
 			if match and not row.error then
 				shown[#shown + 1] = row.assessment
