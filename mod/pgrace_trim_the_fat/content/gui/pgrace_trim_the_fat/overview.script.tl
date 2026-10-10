@@ -401,7 +401,11 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 							localKey = "overview",
 							value = "overview",
 							indicator = builtin.TextView{ meta = { class = "font-scale-tab-widget-indicator" }, text = _("Trim the Fat") },
-							item = builtin.BoxLayout{ orientation = builtin.type.Orientation.Vertical, children = body },
+							-- Must not be a layout ("TabWidgetChild item must not be a Layout" crashes the whole UI);
+							-- F2 wraps its tab content in a FocusTraversalScope component.
+							item = builtin.Component{
+								layout = builtin.BoxLayout{ orientation = builtin.type.Orientation.Vertical, children = body },
+							},
 						},
 					},
 				},
