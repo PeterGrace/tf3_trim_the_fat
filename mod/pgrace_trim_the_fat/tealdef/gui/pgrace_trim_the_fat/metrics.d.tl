@@ -102,6 +102,9 @@ global record PgraceTrimTheFatMetrics
 	STUCK_AVERAGE_LOAD : number
 	-- Passengers waiting at one stop, in vehicles' worth of capacity, that count as a backlog.
 	BACKLOG_VEHICLES : number
+	-- Below this share of a year of data a vehicle's balance per year is "too new": a vehicle's first trips (from the
+	-- depot, a few round trips) scaled up mislead for longer than a whole line's money does.
+	MIN_VEHICLE_DATA_FRACTION : number
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
@@ -110,7 +113,7 @@ global record PgraceTrimTheFatMetrics
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
-	-- A vehicle's balance per year: nil (and false) under MIN_DATA_FRACTION of a year of data, where a few days of
+	-- A vehicle's balance per year: nil (and false) under MIN_VEHICLE_DATA_FRACTION of a year of data, where a few days of
 	-- running costs scaled up to a year would mislead (a new bus showed -381k*); otherwise annualise.
 	vehiclePerYear : function(balance : number, spanMs : number, yearMs : number) : number, boolean
 	-- How long money has been booked on something within the last year, in ms, given balanceBetween(from, to).

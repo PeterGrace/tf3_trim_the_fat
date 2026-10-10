@@ -7,6 +7,7 @@ metrics.MIN_DATA_FRACTION = 1 / 12
 metrics.STUCK_LOAD_NOW = 0.75
 metrics.STUCK_AVERAGE_LOAD = 0.25
 metrics.BACKLOG_VEHICLES = 1
+metrics.MIN_VEHICLE_DATA_FRACTION = 0.25
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -101,7 +102,7 @@ function metrics.dataSpan(balanceBetween : function(integer, integer) : number, 
 end
 
 function metrics.vehiclePerYear(balance : number, spanMs : number, yearMs : number) : number, boolean
-	if spanMs == nil or spanMs < yearMs * metrics.MIN_DATA_FRACTION then
+	if spanMs == nil or spanMs < yearMs * metrics.MIN_VEHICLE_DATA_FRACTION then
 		return nil, false
 	end
 	return metrics.annualise(balance, spanMs, yearMs)
