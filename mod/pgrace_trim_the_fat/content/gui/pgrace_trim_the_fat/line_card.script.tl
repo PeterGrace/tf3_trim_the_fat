@@ -367,7 +367,8 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 				end,
 			},
 			builtin.ColumnDesc{
-				name = _("Balance per year"),
+				name = _("Per year"),
+				tooltip = _("Balance per year"),
 				recipe = BalanceCell,
 				weight = 1.2,
 				getCompareValue = function(rowKey : integer) : any
