@@ -92,6 +92,14 @@ function data()
 	a(root .. " !filter !refresh", {
 		margin = { 0, 0, 0, 12 },
 	})
+	-- F2's search field (R::StatisticsContainer !search); folded with a controller, as F2.
+	a(root .. " !search", {
+		size = { 300, 22 },
+		gravity = { -1, 0.5 },
+	})
+	a("!input-controller " .. root .. " !search", {
+		visibility = "folded",
+	})
 	a(root .. " !expand", {
 		padding = { 6, 6, 6, 6 },
 		margin = { 0, 32, 0, 0 }, -- leave space for the close button (which overlaps due to compact mode)
