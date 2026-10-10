@@ -314,7 +314,8 @@ local NameCell = react.RegisterRecipe("PgraceTrimTheFatNameCell", function(param
 		orientation = builtin.type.Orientation.Horizontal,
 		children = {
 			line_react_util.LocateButton{ entity = row.entity },
-			line_react_util.makeEntityWindowButton(row.name, row.entity),
+			-- The full name on hover, for long custom names the column clips.
+			line_react_util.makeEntityWindowButton(row.name, row.entity, nil, nil, nil, nil, row.name),
 		},
 	}
 end)
@@ -360,7 +361,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 			builtin.ColumnDesc{
 				name = _("Vehicle"),
 				recipe = NameCell,
-				weight = 1.6,
+				weight = 2,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].name
 				end,
@@ -368,7 +369,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 			builtin.ColumnDesc{
 				name = _("Age"),
 				recipe = AgeCell,
-				weight = 1,
+				weight = 0.9,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].ageMs
 				end,
@@ -377,7 +378,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 				name = _("Per year"),
 				tooltip = _("Balance per year"),
 				recipe = BalanceCell,
-				weight = 1.2,
+				weight = 1.1,
 				getCompareValue = function(rowKey : integer) : any
 					return data.rows[rowKey].balancePerYear
 				end,
@@ -386,7 +387,7 @@ local function makeVehicleTable(data : CardData, onSort : function(integer, bool
 				name = _("Load now"),
 				tooltip = _("Load when you last clicked a column header. Click any header to update it."),
 				recipe = LoadCell,
-				weight = 1.4,
+				weight = 1.1,
 				getCompareValue = function(rowKey : integer) : any
 					return data.sortLoad[rowKey] or -1
 				end,
