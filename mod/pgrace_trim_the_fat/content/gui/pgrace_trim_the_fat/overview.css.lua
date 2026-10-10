@@ -1,35 +1,111 @@
 local ssu = require "::/gui/main/stylesheetutil.lua"
 
+-- Copies the F2 Statistics window's rules (base gui/statistics/statistics.css.lua), keyed on our window's class and
+-- our content recipe, so other windows are unaffected.
 function data()
 	local result = {}
 	local a = ssu.makeAdder(result)
 
-	-- Matched by the window's class with a font prefix, as the base map editor window: an id selector
+	-- The window. Matched by its class with a font prefix, as the base map editor window: an id selector
 	-- ("#pgrace_trim_the_fat.overview") didn't apply in-game, and the window shrank to its content.
+	-- Docked bottom-centre, kept clear of the game bar; F2's animations are referenced by name.
 	local window = "Window!pgrace-trim-the-fat-overview"
 	a(window, {
-		gravity = { 0.5, 0.5 },
-		anchorPoint = { 0.5, 0.5 },
+		gravity = { 0.5, 1.0 },
+		anchorPoint = { 0.5, 1.0 },
+		padding = { 0, 0, 64, 0 },
+
+		animationName = "open-statistics",
+		animationIterationCount = 1,
+		animationDuration = 0.2,
+		animationTimingFunction = "EaseOutSine",
+	})
+	a(window .. "!window-expanded", {
+		animationName = "expand-statistics",
+		animationIterationCount = 1,
+		animationDuration = 0.25,
+		animationTimingFunction = "EaseOutSine",
+	})
+	a(window .. "!window-collapsed", {
+		animationName = "collapse-statistics",
+		animationIterationCount = 1,
+		animationDuration = 0.25,
+		animationTimingFunction = "EaseOutSine",
 	})
 	a(window .. " Window::Content", {
 		padding = { 8, 8, 12, 8 },
 	})
-	for __, font in ipairs({ "!font-small", "!font-medium", "!font-large" }) do
+
+	local sizes = {
+		["!font-small"] = { collapsed = { "80vw", 380 }, expanded = { "80vw", "80vh" } },
+		["!font-medium"] = { collapsed = { "90vw", 380 }, expanded = { "90vw", "85vh" } },
+		["!font-large"] = { collapsed = { "96vw", 380 }, expanded = { "96vw", "90vh" } },
+	}
+	for font, size in pairs(sizes) do
 		a(font .. " " .. window, {
-			size = { "70vw", "70vh" },
+			size = size.collapsed,
 		})
-		-- Leaves room for the game bar below and the buttons above.
 		a(font .. " " .. window .. "!window-expanded", {
-			size = { "98vw", "86vh" },
+			size = size.expanded,
 		})
 	end
 
-	-- Let the table fill the window, as F2 does (R::StatisticsContainer Table).
-	a("R::PgraceTrimTheFatOverview Table", {
+	-- The content (F2: R::StatisticsContainer).
+	local root = "R::PgraceTrimTheFatOverview"
+
+	-- Let the table fill the window.
+	a(root .. " Table", {
+		gravity = { -1, -1 },
+		margin = { 0, 0, 0, 0 },
+	})
+	a("!font-medium " .. root .. " Table", {
+		margin = { 0, 0, 8, 0 },
+	})
+	a("!font-large " .. root .. " Table", {
+		margin = { 0, 0, 12, 0 },
+	})
+	a(root .. " Table::Layout", {
 		gravity = { -1, -1 },
 	})
-	a("R::PgraceTrimTheFatOverview Table::Layout", {
+
+	-- The toolbar: filter toggles, refresh, expand.
+	a(root .. " !look-up", {
+		innerSpacing = { 16, 16 },
+	})
+	a(root .. " !look-up BoxLayout", {
+		innerSpacing = { 2, 2 },
+	})
+	a(root .. " !filter ToggleButton", {
+		padding = { 0, 0, 0, 0 },
+	})
+	a(root .. " !filter Button", {
+		padding = { 0, 0, 0, 0 },
+	})
+	a(root .. " !filter ImageView!category", {
+		padding = { 6, 6, 6, 6 },
+	})
+	-- Spaced off the filters as F2's eye toggle.
+	a(root .. " !filter !refresh", {
+		margin = { 0, 0, 0, 12 },
+	})
+	a(root .. " !expand", {
+		padding = { 6, 6, 6, 6 },
+		margin = { 0, 32, 0, 0 }, -- leave space for the close button (which overlaps due to compact mode)
+	})
+	a("!input-controller " .. root .. " !expand", {
+		margin = { 0, 12, 0, 0 },
+	})
+	a(root .. " ToggleButton!expand ImageView", {
+		padding = { 6, 6, 6, 6 },
+	})
+
+	-- Right-aligned numeric columns: cells with react.setStyleClasses("right-aligned") and headers with
+	-- headerStyleClass = "right-aligned".
+	a(root .. " !table-item!right-aligned TextView, "
+		.. root .. " DataTable::HeaderItem !right-aligned, "
+		.. root .. " DataTable::HeaderItem !right-aligned TextView", {
 		gravity = { -1, -1 },
+		textAlignment = { 1, 0.5 },
 	})
 
 	return result
