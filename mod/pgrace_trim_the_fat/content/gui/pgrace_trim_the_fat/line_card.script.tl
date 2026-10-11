@@ -87,8 +87,11 @@ end
 
 -- Verdict -------------------------------------------------------------------------------------------------------
 
-local function verdictLabel(verdict : PgraceTrimTheFatMetrics.Verdict) : string, string
-	if verdict == "NoVehicles" then
+local function verdictLabel(a : PgraceTrimTheFatMetrics.Assessment) : string, string
+	local verdict = a.verdict
+	if a.thinMargin then
+		return _("Busy, but another vehicle would likely lose money"), "font-scale-body, warning"
+	elseif verdict == "NoVehicles" then
 		return _("No vehicles on this line"), "font-scale-body"
 	elseif verdict == "TooNew" then
 		return _("Too new to judge"), "font-scale-body"
@@ -140,6 +143,12 @@ local function verdictTooltip(data : CardData) : string
 	elseif a.verdict == "Busy" then
 		parts[#parts + 1] = ui.fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
 			{ busy = ui.formatPercent(metrics.BUSY_LOAD) })
+	end
+	if a.thinMargin then
+		parts[#parts + 1] = ui.fill(_("But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better."), {
+			percent = ui.formatPercent(a.margin),
+			costs = ui.formatMoney(data.snapshot.input.runningCostsPerYear),
+		})
 	end
 	if a.verdict == "Ok" and not a.queueLimited then
 		parts[#parts + 1] = _("Profitable, and the average load is close to or above the target.")
@@ -338,7 +347,7 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 		children[#children + 1] = node
 	end
 
-	local label, class = verdictLabel(a.verdict)
+	local label, class = verdictLabel(a)
 	local tooltip = verdictTooltip(data)
 	add(tooltip ~= "" and ui.tooltipRow(label, class, tooltip) or ui.textRow(label, class))
 	local signature = signatureState:old()

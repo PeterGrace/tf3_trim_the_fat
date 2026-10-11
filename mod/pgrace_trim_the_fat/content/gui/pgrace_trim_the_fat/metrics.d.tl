@@ -16,6 +16,7 @@ global record PgraceTrimTheFatMetrics
 		"LosingStuck"
 		"TooMany"
 		"Busy"
+		"BusyThin"
 		"TooNew"
 		"NoVehicles"
 		"Ok"
@@ -51,6 +52,8 @@ global record PgraceTrimTheFatMetrics
 		-- The most passengers waiting for the line at any one of its stops right now; nil when unknown or not a
 		-- passenger line.
 		waitingMax : integer
+		-- The line's running costs in the last full calendar year (a positive number); nil before its first full year.
+		runningCostsPerYear : number
 	end
 
 	record Assessment
@@ -75,6 +78,10 @@ global record PgraceTrimTheFatMetrics
 		backlog : boolean
 		-- True when waiting passengers kept the trim smaller than the load alone suggests (possibly 0).
 		queueLimited : boolean
+		-- balancePerYear ÷ runningCostsPerYear; nil when the running costs are unknown.
+		margin : number
+		-- True when the verdict is Busy but margin is under THIN_MARGIN: another vehicle would likely lose money.
+		thinMargin : boolean
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -85,7 +92,7 @@ global record PgraceTrimTheFatMetrics
 		-- Lines with a trim suggestion (losing or not), and the sum of the trims.
 		tooManyCount : integer
 		trimTotal : integer
-		-- Lines whose verdict is Busy.
+		-- Lines whose verdict is Busy, without a thin margin (lines that may need more vehicles).
 		busyCount : integer
 	end
 
@@ -110,6 +117,8 @@ global record PgraceTrimTheFatMetrics
 	-- A trim keeps enough vehicles that each stop's queue, grown by count ÷ keep, stays at or under this many
 	-- vehicles' worth of capacity. Below BACKLOG_VEHICLES, so adding and removing a vehicle doesn't go back and forth.
 	TRIM_QUEUE_LIMIT : number
+	-- Under this balance ÷ running costs, a Busy line is too thin for another vehicle to pay for itself.
+	THIN_MARGIN : number
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
@@ -134,9 +143,10 @@ global record PgraceTrimTheFatMetrics
 	-- The plural form a language uses for a count: "one", "few", "many" or "other" (CLDR integer rules).
 	-- The language is a TF3 code such as "de" or "pt_BR"; unknown ones get English's one/other.
 	pluralCategory : function(language : string, count : integer) : string
-	-- Losing becomes LosingStuck when not delivering, LosingTrim when it carries a trim; other verdicts map 1:1.
+	-- Losing becomes LosingStuck when not delivering, LosingTrim when it carries a trim; Busy becomes BusyThin on a thin
+	-- margin; other verdicts map 1:1.
 	verdictKind : function(a : Assessment) : VerdictKind
-	-- Sort rank, lowest first: Losing kinds 1, TooMany 2, Busy 3, TooNew 4, NoVehicles 5, Ok 6.
+	-- Sort rank, lowest first: Losing kinds 1, TooMany 2, Busy kinds 3, TooNew 4, NoVehicles 5, Ok 6.
 	severity : function(kind : VerdictKind) : integer
 	summarise : function(assessments : {Assessment}) : Summary
 end

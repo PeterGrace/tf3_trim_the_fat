@@ -9,6 +9,7 @@ metrics.STUCK_AVERAGE_LOAD = 0.25
 metrics.BACKLOG_VEHICLES = 1
 metrics.MIN_VEHICLE_DATA_FRACTION = 0.5
 metrics.TRIM_QUEUE_LIMIT = 0.5
+metrics.THIN_MARGIN = 0.2
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -120,6 +121,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		notDelivering = false,
 		backlog = false,
 		queueLimited = false,
+		thinMargin = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	local count = input.vehicleCount or 0
@@ -128,6 +130,9 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		return a
 	end
 	a.profitPerVehicle = a.balancePerYear / count
+	if input.runningCostsPerYear ~= nil and input.runningCostsPerYear > 0 then
+		a.margin = a.balancePerYear / input.runningCostsPerYear
+	end
 	a.load = metrics.averageLoad(input)
 	if input.dataMs == nil or input.dataMs < input.yearMs * metrics.MIN_DATA_FRACTION then
 		a.verdict = "TooNew"
@@ -166,6 +171,9 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	elseif a.load ~= nil and a.load >= metrics.BUSY_LOAD then
 		a.verdict = "Busy"
 	end
+	-- Another vehicle adds a whole vehicle's running costs but shares the line's riders, so it earns less than the
+	-- average vehicle. When the average barely covers its costs, the extra one would lose money.
+	a.thinMargin = a.verdict == "Busy" and a.margin ~= nil and a.margin < metrics.THIN_MARGIN
 	return a
 end
 
@@ -178,12 +186,15 @@ function metrics.verdictKind(a : PgraceTrimTheFatMetrics.Assessment) : PgraceTri
 		end
 		return "Losing"
 	end
+	if a.verdict == "Busy" and a.thinMargin then
+		return "BusyThin"
+	end
 	return a.verdict as PgraceTrimTheFatMetrics.VerdictKind
 end
 
 local SEVERITY : {PgraceTrimTheFatMetrics.VerdictKind : integer} = {
 	Losing = 1, LosingTrim = 1, LosingStuck = 1,
-	TooMany = 2, Busy = 3, TooNew = 4, NoVehicles = 5, Ok = 6,
+	TooMany = 2, Busy = 3, BusyThin = 3, TooNew = 4, NoVehicles = 5, Ok = 6,
 }
 
 function metrics.severity(kind : PgraceTrimTheFatMetrics.VerdictKind) : integer
@@ -198,7 +209,7 @@ function metrics.summarise(assessments : {PgraceTrimTheFatMetrics.Assessment}) :
 			s.losingCount = s.losingCount + 1
 			s.losingPerYear = s.losingPerYear + (a.balancePerYear or 0)
 		end
-		if a.verdict == "Busy" then
+		if a.verdict == "Busy" and not a.thinMargin then
 			s.busyCount = s.busyCount + 1
 		end
 		if a.trim > 0 then

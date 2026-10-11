@@ -327,6 +327,10 @@ t.test("verdictKind: losing with a trim or not delivering", function()
 	t.eq(metrics.verdictKind(assessment({ verdict = "Losing", notDelivering = true })), "LosingStuck")
 end)
 
+t.test("verdictKind: busy on a thin margin", function()
+	t.eq(metrics.verdictKind(assessment({ verdict = "Busy", thinMargin = true })), "BusyThin")
+end)
+
 t.test("severity: losing first, OK last", function()
 	local order = { "LosingStuck", "TooMany", "Busy", "TooNew", "NoVehicles", "Ok" }
 	for i = 2, #order do
@@ -334,6 +338,7 @@ t.test("severity: losing first, OK last", function()
 	end
 	t.eq(metrics.severity("Losing"), metrics.severity("LosingTrim"))
 	t.eq(metrics.severity("Losing"), metrics.severity("LosingStuck"))
+	t.eq(metrics.severity("Busy"), metrics.severity("BusyThin"))
 end)
 
 t.test("summarise: counts and sums", function()
@@ -358,6 +363,14 @@ t.test("summarise: busy lines", function()
 	})
 	t.eq(s.busyCount, 2)
 	t.eq(s.losingCount, 0)
+end)
+
+t.test("summarise: a thin margin doesn't count as needing vehicles", function()
+	local s = metrics.summarise({
+		assessment({ verdict = "Busy", balancePerYear = 100, thinMargin = true }),
+		assessment({ verdict = "Busy", balancePerYear = 200 }),
+	})
+	t.eq(s.busyCount, 1)
 end)
 
 t.test("summarise: empty", function()
@@ -453,4 +466,45 @@ t.test("assess: unknown waiting is no backlog", function()
 	t.eq(a.backlog, false)
 	t.eq(a.trim, 2)
 	t.eq(a.queueLimited, false)
+end)
+
+-- Running costs: 1,000 a year. The fixture's balance is 400 (40% of running costs).
+t.test("constants: thin margin", function()
+	t.eq(metrics.THIN_MARGIN, 0.2)
+end)
+
+t.test("assess: busy with a healthy margin stays plain Busy", function()
+	local a = metrics.assess(line({ waitingMax = 150, runningCostsPerYear = 1000 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, false)
+end)
+
+t.test("assess: busy on a thin margin", function()
+	-- Seen in-game: one bus, 26 waiting, +$115 a year on $108k running costs.
+	local a = metrics.assess(line({ waitingMax = 150, runningCostsPerYear = 1000, balance = 199 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, true)
+	near(a.margin, 0.199)
+end)
+
+t.test("assess: busy from load on a thin margin", function()
+	local a = metrics.assess(line({ itemsTransported = 1200, runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, true)
+end)
+
+t.test("assess: thin margin only matters for Busy", function()
+	local a = metrics.assess(line({ runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.verdict, "TooMany")
+	t.eq(a.thinMargin, false)
+	near(a.margin, 0.1)
+end)
+
+t.test("assess: unknown running costs are no thin margin", function()
+	local a = metrics.assess(line({ waitingMax = 150, balance = 1 }))
+	t.eq(a.thinMargin, false)
+	t.eq(a.margin, nil)
+	a = metrics.assess(line({ waitingMax = 150, balance = 1, runningCostsPerYear = 0 }))
+	t.eq(a.thinMargin, false)
+	t.eq(a.margin, nil)
 end)

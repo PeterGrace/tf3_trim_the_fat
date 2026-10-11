@@ -92,7 +92,7 @@ local function verdictGroups() : {VerdictGroup}
 		{ label = _("Too many"), tooltip = _("Show profitable lines that could run with fewer vehicles"),
 			class = "font-scale-body, warning", kinds = { TooMany = true } },
 		{ label = _("Busy"), tooltip = _("Show lines that may need more vehicles"), class = "font-scale-body, warning",
-			kinds = { Busy = true } },
+			kinds = { Busy = true, BusyThin = true } },
 		{ label = _("OK"), tooltip = _("Show profitable lines with a good load"), class = "font-scale-body, positive",
 			kinds = { Ok = true } },
 	}
@@ -110,6 +110,8 @@ local function verdictText(kind : VerdictKind, a : Assessment) : string, string
 		return ui.fill(_("Too many (−{count})"), { count = trim }), "font-scale-body, warning"
 	elseif kind == "Busy" then
 		return _("Busy"), "font-scale-body, warning"
+	elseif kind == "BusyThin" then
+		return _("Busy · thin margin"), "font-scale-body, warning"
 	elseif kind == "TooNew" then
 		return _("Too new"), "font-scale-body"
 	elseif kind == "NoVehicles" then

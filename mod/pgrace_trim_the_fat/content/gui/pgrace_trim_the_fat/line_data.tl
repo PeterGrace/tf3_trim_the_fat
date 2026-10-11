@@ -143,6 +143,32 @@ local function waitingMax(line : Engine.Entity, stopCount : integer) : integer
 	return ok and result as integer or nil
 end
 
+-- The line's income and running costs per calendar year, oldest first, the current (partial) year last, as the
+-- line window's Balance chart draws them; nil when the chart can't be read. Costs are positive.
+local function accountYears(line : Engine.Entity, years : integer) : {number}, {number}
+	local ok, result = pcall(function() : {{number}}
+		local config : ChartConfig = api.type.ChartConfig.new()
+		config.count = years
+		-- Seen in-game: series[1] is income and series[2] running costs, each { years, values }.
+		local series = api.engine.util.finance.getAccountChart(line, config).series
+		return { series[1][2], series[2][2] }
+	end)
+	if not ok then
+		return nil, nil
+	end
+	local pair = result as {{number}}
+	return pair[1], pair[2]
+end
+
+-- Running costs in the last full calendar year; nil until the line has one (its first year is usually partial).
+local function runningCostsPerYear(line : Engine.Entity) : number
+	local __, costs = accountYears(line, 3)
+	if costs == nil or #costs < 3 then
+		return nil
+	end
+	return costs[#costs - 1]
+end
+
 -- The line-level numbers, and the vehicle rows when withRows is set (the overview skips them).
 local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimTheFatLineData.LineFacts, {VehicleRow}
 	local now = nowMs()
@@ -200,6 +226,7 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			loadNow = line_data.lineLoadNow(line),
 			carriesPassengers = passengers,
 			waitingMax = (passengers and lineComponent ~= nil) and waitingMax(line, #lineComponent.stops) or nil,
+			runningCostsPerYear = runningCostsPerYear(line),
 		},
 		noun = nounFor(carrier, passengers),
 	}
