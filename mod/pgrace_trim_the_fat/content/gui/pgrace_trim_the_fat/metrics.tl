@@ -18,6 +18,7 @@ metrics.RECENT_CHANGE_FRACTION = 0.25
 metrics.FULL_DEPARTURE_SHARE = 0.6
 metrics.MIN_DEPARTURES = 3
 metrics.BREAK_EVEN_BAND = 0.05
+metrics.LOSING_YEARS = 3
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -159,6 +160,18 @@ function metrics.countFullDepartures(times : {integer}, values : {integer}, capa
 	return full, count
 end
 
+function metrics.recentBalance(income : {number}, costs : {number}, years : integer) : number
+	-- The current year and the first year are usually partial, so neither counts.
+	if income == nil or costs == nil or #income ~= #costs or #income < years + 2 then
+		return nil
+	end
+	local sum = 0.0
+	for i = #income - years, #income - 1 do
+		sum = sum + income[i] - costs[i]
+	end
+	return sum / years
+end
+
 -- Guards ceil() against float noise: 8 × 0.25 ÷ 0.5 may come out as 4.000000001.
 local EPSILON = 1e-9
 
@@ -175,6 +188,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		thinMargin = false,
 		changedRecently = false,
 		breakEven = false,
+		shortLoss = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	a.changedRecently = input.lastChangeMs ~= nil and input.nowMs ~= nil
@@ -232,7 +246,12 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	local costs = input.runningCostsPerYear
 	a.breakEven = a.balancePerYear < 0 and costs ~= nil and costs > 0
 		and a.balancePerYear >= -costs * metrics.BREAK_EVEN_BAND
-	if a.balancePerYear < 0 and not a.breakEven then
+	-- And a line that made money on average over the last full years isn't Losing for one bad stretch: a line paid
+	-- in lumps swung tens of thousands either way (seen in-game). A young line has no such history; its loss counts.
+	a.recentYearsBalance = metrics.recentBalance(input.incomeByYear, input.costsByYear, metrics.LOSING_YEARS)
+	a.shortLoss = a.balancePerYear < 0 and not a.breakEven
+		and a.recentYearsBalance ~= nil and a.recentYearsBalance >= 0
+	if a.balancePerYear < 0 and not a.breakEven and not a.shortLoss then
 		a.verdict = "Losing"
 	elseif a.backlog then
 		a.verdict = "Busy"

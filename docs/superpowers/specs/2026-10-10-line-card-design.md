@@ -272,3 +272,10 @@ overview later.
   last full year's running costs is now break-even, not Losing: the line falls through to the load checks, and its
   verdict tooltip says so. Without known running costs, any loss is still Losing. ForWay-LO-1 (−$7k on $108k,
   about −6%) still reads Losing.
+  The band wasn't enough for that ship: at −$5.8k on $90k of costs (−6.4%) it read Losing, and its yearly income
+  swings between about $75k and $175k. So a line is now Losing only when, beyond the band, the average balance of
+  its last `LOSING_YEARS = 3` full calendar years (from the account chart) is negative too, or unknown for a young
+  line. Otherwise it's a short loss and its tooltip gives the 3-year average. The same card's tooltip said "losing
+  money" and then "needs more vehicles", from its full departures. A Losing line whose departures leave full now
+  says each trip earns less than it costs, so more vehicles would add to the loss. A Losing line with only a queue
+  no longer says it needs more vehicles.

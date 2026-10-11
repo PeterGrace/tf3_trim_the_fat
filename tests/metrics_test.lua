@@ -684,3 +684,37 @@ end)
 t.test("assess: a profit is never break-even", function()
 	t.eq(metrics.assess(line({ balance = 10, runningCostsPerYear = 1000 })).breakEven, false)
 end)
+
+t.test("constants: losing years", function()
+	t.eq(metrics.LOSING_YEARS, 3)
+end)
+
+t.test("recentBalance: average over the last full years", function()
+	-- partial first year, then 3 full years, then the current partial year.
+	near(metrics.recentBalance({ 1, 100, 120, 80, 5 }, { 1, 90, 90, 90, 5 }, 3), 10)
+	t.eq(metrics.recentBalance({ 100, 120, 80, 5 }, { 90, 90, 90, 5 }, 3), nil, "first year may be partial")
+	t.eq(metrics.recentBalance(nil, nil, 3), nil)
+	t.eq(metrics.recentBalance({ 1, 2, 3, 4, 5 }, { 1, 2 }, 3), nil, "different lengths")
+end)
+
+t.test("assess: a 12-month loss on a line that made money over 3 years isn't Losing", function()
+	-- Seen in-game: a one-ship line at -$5.8k on $90k of costs (-6.4%) whose yearly income swings $75k-$175k.
+	local a = metrics.assess(line({ balance = -64, runningCostsPerYear = 1000,
+		incomeByYear = { 1, 1100, 1200, 950, 5 }, costsByYear = { 1, 1000, 1000, 1000, 5 } }))
+	t.eq(a.verdict, "TooMany")
+	t.eq(a.shortLoss, true)
+	near(a.recentYearsBalance, (100 + 200 - 50) / 3)
+end)
+
+t.test("assess: losing over 3 years too is Losing", function()
+	local a = metrics.assess(line({ balance = -64, runningCostsPerYear = 1000,
+		incomeByYear = { 1, 900, 1000, 950, 5 }, costsByYear = { 1, 1000, 1000, 1000, 5 } }))
+	t.eq(a.verdict, "Losing")
+	t.eq(a.shortLoss, false)
+end)
+
+t.test("assess: a young line's loss is Losing", function()
+	local a = metrics.assess(line({ balance = -64, runningCostsPerYear = 1000,
+		incomeByYear = { 1, 1100, 5 }, costsByYear = { 1, 1000, 5 } }))
+	t.eq(a.verdict, "Losing")
+end)
