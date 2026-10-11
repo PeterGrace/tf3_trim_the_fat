@@ -284,3 +284,10 @@ overview later.
   average vehicle does, so it only pays when the line makes money. The lift (`deepQueue`) now needs a margin of at
   least 0. CouClu-LO-3 (+$17k a bus) stays plain Busy; the ship reads "another vehicle would likely lose money", with
   a tooltip variant that doesn't say the extra vehicle "shares the same riders".
+- **A queue only counts when departures leave full (2026-10-11).** Tur-LO-1 (20-seat buses, 21% average load)
+  read Busy with one bus because a busload was waiting. With a second bus it read Too many (−1), then OK twelve days
+  later at −$11k a year, as a handful waiting kept both buses (the trim's queue limit). The waiting count is a
+  snapshot: when few departures leave full, each bus takes the whole queue. Now, when the stop logs show under
+  `QUEUE_FULL_SHARE` (25%) of departures leaving full, people waiting count toward neither the backlog, the deep
+  queue nor the trim's queue limit (`queueIgnored`, explained in the tooltip). Without enough departures logged, the
+  queue counts as before.

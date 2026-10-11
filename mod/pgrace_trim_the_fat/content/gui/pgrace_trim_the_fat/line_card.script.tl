@@ -153,6 +153,12 @@ local function verdictTooltip(data : CardData) : string
 		parts[#parts + 1] = ui.fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
 			{ busy = ui.formatPercent(metrics.BUSY_LOAD) })
 	end
+	if a.queueIgnored then
+		parts[#parts + 1] = ui.fill(_("{passengers} waiting at one stop, but only {percent} of departures left full over the last year: each vehicle takes the whole queue, so it doesn't count."), {
+			passengers = passengersText(data.snapshot.input.waitingMax),
+			percent = ui.formatPercent(a.fullShare),
+		})
+	end
 	if a.verdict == "Busy" and not a.thinMargin and a.margin ~= nil and a.margin < metrics.THIN_MARGIN then
 		parts[#parts + 1] = ui.fill(_("The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them."),
 			{ percent = ui.formatPercent(a.margin) })

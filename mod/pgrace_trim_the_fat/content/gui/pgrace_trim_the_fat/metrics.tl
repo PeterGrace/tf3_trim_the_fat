@@ -19,6 +19,7 @@ metrics.FULL_DEPARTURE_SHARE = 0.6
 metrics.MIN_DEPARTURES = 3
 metrics.BREAK_EVEN_BAND = 0.05
 metrics.LOSING_YEARS = 3
+metrics.QUEUE_FULL_SHARE = 0.25
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -190,6 +191,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		breakEven = false,
 		shortLoss = false,
 		deepQueue = false,
+		queueIgnored = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	a.changedRecently = input.lastChangeMs ~= nil and input.nowMs ~= nil
@@ -222,7 +224,17 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	if input.departures ~= nil and input.departures >= metrics.MIN_DEPARTURES then
 		a.fullShare = (input.fullDepartures or 0) / input.departures
 	end
-	a.waitingBacklog = input.waitingMax ~= nil and perVehicle > 0 and input.waitingMax >= perVehicle * metrics.BACKLOG_VEHICLES
+	-- People waiting are a snapshot. When few departures leave full, each vehicle takes the whole queue, so it isn't
+	-- a sign of too few vehicles (seen in-game: a 20-seat bus with a busload waiting at 21% load read Busy; the
+	-- second bus then read Too many or OK as the queue came and went).
+	local queueCounts = a.fullShare == nil or a.fullShare >= metrics.QUEUE_FULL_SHARE
+	local waiting : integer = nil
+	if queueCounts then
+		waiting = input.waitingMax
+	end
+	a.waitingBacklog = waiting ~= nil and perVehicle > 0 and waiting >= perVehicle * metrics.BACKLOG_VEHICLES
+	a.queueIgnored = not queueCounts and input.waitingMax ~= nil and perVehicle > 0
+		and input.waitingMax >= perVehicle * metrics.BACKLOG_VEHICLES
 	a.fullBacklog = a.fullShare ~= nil and a.fullShare >= metrics.FULL_DEPARTURE_SHARE
 	a.backlog = a.waitingBacklog or a.fullBacklog
 	if a.load ~= nil and a.load < a.target and count > 1 and not a.notDelivering and not a.backlog then
@@ -233,8 +245,12 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		if input.waitingMax ~= nil and input.waitingMax > 0 then
 			local queueKeep = math.ceil(count * input.waitingMax / (perVehicle * metrics.TRIM_QUEUE_LIMIT) - EPSILON)
 			if queueKeep > keep then
-				keep = queueKeep
-				a.queueLimited = true
+				if queueCounts then
+					keep = queueKeep
+					a.queueLimited = true
+				else
+					a.queueIgnored = true
+				end
 			end
 		end
 		if keep < count then
@@ -267,8 +283,8 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	-- in-game: 237 waiting on 8 buses; 33 waiting with every departure full).
 	-- Then it earns about what the average vehicle does, so it pays only when the line makes money (seen in-game: a
 	-- ship at -$9.8k a year, full on 67% of departures, read plain Busy).
-	a.deepQueue = a.fullBacklog or (input.waitingMax ~= nil and perVehicle > 0
-		and input.waitingMax >= perVehicle * metrics.DEEP_QUEUE_VEHICLES)
+	a.deepQueue = a.fullBacklog or (waiting ~= nil and perVehicle > 0
+		and waiting >= perVehicle * metrics.DEEP_QUEUE_VEHICLES)
 	a.thinMargin = a.verdict == "Busy" and a.margin ~= nil and a.margin < metrics.THIN_MARGIN
 		and not (a.deepQueue and a.margin >= 0)
 	return a

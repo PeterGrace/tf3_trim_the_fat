@@ -728,3 +728,47 @@ t.test("assess: a deep queue doesn't lift the thin margin on a line that loses m
 	t.eq(a.thinMargin, true)
 	t.eq(a.deepQueue, true)
 end)
+
+t.test("constants: full share for a queue to count", function()
+	t.eq(metrics.QUEUE_FULL_SHARE, 0.25)
+end)
+
+t.test("assess: a busload waiting doesn't count when few departures leave full", function()
+	-- Seen in-game: Tur-LO-1, one 20-seat bus at 21% load read Busy with a busload waiting; each bus took the queue.
+	local a = metrics.assess(line({ waitingMax = 150, fullDepartures = 1, departures = 5 }))
+	t.eq(a.waitingBacklog, false)
+	t.eq(a.backlog, false)
+	t.eq(a.queueIgnored, true)
+	t.eq(a.verdict, "TooMany")
+	t.eq(a.trim, 2)
+end)
+
+t.test("assess: a busload waiting still counts with enough full departures", function()
+	local a = metrics.assess(line({ waitingMax = 150, fullDepartures = 2, departures = 8 }))
+	t.eq(a.waitingBacklog, true)
+	t.eq(a.queueIgnored, false)
+	t.eq(a.verdict, "Busy")
+end)
+
+t.test("assess: a queue doesn't limit the trim when few departures leave full", function()
+	-- Seen in-game: Tur-LO-1 went from Too many to OK as a handful of people waited at one stop.
+	local a = metrics.assess(line({ waitingMax = 99, fullDepartures = 0, departures = 5 }))
+	t.eq(a.queueLimited, false)
+	t.eq(a.queueIgnored, true)
+	t.eq(a.trim, 2)
+	t.eq(a.verdict, "TooMany")
+end)
+
+t.test("assess: a small queue that limits nothing isn't marked ignored", function()
+	local a = metrics.assess(line({ waitingMax = 20, fullDepartures = 0, departures = 5 }))
+	t.eq(a.queueIgnored, false)
+	t.eq(a.trim, 2)
+end)
+
+t.test("assess: an ignored queue isn't a deep queue", function()
+	local a = metrics.assess(line({ waitingMax = 200, runningCostsPerYear = 1000, balance = 100, itemsTransported = 1200,
+		fullDepartures = 1, departures = 5 }))
+	t.eq(a.verdict, "Busy", "Busy from the average load")
+	t.eq(a.deepQueue, false)
+	t.eq(a.thinMargin, true)
+end)
