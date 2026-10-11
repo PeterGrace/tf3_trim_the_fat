@@ -254,3 +254,6 @@ overview later.
   one stop over the last year left full (`MIN_DEPARTURES = 3`). Unlike the waiting snapshot, this doesn't depend on
   when the window is opened, and it survives restarts. Freight stops weren't seen in the probe, so freight isn't
   covered yet.
+  SouVal-LO-1 (33 waiting, under two busloads, every departure from one stop full, $5k per bus) then read "another
+  vehicle would likely lose money". Departures that mostly leave full mean an extra vehicle fills from passengers
+  left behind, as with a deep queue, so a full-departure backlog now also lifts the thin-margin verdict.

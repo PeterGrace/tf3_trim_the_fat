@@ -104,7 +104,7 @@ global record PgraceTrimTheFatMetrics
 		-- balancePerYear ÷ runningCostsPerYear; nil when the running costs are unknown.
 		margin : number
 		-- True when the verdict is Busy but margin is under THIN_MARGIN, with fewer than DEEP_QUEUE_VEHICLES
-		-- vehicles' worth waiting: another vehicle would likely lose money.
+		-- vehicles' worth waiting and no fullBacklog: another vehicle would likely lose money.
 		thinMargin : boolean
 		-- nil without enough history (metrics.trend).
 		trend : Trend

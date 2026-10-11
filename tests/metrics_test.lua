@@ -652,3 +652,11 @@ t.test("assess: fewer full departures, or too few departures, is no backlog", fu
 	a = metrics.assess(line())
 	t.eq(a.fullShare, nil)
 end)
+
+t.test("assess: departures that mostly leave full keep a thin line plain Busy", function()
+	-- Seen in-game: SouVal-LO-1, 33 waiting (under two busloads), every departure from one stop full, thin margin.
+	local a = metrics.assess(line({ waitingMax = 150, runningCostsPerYear = 1000, balance = 100,
+		fullDepartures = 5, departures = 5 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, false)
+end)
