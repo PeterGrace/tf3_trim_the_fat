@@ -94,7 +94,7 @@ global record PgraceTrimTheFatMetrics
 		-- True when the vehicles are full now but carried little over the window: cargo is on board but not being
 		-- unloaded. No trim is suggested then.
 		notDelivering : boolean
-		-- True when waitingMax is at least BACKLOG_VEHICLES vehicles' worth of capacity, or fullShare is at least
+		-- True when waitingMax (unless queueIgnored) is at least BACKLOG_VEHICLES vehicles' worth of capacity, or fullShare is at least
 		-- FULL_DEPARTURE_SHARE: no trim, and Busy unless Losing.
 		backlog : boolean
 		-- Which made it a backlog: waitingMax, or fullShare (either or both).
@@ -126,6 +126,9 @@ global record PgraceTrimTheFatMetrics
 		shortLoss : boolean
 		-- fullDepartures ÷ departures; nil under MIN_DEPARTURES departures.
 		fullShare : number
+		-- True when waitingMax would have made a backlog or limited the trim, but fullShare is under QUEUE_FULL_SHARE:
+		-- each vehicle takes the whole queue, so it was left out (also of deepQueue).
+		queueIgnored : boolean
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -161,6 +164,8 @@ global record PgraceTrimTheFatMetrics
 	-- A trim keeps enough vehicles that each stop's queue, grown by count ÷ keep, stays at or under this many
 	-- vehicles' worth of capacity. Below BACKLOG_VEHICLES, so adding and removing a vehicle doesn't go back and forth.
 	TRIM_QUEUE_LIMIT : number
+	-- Under this fullShare, people waiting at a stop don't count: no backlog, deep queue or trim limit from them.
+	QUEUE_FULL_SHARE : number
 	-- Under this balance ÷ running costs, a Busy line is too thin for another vehicle to pay for itself.
 	THIN_MARGIN : number
 	-- Waiting passengers, in vehicles' worth of capacity, from which another vehicle fills from the queue: a thin
