@@ -118,7 +118,8 @@
         "Declining ↘": "Rückläufig ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Fahrzeuge vor {age} geändert: Die Zahlen enthalten noch die alte Aufstellung.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Linien ausblenden, deren Fahrzeuge sich in den letzten 3 Monaten geändert haben. Verkäufe und Verschiebungen zählen ab dem Spielstart.",
-        "Hide changed": "Geänderte ausblenden"
+        "Hide changed": "Geänderte ausblenden",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Die Bilanz beträgt nur {percent} der Betriebskosten: Größere Fahrzeuge lohnen sich womöglich mehr als zusätzliche."
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -217,7 +218,8 @@
         "Declining ↘": "En declive ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Vehículos cambiados hace {age}: las cifras aún incluyen la configuración anterior.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ocultar líneas cuyos vehículos cambiaron en los últimos 3 meses. Las ventas y traslados cuentan desde que se inició el juego.",
-        "Hide changed": "Ocultar cambiadas"
+        "Hide changed": "Ocultar cambiadas",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "El balance es solo el {percent} de los costes de funcionamiento: vehículos más grandes pueden salir más rentables que añadir más."
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -316,7 +318,8 @@
         "Declining ↘": "En déclin ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Véhicules modifiés il y a {age} : les chiffres incluent encore l'ancienne configuration.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Masquer les lignes dont les véhicules ont changé au cours des 3 derniers mois. Les ventes et déplacements comptent depuis le lancement du jeu.",
-        "Hide changed": "Masquer modifiées"
+        "Hide changed": "Masquer modifiées",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Le bilan ne représente que {percent} des coûts d'exploitation : des véhicules plus grands pourraient être plus rentables que davantage de véhicules."
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -415,7 +418,8 @@
         "Declining ↘": "In calo ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Veicoli cambiati {age} fa: i numeri includono ancora la configurazione precedente.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Nascondi le linee i cui veicoli sono cambiati negli ultimi 3 mesi. Vendite e spostamenti contano dall'avvio del gioco.",
-        "Hide changed": "Nascondi modificate"
+        "Hide changed": "Nascondi modificate",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Il bilancio è solo il {percent} dei costi di esercizio: veicoli più grandi potrebbero rendere più che aggiungerne altri."
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -504,7 +508,8 @@
         "Declining ↘": "減少傾向 ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "{age}前に車両が変更されました：数値にはまだ以前の構成が含まれています。",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "過去3か月に車両が変更された路線を非表示にします。売却と移動はゲーム起動時から数えます。",
-        "Hide changed": "変更を非表示"
+        "Hide changed": "変更を非表示",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "収支は運行費用の{percent}にすぎません。車両を増やすより、大きい車両にする方が採算が合うかもしれません。"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -593,7 +598,8 @@
         "Declining ↘": "감소 추세 ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "{age} 전에 운송 수단이 바뀌었습니다: 수치에는 아직 이전 구성이 포함되어 있습니다.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "최근 3개월 안에 운송 수단이 바뀐 노선을 숨깁니다. 판매와 이동은 게임을 시작한 시점부터 계산합니다.",
-        "Hide changed": "변경된 노선 숨기기"
+        "Hide changed": "변경된 노선 숨기기",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "수지가 운영비의 {percent}에 불과합니다. 운송 수단을 늘리기보다 더 큰 운송 수단이 수익성이 좋을 수 있습니다."
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -692,7 +698,8 @@
         "Declining ↘": "Dalend ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Voertuigen {age} geleden gewijzigd: de cijfers bevatten nog de oude opzet.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Lijnen verbergen waarvan de voertuigen de laatste 3 maanden zijn gewijzigd. Verkopen en verplaatsingen tellen vanaf het starten van het spel.",
-        "Hide changed": "Gewijzigde verbergen"
+        "Hide changed": "Gewijzigde verbergen",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "De balans is maar {percent} van de bedrijfskosten: grotere voertuigen leveren misschien meer op dan extra voertuigen."
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -801,7 +808,8 @@
         "Declining ↘": "Spadek ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Pojazdy zmieniono {age} temu: liczby wciąż obejmują poprzedni układ.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ukryj linie, których pojazdy zmieniły się w ostatnich 3 miesiącach. Sprzedaże i przeniesienia liczą się od uruchomienia gry.",
-        "Hide changed": "Ukryj zmienione"
+        "Hide changed": "Ukryj zmienione",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Bilans to tylko {percent} kosztów eksploatacji: większe pojazdy mogą się bardziej opłacać niż dodatkowe."
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -900,7 +908,8 @@
         "Declining ↘": "Em queda ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Veículos alterados há {age}: os números ainda incluem a configuração anterior.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ocultar linhas cujos veículos mudaram nos últimos 3 meses. Vendas e transferências contam a partir de quando o jogo foi iniciado.",
-        "Hide changed": "Ocultar alteradas"
+        "Hide changed": "Ocultar alteradas",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "O saldo é só {percent} dos custos operacionais: veículos maiores podem compensar mais do que adicionar outros."
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -1009,7 +1018,8 @@
         "Declining ↘": "Спад ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Транспорт изменён {age} назад: в цифрах ещё учтён прежний состав.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Скрыть линии, у которых транспорт менялся за последние 3 месяца. Продажи и перемещения учитываются с момента запуска игры.",
-        "Hide changed": "Скрыть изменённые"
+        "Hide changed": "Скрыть изменённые",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Баланс составляет лишь {percent} эксплуатационных расходов: более вместительный транспорт может окупиться лучше, чем дополнительный."
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -1098,7 +1108,8 @@
         "Declining ↘": "下滑 ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "载具于 {age}前变更：数据仍包含旧的配置。",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "隐藏过去 3 个月内载具有变更的线路。出售和转移从游戏启动时开始计算。",
-        "Hide changed": "隐藏已变更"
+        "Hide changed": "隐藏已变更",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "收支仅为运营成本的{percent}：换用更大的载具可能比增加载具更划算。"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -1187,6 +1198,7 @@
         "Declining ↘": "下滑 ↘",
         "Vehicles changed {age} ago: the numbers still include the old setup.": "車輛於 {age}前變更：數據仍包含舊的配置。",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "隱藏過去 3 個月內車輛有變更的路線。出售和轉移從遊戲啟動時開始計算。",
-        "Hide changed": "隱藏已變更"
+        "Hide changed": "隱藏已變更",
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "收支僅為營運成本的{percent}：換用更大的車輛可能比增加車輛更划算。"
     }
 }

@@ -96,7 +96,8 @@ global record PgraceTrimTheFatMetrics
 		queueLimited : boolean
 		-- balancePerYear ÷ runningCostsPerYear; nil when the running costs are unknown.
 		margin : number
-		-- True when the verdict is Busy but margin is under THIN_MARGIN: another vehicle would likely lose money.
+		-- True when the verdict is Busy but margin is under THIN_MARGIN, with fewer than DEEP_QUEUE_VEHICLES
+		-- vehicles' worth waiting: another vehicle would likely lose money.
 		thinMargin : boolean
 		-- nil without enough history (metrics.trend).
 		trend : Trend
@@ -143,6 +144,9 @@ global record PgraceTrimTheFatMetrics
 	TRIM_QUEUE_LIMIT : number
 	-- Under this balance ÷ running costs, a Busy line is too thin for another vehicle to pay for itself.
 	THIN_MARGIN : number
+	-- Waiting passengers, in vehicles' worth of capacity, from which another vehicle fills from the queue: a thin
+	-- margin no longer counts.
+	DEEP_QUEUE_VEHICLES : number
 	-- Years averaged for a trend: the recent ones, and the ones before them.
 	TREND_RECENT_YEARS : integer
 	TREND_BEFORE_YEARS : integer

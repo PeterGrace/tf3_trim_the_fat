@@ -10,6 +10,7 @@ metrics.BACKLOG_VEHICLES = 1
 metrics.MIN_VEHICLE_DATA_FRACTION = 0.5
 metrics.TRIM_QUEUE_LIMIT = 0.5
 metrics.THIN_MARGIN = 0.2
+metrics.DEEP_QUEUE_VEHICLES = 2
 metrics.TREND_RECENT_YEARS = 3
 metrics.TREND_BEFORE_YEARS = 5
 metrics.DECLINE_RATIO = 0.75
@@ -208,8 +209,11 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		a.verdict = "Busy"
 	end
 	-- Another vehicle adds a whole vehicle's running costs but shares the line's riders, so it earns less than the
-	-- average vehicle. When the average barely covers its costs, the extra one would lose money.
-	a.thinMargin = a.verdict == "Busy" and a.margin ~= nil and a.margin < metrics.THIN_MARGIN
+	-- average vehicle. When the average barely covers its costs, the extra one would lose money. Not with several
+	-- busloads waiting: then it fills from passengers left behind now (seen in-game: 237 waiting on 8 buses).
+	local deepQueue = input.waitingMax ~= nil and perVehicle > 0
+		and input.waitingMax >= perVehicle * metrics.DEEP_QUEUE_VEHICLES
+	a.thinMargin = a.verdict == "Busy" and a.margin ~= nil and a.margin < metrics.THIN_MARGIN and not deepQueue
 	return a
 end
 

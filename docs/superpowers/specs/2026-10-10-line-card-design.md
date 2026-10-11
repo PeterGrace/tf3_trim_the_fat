@@ -237,3 +237,9 @@ overview later.
   which starts empty after a restart. A change younger than `RECENT_CHANGE_FRACTION = 0.25` of a year gives
   `changedRecently`: a card note and the overview's "Hide changed" toggle. The unsatisfied-at-stop logs may be a
   better backlog signal than the waiting snapshot; not explored yet.
+- **Deep queues** (2026-10-11): CouClu-LO-3 (8 buses, 7 stops, $17k per bus, 237 waiting) read "another vehicle
+  would likely lose money". With several busloads waiting, another bus fills from passengers left behind now and
+  doesn't share the same riders, so from `DEEP_QUEUE_VEHICLES = 2` busloads a thin margin no longer counts. The line
+  stays plain Busy, and its tooltip notes the margin and suggests bigger vehicles. Declining also moves with the
+  calendar: after the year rolled over, FaiOak-SouVal's 5-year window took in its first bad year and the line left
+  the list (it reads Losing money); Elk-Chi stayed.

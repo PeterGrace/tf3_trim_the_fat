@@ -584,3 +584,18 @@ t.test("assess: a recent change doesn't touch the verdict", function()
 	t.eq(a.verdict, "TooMany")
 	t.eq(a.trim, 2)
 end)
+
+t.test("constants: deep queue", function()
+	t.eq(metrics.DEEP_QUEUE_VEHICLES, 2)
+end)
+
+t.test("assess: a deep queue keeps a thin line plain Busy", function()
+	-- Seen in-game: CouClu-LO-3, 8 buses, 237 waiting (several busloads), a thin margin; another bus would fill
+	-- from the queue rather than share the same riders.
+	local a = metrics.assess(line({ waitingMax = 200, runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, false)
+	near(a.margin, 0.1)
+	a = metrics.assess(line({ waitingMax = 199, runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.thinMargin, true)
+end)
