@@ -267,3 +267,20 @@ overview later.
   `itemsAtStop1` log to +20, +20, +20, while `itemsAtStop0` stayed at +4 to +11. So `k` is the stop index plus one,
   wrapping, and the waiting count takes the stop index itself. The check now covers every cargo type, counts a
   departure full at the vehicles' average `allCaps` for that cargo, and skips full-load stops.
+- **Break-even band** (2026-10-11): a one-ship line paid per delivery flipped between OK and "Losing · not
+  delivering" as its 12-month balance crossed zero between deliveries. A loss down to `BREAK_EVEN_BAND = 0.05` of the
+  last full year's running costs is now break-even, not Losing: the line falls through to the load checks, and its
+  verdict tooltip says so. Without known running costs, any loss is still Losing. ForWay-LO-1 (−$7k on $108k,
+  about −6%) still reads Losing.
+  The band wasn't enough for that ship: at −$5.8k on $90k of costs (−6.4%) it read Losing, and its yearly income
+  swings between about $75k and $175k. So a line is now Losing only when, beyond the band, the average balance of
+  its last `LOSING_YEARS = 3` full calendar years (from the account chart) is negative too, or unknown for a young
+  line. Otherwise it's a short loss and its tooltip gives the 3-year average. The same card's tooltip said "losing
+  money" and then "needs more vehicles", from its full departures. A Losing line whose departures leave full now
+  says each trip earns less than it costs, so more vehicles would add to the loss. A Losing line with only a queue
+  no longer says it needs more vehicles.
+  With the 3-year rule that ship read plain Busy at −$9.8k a year (full on 67% of departures), because full
+  departures lifted the thin margin. When an extra vehicle fills from what's left behind, it earns about what the
+  average vehicle does, so it only pays when the line makes money. The lift (`deepQueue`) now needs a margin of at
+  least 0. CouClu-LO-3 (+$17k a bus) stays plain Busy; the ship reads "another vehicle would likely lose money", with
+  a tooltip variant that doesn't say the extra vehicle "shares the same riders".

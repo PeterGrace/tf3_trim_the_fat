@@ -660,3 +660,71 @@ t.test("assess: departures that mostly leave full keep a thin line plain Busy", 
 	t.eq(a.verdict, "Busy")
 	t.eq(a.thinMargin, false)
 end)
+
+t.test("constants: break-even band", function()
+	t.eq(metrics.BREAK_EVEN_BAND, 0.05)
+end)
+
+t.test("assess: a small loss within the band isn't Losing", function()
+	-- Seen in-game: a one-ship line paid per delivery flipped between OK and Losing as its balance crossed zero.
+	local a = metrics.assess(line({ balance = -50, runningCostsPerYear = 1000 }))
+	t.eq(a.verdict, "TooMany", "exactly -5% is still within the band")
+	t.eq(a.breakEven, true)
+	a = metrics.assess(line({ balance = -51, runningCostsPerYear = 1000 }))
+	t.eq(a.verdict, "Losing")
+	t.eq(a.breakEven, false)
+end)
+
+t.test("assess: without running costs any loss is Losing", function()
+	local a = metrics.assess(line({ balance = -1 }))
+	t.eq(a.verdict, "Losing")
+	t.eq(a.breakEven, false)
+end)
+
+t.test("assess: a profit is never break-even", function()
+	t.eq(metrics.assess(line({ balance = 10, runningCostsPerYear = 1000 })).breakEven, false)
+end)
+
+t.test("constants: losing years", function()
+	t.eq(metrics.LOSING_YEARS, 3)
+end)
+
+t.test("recentBalance: average over the last full years", function()
+	-- partial first year, then 3 full years, then the current partial year.
+	near(metrics.recentBalance({ 1, 100, 120, 80, 5 }, { 1, 90, 90, 90, 5 }, 3), 10)
+	t.eq(metrics.recentBalance({ 100, 120, 80, 5 }, { 90, 90, 90, 5 }, 3), nil, "first year may be partial")
+	t.eq(metrics.recentBalance(nil, nil, 3), nil)
+	t.eq(metrics.recentBalance({ 1, 2, 3, 4, 5 }, { 1, 2 }, 3), nil, "different lengths")
+end)
+
+t.test("assess: a 12-month loss on a line that made money over 3 years isn't Losing", function()
+	-- Seen in-game: a one-ship line at -$5.8k on $90k of costs (-6.4%) whose yearly income swings $75k-$175k.
+	local a = metrics.assess(line({ balance = -64, runningCostsPerYear = 1000,
+		incomeByYear = { 1, 1100, 1200, 950, 5 }, costsByYear = { 1, 1000, 1000, 1000, 5 } }))
+	t.eq(a.verdict, "TooMany")
+	t.eq(a.shortLoss, true)
+	near(a.recentYearsBalance, (100 + 200 - 50) / 3)
+end)
+
+t.test("assess: losing over 3 years too is Losing", function()
+	local a = metrics.assess(line({ balance = -64, runningCostsPerYear = 1000,
+		incomeByYear = { 1, 900, 1000, 950, 5 }, costsByYear = { 1, 1000, 1000, 1000, 5 } }))
+	t.eq(a.verdict, "Losing")
+	t.eq(a.shortLoss, false)
+end)
+
+t.test("assess: a young line's loss is Losing", function()
+	local a = metrics.assess(line({ balance = -64, runningCostsPerYear = 1000,
+		incomeByYear = { 1, 1100, 5 }, costsByYear = { 1, 1000, 5 } }))
+	t.eq(a.verdict, "Losing")
+end)
+
+t.test("assess: a deep queue doesn't lift the thin margin on a line that loses money", function()
+	-- Seen in-game: a one-ship line at -$9.8k a year, full on 67% of departures, read plain Busy. Full, an extra
+	-- vehicle earns about what the average one does, so it only pays when the line makes money.
+	local a = metrics.assess(line({ balance = -100, runningCostsPerYear = 1000, fullDepartures = 4, departures = 6,
+		incomeByYear = { 1, 1100, 1100, 1100, 5 }, costsByYear = { 1, 1000, 1000, 1000, 5 } }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, true)
+	t.eq(a.deepQueue, true)
+end)

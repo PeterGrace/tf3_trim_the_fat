@@ -138,7 +138,14 @@ local function verdictTooltip(data : CardData) : string
 	if a.trim > 0 then
 		parts[#parts + 1] = _("Fewer vehicles means a longer wait, which can cost passengers or cargo.")
 	end
-	if a.waitingBacklog then
+	if a.verdict == "Losing" and a.fullBacklog then
+		-- More vehicles would only add to the loss: each trip already earns less than it costs (seen in-game on a
+		-- truck line and a ship line, both leaving full).
+		parts[#parts + 1] = _("Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.")
+	elseif a.verdict == "Losing" then
+		-- A queue on a losing line isn't a reason to add vehicles (seen in-game: 64 waiting while 4 of 5 buses ran
+		-- empty); the card's hint row still says how many are waiting.
+	elseif a.waitingBacklog then
 		parts[#parts + 1] = _("Passengers are piling up at a stop, so the line needs more vehicles, whatever the average load says.")
 	elseif a.fullBacklog then
 		parts[#parts + 1] = _("Vehicles keep leaving a stop full, so the line needs more vehicles, whatever the average load says.")
@@ -151,12 +158,24 @@ local function verdictTooltip(data : CardData) : string
 			{ percent = ui.formatPercent(a.margin) })
 	end
 	if a.thinMargin then
-		parts[#parts + 1] = ui.fill(_("But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better."), {
+		-- Both keys stay literal, so both stay translated.
+		local template = a.deepQueue
+			and _("But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.")
+			or _("But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.")
+		parts[#parts + 1] = ui.fill(template, {
 			percent = ui.formatPercent(a.margin),
 			costs = ui.formatMoney(data.snapshot.input.runningCostsPerYear),
 		})
 	end
-	if a.verdict == "Ok" and not a.queueLimited then
+	if a.shortLoss then
+		parts[#parts + 1] = ui.fill(_("Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money."),
+			{ amount = ui.formatMoney(a.recentYearsBalance) })
+	end
+	if a.breakEven then
+		parts[#parts + 1] = ui.fill(_("About break-even: a loss of up to {band} of the running costs doesn't count as losing money."),
+			{ band = ui.formatPercent(metrics.BREAK_EVEN_BAND) })
+	end
+	if a.verdict == "Ok" and not a.queueLimited and not a.breakEven and not a.shortLoss then
 		parts[#parts + 1] = _("Profitable, and the average load is close to or above the target.")
 	end
 	return table.concat(parts, "\n")
@@ -387,7 +406,7 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 	end
 	if a.fullBacklog then
 		-- Both keys stay literal, so both stay translated.
-		local template = a.waitingBacklog and _("Full on {percent} of departures from one stop over the last year.")
+		local template = (a.waitingBacklog or a.verdict == "Losing") and _("Full on {percent} of departures from one stop over the last year.")
 			or _("Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.")
 		add(ui.textRow(ui.fill(template, { percent = ui.formatPercent(a.fullShare) }), "font-scale-body, warning"))
 	end
