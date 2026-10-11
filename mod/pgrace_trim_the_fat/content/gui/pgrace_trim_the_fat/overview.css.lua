@@ -120,5 +120,10 @@ function data()
 		textAlignment = { 1, 0.5 },
 	})
 
+	-- Our own pin in the Line column, placed as the base table places its LocateButton (line_react_util.css.lua).
+	a("Table::TableLayout R::PgraceTrimTheFatLocateButton Button", {
+		gravity = { 0, -1 },
+	})
+
 	return result
 end

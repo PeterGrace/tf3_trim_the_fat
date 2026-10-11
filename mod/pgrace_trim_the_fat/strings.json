@@ -126,7 +126,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "Etwa kostendeckend: Ein Verlust bis {band} der Betriebskosten zählt nicht als Verlust.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "Die Fahrzeuge fahren voll ab, und trotzdem macht die Linie Verlust: Jede Fahrt bringt weniger ein, als sie kostet, also würden mehr Fahrzeuge den Verlust vergrößern. Prüfe die Streckenlänge, wohin die Fracht geht, oder die Betriebskosten der Fahrzeuge.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "In den letzten 12 Monaten Verlust, aber in den letzten 3 vollen Jahren im Schnitt {amount} pro Jahr verdient, daher zählt es nicht als Verlust.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Aber die Bilanz beträgt nur {percent} der Betriebskosten ({costs} im letzten Jahr): Selbst voll würde ein weiteres Fahrzeug kaum mehr verdienen als die anderen. Größere oder neuere Fahrzeuge lohnen sich womöglich eher."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Aber die Bilanz beträgt nur {percent} der Betriebskosten ({costs} im letzten Jahr): Selbst voll würde ein weiteres Fahrzeug kaum mehr verdienen als die anderen. Größere oder neuere Fahrzeuge lohnen sich womöglich eher.",
+        "Locate": "Anpeilen"
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -233,7 +234,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "Aproximadamente sin pérdidas: una pérdida de hasta el {band} de los costes de funcionamiento no cuenta como perder dinero.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "Los vehículos salen llenos y aun así la línea pierde dinero: cada viaje gana menos de lo que cuesta, así que más vehículos aumentarían la pérdida. Revisa la longitud de la ruta, adónde va la carga o los costes de funcionamiento de los vehículos.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "Perdió dinero en los últimos 12 meses, pero ganó {amount} al año de media en los últimos 3 años completos, así que no cuenta como perder dinero.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Pero el balance es solo el {percent} de los costes de funcionamiento ({costs} el año pasado): incluso lleno, otro vehículo ganaría tan poco como los demás. Vehículos más grandes o modernos pueden salir más rentables."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Pero el balance es solo el {percent} de los costes de funcionamiento ({costs} el año pasado): incluso lleno, otro vehículo ganaría tan poco como los demás. Vehículos más grandes o modernos pueden salir más rentables.",
+        "Locate": "Ubicar"
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -340,7 +342,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "À peu près à l'équilibre : une perte jusqu'à {band} des coûts d'exploitation n'est pas comptée comme une perte.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "Les véhicules partent pleins, et pourtant la ligne perd de l'argent : chaque trajet rapporte moins qu'il ne coûte, donc plus de véhicules creuseraient la perte. Vérifiez la longueur du trajet, la destination du fret ou les coûts d'exploitation des véhicules.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "Perte sur les 12 derniers mois, mais {amount} gagnés par an en moyenne sur les 3 dernières années complètes : cela ne compte pas comme une perte.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Mais le bilan ne représente que {percent} des coûts d'exploitation ({costs} l'an dernier) : même plein, un véhicule de plus gagnerait aussi peu que les autres. Des véhicules plus grands ou plus récents pourraient être plus rentables."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Mais le bilan ne représente que {percent} des coûts d'exploitation ({costs} l'an dernier) : même plein, un véhicule de plus gagnerait aussi peu que les autres. Des véhicules plus grands ou plus récents pourraient être plus rentables.",
+        "Locate": "Localiser"
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -447,7 +450,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "Circa in pareggio: una perdita fino al {band} dei costi di esercizio non conta come perdita.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "I veicoli partono pieni, eppure la linea è in perdita: ogni viaggio rende meno di quanto costa, quindi più veicoli aumenterebbero la perdita. Controlla la lunghezza del percorso, dove va il carico o i costi di esercizio dei veicoli.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "In perdita negli ultimi 12 mesi, ma ha guadagnato in media {amount} all'anno negli ultimi 3 anni completi, quindi non conta come in perdita.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Ma il bilancio è solo il {percent} dei costi di esercizio ({costs} l'anno scorso): anche pieno, un altro veicolo guadagnerebbe poco quanto gli altri. Veicoli più grandi o più nuovi potrebbero rendere di più."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Ma il bilancio è solo il {percent} dei costi di esercizio ({costs} l'anno scorso): anche pieno, un altro veicolo guadagnerebbe poco quanto gli altri. Veicoli più grandi o più nuovi potrebbero rendere di più.",
+        "Locate": "Localizza"
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -544,7 +548,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "ほぼ収支均衡：運行費用の{band}までの損失は赤字として扱いません。",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "車両は満載で出発していますが、路線は赤字です。1回の運行の収入が費用を下回っているため、車両を増やすと赤字が増えます。路線の長さ、貨物の行き先、車両の運行費用を確認してください。",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "過去12か月は赤字ですが、直近3年間（通年）の平均では年{amount}の黒字のため、赤字とは見なしません。",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "ただし収支は運行費用の{percent}にすぎません（昨年の運行費用：{costs}）。満載でも、車両を追加して得られる収入は他の車両と同程度にとどまります。より大きい、または新しい車両の方が採算が合うかもしれません。"
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "ただし収支は運行費用の{percent}にすぎません（昨年の運行費用：{costs}）。満載でも、車両を追加して得られる収入は他の車両と同程度にとどまります。より大きい、または新しい車両の方が採算が合うかもしれません。",
+        "Locate": "カメラ移動"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -641,7 +646,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "거의 손익분기점: 운영비의 {band}까지의 손실은 적자로 보지 않습니다.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "운송 수단이 가득 차서 출발하지만 노선은 적자입니다. 운행 한 번의 수입이 비용보다 적으므로 운송 수단을 늘리면 적자가 커집니다. 노선 길이, 화물의 목적지, 운송 수단의 운영비를 확인하세요.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "지난 12개월은 적자였지만 최근 3년(전체 연도) 동안 연평균 {amount}의 수익을 냈으므로 적자로 보지 않습니다.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "하지만 수지는 운영비의 {percent}에 불과합니다(작년 운영비 {costs}). 가득 차더라도 운송 수단을 추가하면 다른 운송 수단만큼 적게 벌 뿐입니다. 더 크거나 새로운 운송 수단이 더 수익성이 좋을 수 있습니다."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "하지만 수지는 운영비의 {percent}에 불과합니다(작년 운영비 {costs}). 가득 차더라도 운송 수단을 추가하면 다른 운송 수단만큼 적게 벌 뿐입니다. 더 크거나 새로운 운송 수단이 더 수익성이 좋을 수 있습니다.",
+        "Locate": "위치 찾기"
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -748,7 +754,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "Ongeveer kostendekkend: een verlies tot {band} van de bedrijfskosten telt niet als verlies.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "De voertuigen vertrekken vol, maar de lijn maakt verlies: elke rit levert minder op dan hij kost, dus meer voertuigen zouden het verlies vergroten. Controleer de lengte van de route, waar de vracht heen gaat of de bedrijfskosten van de voertuigen.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "Verlies over de afgelopen 12 maanden, maar gemiddeld {amount} per jaar verdiend over de laatste 3 volle jaren, dus dit telt niet als verlies.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Maar de balans is maar {percent} van de bedrijfskosten ({costs} vorig jaar): zelfs vol zou een extra voertuig net zo weinig verdienen als de andere. Grotere of nieuwere voertuigen leveren misschien meer op."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Maar de balans is maar {percent} van de bedrijfskosten ({costs} vorig jaar): zelfs vol zou een extra voertuig net zo weinig verdienen als de andere. Grotere of nieuwere voertuigen leveren misschien meer op.",
+        "Locate": "Zoeken"
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -865,7 +872,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "Mniej więcej na zero: strata do {band} kosztów eksploatacji nie jest liczona jako przynoszenie strat.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "Pojazdy odjeżdżają pełne, a mimo to linia przynosi straty: każdy kurs zarabia mniej, niż kosztuje, więc więcej pojazdów powiększyłoby stratę. Sprawdź długość trasy, dokąd trafia ładunek lub koszty eksploatacji pojazdów.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "Strata w ostatnich 12 miesiącach, ale średnio {amount} zysku rocznie w ostatnich 3 pełnych latach, więc nie liczy się jako przynoszenie strat.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Ale bilans to tylko {percent} kosztów eksploatacji ({costs} w zeszłym roku): nawet pełny, kolejny pojazd zarobiłby tak mało jak pozostałe. Większe lub nowsze pojazdy mogą się bardziej opłacać."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Ale bilans to tylko {percent} kosztów eksploatacji ({costs} w zeszłym roku): nawet pełny, kolejny pojazd zarobiłby tak mało jak pozostałe. Większe lub nowsze pojazdy mogą się bardziej opłacać.",
+        "Locate": "Zlokalizuj"
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -972,7 +980,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "Mais ou menos no zero a zero: um prejuízo de até {band} dos custos operacionais não conta como prejuízo.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "Os veículos saem cheios, mas a linha dá prejuízo: cada viagem rende menos do que custa, então mais veículos aumentariam o prejuízo. Verifique o comprimento da rota, para onde vai a carga ou os custos operacionais dos veículos.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "Teve prejuízo nos últimos 12 meses, mas lucrou em média {amount} por ano nos últimos 3 anos completos, então não conta como prejuízo.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Mas o saldo é só {percent} dos custos operacionais ({costs} no ano passado): mesmo cheio, outro veículo ganharia tão pouco quanto os outros. Veículos maiores ou mais novos podem compensar mais."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Mas o saldo é só {percent} dos custos operacionais ({costs} no ano passado): mesmo cheio, outro veículo ganharia tão pouco quanto os outros. Veículos maiores ou mais novos podem compensar mais.",
+        "Locate": "Localizar"
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -1089,7 +1098,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "Примерно в ноль: убыток до {band} эксплуатационных расходов не считается убыточностью.",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "Транспорт уходит полным, но линия убыточна: каждый рейс приносит меньше, чем стоит, поэтому больше транспорта только увеличит убыток. Проверьте длину маршрута, куда идёт груз или эксплуатационные расходы транспорта.",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "Убыток за последние 12 месяцев, но в среднем {amount} прибыли в год за последние 3 полных года, поэтому это не считается убыточностью.",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Но баланс составляет лишь {percent} эксплуатационных расходов ({costs} за прошлый год): даже полным ещё один транспорт заработает так же мало, как остальные. Более вместительный или новый транспорт может окупиться лучше."
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "Но баланс составляет лишь {percent} эксплуатационных расходов ({costs} за прошлый год): даже полным ещё один транспорт заработает так же мало, как остальные. Более вместительный или новый транспорт может окупиться лучше.",
+        "Locate": "Размещение"
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -1186,7 +1196,8 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "大致收支平衡：不超过运营成本 {band} 的亏损不算作亏损。",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "载具满载出发，但线路仍在亏损：每趟收入低于成本，增加载具只会扩大亏损。请检查线路长度、货物去向或载具的运营成本。",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "过去 12 个月亏损，但最近 3 个完整年度平均每年盈利 {amount}，因此不算作亏损。",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "但收支仅为运营成本的{percent}（去年运营成本 {costs}）：即使满载，再加一辆载具也只能和其他载具一样赚得很少。更大或更新的载具可能更划算。"
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "但收支仅为运营成本的{percent}（去年运营成本 {costs}）：即使满载，再加一辆载具也只能和其他载具一样赚得很少。更大或更新的载具可能更划算。",
+        "Locate": "定位"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -1283,6 +1294,7 @@
         "About break-even: a loss of up to {band} of the running costs doesn't count as losing money.": "大致收支平衡：不超過營運成本 {band} 的虧損不算作虧損。",
         "Vehicles leave full, yet the line loses money: each trip earns less than it costs, so more vehicles would add to the loss. Check the route length, where the cargo goes, or the vehicles' running costs.": "車輛滿載出發，但路線仍在虧損：每趟收入低於成本，增加車輛只會擴大虧損。請檢查路線長度、貨物去向或車輛的營運成本。",
         "Lost money over the last 12 months, but made {amount} a year on average over the last 3 full years, so it doesn't count as losing money.": "過去 12 個月虧損，但最近 3 個完整年度平均每年獲利 {amount}，因此不算作虧損。",
-        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "但收支僅為營運成本的{percent}（去年營運成本 {costs}）：即使滿載，再加一輛車輛也只能和其他車輛一樣賺得很少。更大或更新的車輛可能更划算。"
+        "But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.": "但收支僅為營運成本的{percent}（去年營運成本 {costs}）：即使滿載，再加一輛車輛也只能和其他車輛一樣賺得很少。更大或更新的車輛可能更划算。",
+        "Locate": "定位"
     }
 }
