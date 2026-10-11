@@ -399,10 +399,46 @@ t.test("assess: a busload waiting at a stop makes the line Busy, with no trim", 
 	t.eq(a.keep, nil)
 end)
 
-t.test("assess: fewer than a busload waiting changes nothing", function()
+t.test("constants: queue limit for a trim", function()
+	t.eq(metrics.TRIM_QUEUE_LIMIT, 0.5)
+end)
+
+-- The load alone keeps ceil(8 × 0.34 ÷ 0.5) = 6. Each queue grows by count ÷ keep when vehicles are removed, and
+-- must stay under half a vehicle's capacity (50).
+t.test("assess: a small queue leaves the trim alone", function()
+	local a = metrics.assess(line({ waitingMax = 20 })) -- 6 vehicles: 20 × 8 ÷ 6 ≈ 27 waiting
+	t.eq(a.backlog, false)
+	t.eq(a.keep, 6)
+	t.eq(a.trim, 2)
+	t.eq(a.queueLimited, false)
+	t.eq(a.verdict, "TooMany")
+end)
+
+t.test("assess: a queue limits the trim", function()
+	local a = metrics.assess(line({ waitingMax = 40 })) -- 6 vehicles: 53 waiting; 7: ≈ 46
+	t.eq(a.keep, 7)
+	t.eq(a.trim, 1)
+	t.eq(a.queueLimited, true)
+	t.eq(a.verdict, "TooMany")
+end)
+
+t.test("assess: a queue just under a busload stops the trim, without Busy", function()
+	-- Seen in-game: a bus added for a backlog was suggested for removal once the queue cleared, and so on.
 	local a = metrics.assess(line({ waitingMax = 99 }))
 	t.eq(a.backlog, false)
-	t.eq(a.verdict, "TooMany")
+	t.eq(a.keep, nil)
+	t.eq(a.trim, 0)
+	t.eq(a.queueLimited, true)
+	t.eq(a.verdict, "Ok")
+end)
+
+t.test("assess: a queue exactly at the limit is allowed", function()
+	local a = metrics.assess(line({ waitingMax = 25, vehicleCount = 8 })) -- 4 vehicles would leave exactly 50
+	t.eq(a.keep, 6)
+	t.eq(a.queueLimited, false)
+	a = metrics.assess(line({ waitingMax = 0 }))
+	t.eq(a.keep, 6)
+	t.eq(a.queueLimited, false)
 end)
 
 t.test("assess: a losing line with a backlog stays Losing, with no trim", function()
@@ -415,4 +451,6 @@ end)
 t.test("assess: unknown waiting is no backlog", function()
 	local a = metrics.assess(line({ waitingMax = NIL }))
 	t.eq(a.backlog, false)
+	t.eq(a.trim, 2)
+	t.eq(a.queueLimited, false)
 end)

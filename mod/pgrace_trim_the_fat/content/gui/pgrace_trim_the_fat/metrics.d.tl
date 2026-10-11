@@ -73,6 +73,8 @@ global record PgraceTrimTheFatMetrics
 		-- True when waitingMax is at least BACKLOG_VEHICLES vehicles' worth of capacity: no trim, and Busy unless
 		-- Losing.
 		backlog : boolean
+		-- True when waiting passengers kept the trim smaller than the load alone suggests (possibly 0).
+		queueLimited : boolean
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -105,6 +107,9 @@ global record PgraceTrimTheFatMetrics
 	-- Below this share of a year of data a vehicle's balance per year is "too new": a vehicle's first trips (from the
 	-- depot, a few round trips) scaled up mislead for longer than a whole line's money does.
 	MIN_VEHICLE_DATA_FRACTION : number
+	-- A trim keeps enough vehicles that each stop's queue, grown by count ÷ keep, stays at or under this many
+	-- vehicles' worth of capacity. Below BACKLOG_VEHICLES, so adding and removing a vehicle doesn't go back and forth.
+	TRIM_QUEUE_LIMIT : number
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
@@ -122,7 +127,7 @@ global record PgraceTrimTheFatMetrics
 	dataSpan : function(balanceBetween : function(integer, integer) : number, bought : integer, now : integer,
 		yearMs : integer) : integer
 	-- The verdict and the numbers behind it.
-	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), Busy (backlog), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
+	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), Busy (backlog), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion, limited by TRIM_QUEUE_LIMIT. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
 	assess : function(input : LineInput) : Assessment
 	-- Whole percent, rounded half up (0.344 → 34); nil for nil.
 	percent : function(fraction : number) : integer

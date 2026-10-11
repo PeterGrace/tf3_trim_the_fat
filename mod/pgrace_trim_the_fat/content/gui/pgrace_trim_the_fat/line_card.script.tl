@@ -112,7 +112,18 @@ local function verdictTooltip(data : CardData) : string
 	if a.verdict == "Losing" then
 		parts[#parts + 1] = _("The balance over the last 12 months is negative: income minus running and maintenance costs, without the purchase price.")
 	end
-	if a.trim > 0 then
+	if a.queueLimited then
+		parts[#parts + 1] = ui.fill(_("{count} × {load} ÷ {target} = {exact}."), {
+			count = ui.formatCount(count),
+			load = ui.formatPercent(a.load),
+			target = ui.formatPercent(a.target),
+			exact = ui.formatOneDecimal(count * a.load / a.target),
+		})
+		parts[#parts + 1] = ui.fill(_("With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load."), {
+			passengers = passengersText(data.snapshot.input.waitingMax),
+			keep = ui.formatCount(a.keep or count),
+		})
+	elseif a.trim > 0 then
 		parts[#parts + 1] = ui.fill(_("{count} × {load} ÷ {target} = {exact}, so keep {keep}."), {
 			count = ui.formatCount(count),
 			load = ui.formatPercent(a.load),
@@ -120,6 +131,8 @@ local function verdictTooltip(data : CardData) : string
 			exact = ui.formatOneDecimal(count * a.load / a.target),
 			keep = ui.formatCount(a.keep),
 		})
+	end
+	if a.trim > 0 then
 		parts[#parts + 1] = _("Fewer vehicles means a longer wait, which can cost passengers or cargo.")
 	end
 	if a.backlog then
@@ -128,7 +141,7 @@ local function verdictTooltip(data : CardData) : string
 		parts[#parts + 1] = ui.fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
 			{ busy = ui.formatPercent(metrics.BUSY_LOAD) })
 	end
-	if a.verdict == "Ok" then
+	if a.verdict == "Ok" and not a.queueLimited then
 		parts[#parts + 1] = _("Profitable, and the average load is close to or above the target.")
 	end
 	return table.concat(parts, "\n")

@@ -8,6 +8,7 @@ metrics.STUCK_LOAD_NOW = 0.75
 metrics.STUCK_AVERAGE_LOAD = 0.25
 metrics.BACKLOG_VEHICLES = 1
 metrics.MIN_VEHICLE_DATA_FRACTION = 0.5
+metrics.TRIM_QUEUE_LIMIT = 0.5
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -118,6 +119,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		trim = 0,
 		notDelivering = false,
 		backlog = false,
+		queueLimited = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	local count = input.vehicleCount or 0
@@ -140,6 +142,16 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	a.backlog = input.waitingMax ~= nil and perVehicle > 0 and input.waitingMax >= perVehicle * metrics.BACKLOG_VEHICLES
 	if a.load ~= nil and a.load < a.target and count > 1 and not a.notDelivering and not a.backlog then
 		local keep = math.max(1, math.ceil(count * a.load / a.target - EPSILON))
+		-- Fewer vehicles stretch the interval by count ÷ keep, and the queues with it. Keeping each queue under
+		-- TRIM_QUEUE_LIMIT, well below the backlog threshold, stops a vehicle added for a backlog from being
+		-- suggested for removal once the queue clears.
+		if input.waitingMax ~= nil and input.waitingMax > 0 then
+			local queueKeep = math.ceil(count * input.waitingMax / (perVehicle * metrics.TRIM_QUEUE_LIMIT) - EPSILON)
+			if queueKeep > keep then
+				keep = queueKeep
+				a.queueLimited = true
+			end
+		end
 		if keep < count then
 			a.keep = keep
 			a.trim = count - keep

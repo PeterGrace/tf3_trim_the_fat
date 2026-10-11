@@ -107,7 +107,9 @@
         "No lines yet.": "Noch keine Linien.",
         "No lines match the filters.": "Keine Linie passt zu den Filtern.",
         "{count} lines|one": "{count} Linie",
-        "{count} lines|other": "{count} Linien"
+        "{count} lines|other": "{count} Linien",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "{passengers} warten an einer Haltestelle: Mit weniger als {keep} Fahrzeugen würde die Schlange auf mehr als eine halbe Fahrzeugladung wachsen."
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -195,7 +197,9 @@
         "No lines yet.": "Aún no hay líneas.",
         "No lines match the filters.": "Ninguna línea coincide con los filtros.",
         "{count} lines|one": "{count} línea",
-        "{count} lines|other": "{count} líneas"
+        "{count} lines|other": "{count} líneas",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Con {passengers} esperando en una parada, con menos de {keep} la cola superaría media carga de un vehículo."
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -283,7 +287,9 @@
         "No lines yet.": "Aucune ligne pour l’instant.",
         "No lines match the filters.": "Aucune ligne ne correspond aux filtres.",
         "{count} lines|one": "{count} ligne",
-        "{count} lines|other": "{count} lignes"
+        "{count} lines|other": "{count} lignes",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Avec {passengers} en attente à un arrêt, en dessous de {keep} la file dépasserait la moitié de la capacité d'un véhicule."
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -371,7 +377,9 @@
         "No lines yet.": "Ancora nessuna linea.",
         "No lines match the filters.": "Nessuna linea corrisponde ai filtri.",
         "{count} lines|one": "{count} linea",
-        "{count} lines|other": "{count} linee"
+        "{count} lines|other": "{count} linee",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Con {passengers} in attesa a una fermata, con meno di {keep} la coda supererebbe metà del carico di un veicolo."
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -449,7 +457,9 @@
         "Recalculate every line": "すべての路線を再計算",
         "No lines yet.": "路線はまだありません。",
         "No lines match the filters.": "フィルターに一致する路線はありません。",
-        "{count} lines|other": "{count}路線"
+        "{count} lines|other": "{count}路線",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}。",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "1つの停留所で{passengers}が待機中：{keep}未満にすると、待ち行列が車両1台の定員の半分を超えます。"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -527,7 +537,9 @@
         "Recalculate every line": "모든 노선 다시 계산",
         "No lines yet.": "아직 노선이 없습니다.",
         "No lines match the filters.": "필터와 일치하는 노선이 없습니다.",
-        "{count} lines|other": "노선 {count}개"
+        "{count} lines|other": "노선 {count}개",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "한 정류장에서 {passengers} 대기 중: {keep} 미만이면 대기열이 운송 수단 1대 정원의 절반을 넘게 됩니다."
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -615,7 +627,9 @@
         "No lines yet.": "Nog geen lijnen.",
         "No lines match the filters.": "Geen lijnen voldoen aan de filters.",
         "{count} lines|one": "{count} lijn",
-        "{count} lines|other": "{count} lijnen"
+        "{count} lines|other": "{count} lijnen",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Met {passengers} wachtend bij één halte zou de rij met minder dan {keep} groeien tot meer dan een halve voertuiglading."
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -713,7 +727,9 @@
         "No lines match the filters.": "Żadna linia nie pasuje do filtrów.",
         "{count} lines|one": "{count} linia",
         "{count} lines|few": "{count} linie",
-        "{count} lines|many": "{count} linii"
+        "{count} lines|many": "{count} linii",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Na jednym przystanku czeka: {passengers}. Przy mniej niż {keep} kolejka przekroczyłaby połowę pojemności pojazdu."
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -801,7 +817,9 @@
         "No lines yet.": "Ainda não há linhas.",
         "No lines match the filters.": "Nenhuma linha corresponde aos filtros.",
         "{count} lines|one": "{count} linha",
-        "{count} lines|other": "{count} linhas"
+        "{count} lines|other": "{count} linhas",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Com {passengers} esperando em uma parada, com menos de {keep} a fila passaria de meia carga de um veículo."
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -899,7 +917,9 @@
         "No lines match the filters.": "Нет маршрутов, подходящих под фильтры.",
         "{count} lines|one": "{count} маршрут",
         "{count} lines|few": "{count} маршрута",
-        "{count} lines|many": "{count} маршрутов"
+        "{count} lines|many": "{count} маршрутов",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}.",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "На одной остановке ждут: {passengers}. Если оставить меньше {keep}, очередь превысит половину вместимости одного транспортного средства."
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -977,7 +997,9 @@
         "Recalculate every line": "重新计算所有线路",
         "No lines yet.": "还没有线路。",
         "No lines match the filters.": "没有符合筛选条件的线路。",
-        "{count} lines|other": "{count} 条线路"
+        "{count} lines|other": "{count} 条线路",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}。",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "一个站点有{passengers}在等待：少于 {keep} 时，排队人数会超过一辆载具容量的一半。"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -1055,6 +1077,8 @@
         "Recalculate every line": "重新計算所有路線",
         "No lines yet.": "還沒有路線。",
         "No lines match the filters.": "沒有符合篩選條件的路線。",
-        "{count} lines|other": "{count} 條路線"
+        "{count} lines|other": "{count} 條路線",
+        "{count} × {load} ÷ {target} = {exact}.": "{count} × {load} ÷ {target} = {exact}。",
+        "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "一個站點有{passengers}在等待：少於 {keep} 時，排隊人數會超過一輛車輛容量的一半。"
     }
 }

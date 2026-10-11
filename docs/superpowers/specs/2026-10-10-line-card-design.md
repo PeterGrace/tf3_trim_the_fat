@@ -209,3 +209,10 @@ overview later.
 - **Young vehicles:** "Per year" for a vehicle shows "Too new" until it has half a year of data
   (`MIN_VEHICLE_DATA_FRACTION = 0.5`). One month still showed a 2-month-old bus at -116,492* (its depot run and
   first trips scaled up 6×); the user chose six months over three. A whole line's Too new stays at one month.
+- **Queue-limited trim:** on CouClu lines with a big backlog at the train station, a bus added for the backlog was
+  suggested for removal once the queue cleared (the low average load decided the trim alone), and removing it brought
+  the backlog back. Fewer vehicles stretch the interval by count ÷ keep, and the queues grow with it, so a trim now
+  keeps at least `ceil(count × waitingMax ÷ (TRIM_QUEUE_LIMIT × capacity per vehicle))` vehicles, with
+  `TRIM_QUEUE_LIMIT = 0.5`. The gap between half a busload (trim stops) and a whole busload (Busy) is the hysteresis.
+  `queueLimited` marks it; the verdict tooltip says how many are waiting. The waiting count is a snapshot: a look
+  just after a pickup reads low. If that proves too jumpy, remember each line's largest queue for the session.
