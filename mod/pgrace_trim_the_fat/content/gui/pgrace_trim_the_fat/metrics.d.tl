@@ -66,6 +66,10 @@ global record PgraceTrimTheFatMetrics
 		-- the line window's Balance chart; nil when unknown. At least 10 years for a trend.
 		incomeByYear : {number}
 		costsByYear : {number}
+		-- When the line's vehicles last changed (bought, replaced, sold or moved), as far as is known; nil for never.
+		lastChangeMs : integer
+		-- The game time the input was read at.
+		nowMs : integer
 	end
 
 	record Assessment
@@ -99,6 +103,9 @@ global record PgraceTrimTheFatMetrics
 		-- True when the line made money over the earlier years and its recent income is under DECLINE_RATIO of
 		-- theirs. A marker beside the verdict, which it doesn't change.
 		declining : boolean
+		-- True when the vehicles changed less than RECENT_CHANGE_FRACTION of a year ago: the 12-month numbers still
+		-- mix the old setup in. The verdict is unchanged.
+		changedRecently : boolean
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -141,6 +148,8 @@ global record PgraceTrimTheFatMetrics
 	TREND_BEFORE_YEARS : integer
 	-- Recent income under this share of the earlier income is a decline.
 	DECLINE_RATIO : number
+	-- A vehicle change younger than this share of a year counts as recent.
+	RECENT_CHANGE_FRACTION : number
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number

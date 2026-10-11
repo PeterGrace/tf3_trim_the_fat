@@ -107,6 +107,12 @@ end
 
 -- Which vehicles the line has and when each was bought. Changes when a vehicle is bought, sold or replaced
 -- (replacing keeps the entity but resets its purchase time).
+-- Sorts `parts` ("vehicle:purchaseTime") in place.
+local function signatureOf(parts : {string}) : string
+	table.sort(parts)
+	return table.concat(parts, ",")
+end
+
 function line_data.vehicleSignature(line : Engine.Entity) : string
 	local parts : {string} = {}
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
@@ -115,8 +121,7 @@ function line_data.vehicleSignature(line : Engine.Entity) : string
 			parts[#parts + 1] = tostring(vehicle) .. ":" .. tostring(purchaseTime(tv))
 		end
 	end
-	table.sort(parts)
-	return table.concat(parts, ",")
+	return signatureOf(parts)
 end
 
 -- How long money has been booked on `entities` within the last year (metrics.dataSpan).
@@ -160,6 +165,30 @@ local function accountYears(line : Engine.Entity, years : integer) : {number}, {
 	return pair[1], pair[2]
 end
 
+-- Each line's vehicles when last read, and when they were last seen to change. Sales and vehicles moved between lines
+-- leave no trace in the game's data, so this is the only way to see them; it starts empty after a restart.
+local record Seen
+	signature : string
+	changedAt : integer
+end
+local seen : {Engine.Entity : Seen} = {}
+
+-- When the line's vehicles last changed: the newest purchase (or replacement), or a change in the vehicle list
+-- since the line was last read; nil when neither is known.
+local function lastChange(line : Engine.Entity, signature : string, newestPurchase : integer, now : integer) : integer
+	local entry = seen[line]
+	if entry == nil then
+		seen[line] = { signature = signature }
+	elseif entry.signature ~= signature then
+		seen[line] = { signature = signature, changedAt = now }
+	end
+	local changedAt = seen[line].changedAt
+	if changedAt == nil or (newestPurchase ~= nil and newestPurchase > changedAt) then
+		return newestPurchase
+	end
+	return changedAt
+end
+
 -- The line-level numbers, and the vehicle rows when withRows is set (the overview skips them).
 local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimTheFatLineData.LineFacts, {VehicleRow}
 	local now = nowMs()
@@ -170,6 +199,8 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 	local oldest : integer = nil
 	local vehicleDataMs = 0
 	local carrier : Carrier = nil
+	local newest : integer = nil
+	local parts : {string} = {}
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
 		local tv = transportVehicle(vehicle)
 		if tv ~= nil then
@@ -178,6 +209,10 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			if oldest == nil or bought < oldest then
 				oldest = bought
 			end
+			if newest == nil or bought > newest then
+				newest = bought
+			end
+			parts[#parts + 1] = tostring(vehicle) .. ":" .. tostring(bought)
 			if carrier == nil then
 				carrier = tv.carrier
 			end
@@ -221,6 +256,8 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			runningCostsPerYear = metrics.lastFullYear(costs),
 			incomeByYear = income,
 			costsByYear = costs,
+			lastChangeMs = lastChange(line, signatureOf(parts), newest, now),
+			nowMs = now,
 		},
 		noun = nounFor(carrier, passengers),
 	}

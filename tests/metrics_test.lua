@@ -566,3 +566,21 @@ t.test("assess: no history, no trend", function()
 	t.eq(a.declining, false)
 	t.eq(a.trend, nil)
 end)
+
+t.test("constants: recent change", function()
+	t.eq(metrics.RECENT_CHANGE_FRACTION, 0.25)
+end)
+
+t.test("assess: vehicles changed within a quarter of a year", function()
+	-- yearMs 1200: a quarter is 300.
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 1299 })).changedRecently, true)
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 1300 })).changedRecently, false)
+	t.eq(metrics.assess(line({ lastChangeMs = NIL, nowMs = 1300 })).changedRecently, false, "never changed")
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = NIL })).changedRecently, false, "unknown time")
+end)
+
+t.test("assess: a recent change doesn't touch the verdict", function()
+	local a = metrics.assess(line({ lastChangeMs = 1000, nowMs = 1100 }))
+	t.eq(a.verdict, "TooMany")
+	t.eq(a.trim, 2)
+end)

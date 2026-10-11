@@ -383,6 +383,10 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 		add(ui.textRow(_("Vehicles are full but deliver little: check where the cargo is unloaded."),
 			"font-scale-body, warning"))
 	end
+	if a.changedRecently then
+		add(ui.textRow(ui.fill(_("Vehicles changed {age} ago: the numbers still include the old setup."),
+			{ age = api.engine.util.formatAge(input.lastChangeMs, input.nowMs) }), "font-scale-body"))
+	end
 	if a.declining then
 		add(ui.textRow(ui.fill(_("Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line."),
 			{ recent = ui.formatMoney(a.trend.recentIncome), before = ui.formatMoney(a.trend.beforeIncome) }),

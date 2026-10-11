@@ -349,6 +349,8 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	-- Declining is a marker, not a verdict: on, it narrows whatever the verdict filters show.
 	local decliningState = react.useState(false)
 	local decliningOnly = decliningState:old()
+	local hideChangedState = react.useState(false)
+	local hideChanged = hideChangedState:old()
 	local data = dataState:old()
 	local enabled = enabledState:old()
 	local verdictEnabled = verdictState:old()
@@ -401,6 +403,15 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 		content = builtin.TextView{ meta = { class = "font-scale-body, warning" }, text = _("Declining ↘") },
 		onValueChange = function(value : integer)
 			decliningState:set(value == 1)
+		end,
+	}
+	filterKey = filterKey .. (hideChanged and "h" or "")
+	verdictButtons[#verdictButtons + 1] = builtin.ToggleButton{
+		meta = { class = "verdict", tooltip = _("Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.") },
+		value = hideChanged and 1 or 0,
+		content = builtin.TextView{ meta = { class = "font-scale-body" }, text = _("Hide changed") },
+		onValueChange = function(value : integer)
+			hideChangedState:set(value == 1)
 		end,
 	}
 	-- The search text is part of the table's key, so typing remounts it with the matching rows.
@@ -513,6 +524,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 				verdictMatch = verdictMatch or (verdictEnabled[i] == true and row.kind ~= nil and groups[i].kinds[row.kind] == true)
 			end
 			match = match and verdictMatch and (not decliningOnly or (row.assessment ~= nil and row.assessment.declining))
+				and not (hideChanged and row.assessment ~= nil and row.assessment.changedRecently)
 			if match and search ~= "" then
 				local ok, found = pcall(lang_util.stringContains, row.name, search)
 				match = ok and found as boolean

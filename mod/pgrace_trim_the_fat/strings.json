@@ -115,7 +115,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Aber die Bilanz beträgt nur {percent} der Betriebskosten ({costs} im letzten Jahr): Ein weiteres Fahrzeug bringt eigene Betriebskosten und teilt sich dieselben Fahrgäste. Größere oder neuere Fahrzeuge lohnen sich womöglich eher.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Die Einnahmen sind in den letzten 3 Jahren auf {recent} pro Jahr gesunken, von {before} in den 5 Jahren davor: Prüfe, was sich an der Linie verändert hat.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Nur Linien zeigen, die vorher Gewinn machten und deren Einnahmen in den letzten 3 Jahren um ein Viertel oder mehr gesunken sind",
-        "Declining ↘": "Rückläufig ↘"
+        "Declining ↘": "Rückläufig ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Fahrzeuge vor {age} geändert: Die Zahlen enthalten noch die alte Aufstellung.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Linien ausblenden, deren Fahrzeuge sich in den letzten 3 Monaten geändert haben. Verkäufe und Verschiebungen zählen ab dem Spielstart.",
+        "Hide changed": "Geänderte ausblenden"
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -211,7 +214,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Pero el balance es solo el {percent} de los costes de funcionamiento ({costs} el año pasado): otro vehículo añade sus propios costes y comparte los mismos pasajeros. Vehículos más grandes o modernos pueden salir más rentables.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Los ingresos bajaron a {recent} al año en los últimos 3 años, desde {before} en los 5 anteriores: revisa qué ha cambiado en torno a la línea.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Mostrar solo líneas que antes daban beneficios y cuyos ingresos han caído una cuarta parte o más en los últimos 3 años",
-        "Declining ↘": "En declive ↘"
+        "Declining ↘": "En declive ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Vehículos cambiados hace {age}: las cifras aún incluyen la configuración anterior.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ocultar líneas cuyos vehículos cambiaron en los últimos 3 meses. Las ventas y traslados cuentan desde que se inició el juego.",
+        "Hide changed": "Ocultar cambiadas"
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -307,7 +313,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Mais le bilan ne représente que {percent} des coûts d'exploitation ({costs} l'an dernier) : un véhicule de plus ajoute ses propres coûts et partage les mêmes passagers. Des véhicules plus grands ou plus récents pourraient être plus rentables.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Les revenus sont tombés à {recent} par an sur les 3 dernières années, contre {before} sur les 5 précédentes : vérifiez ce qui a changé autour de la ligne.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Afficher uniquement les lignes rentables auparavant dont les revenus ont baissé d'un quart ou plus sur les 3 dernières années",
-        "Declining ↘": "En déclin ↘"
+        "Declining ↘": "En déclin ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Véhicules modifiés il y a {age} : les chiffres incluent encore l'ancienne configuration.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Masquer les lignes dont les véhicules ont changé au cours des 3 derniers mois. Les ventes et déplacements comptent depuis le lancement du jeu.",
+        "Hide changed": "Masquer modifiées"
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -403,7 +412,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Ma il bilancio è solo il {percent} dei costi di esercizio ({costs} l'anno scorso): un altro veicolo aggiunge i propri costi e si divide gli stessi passeggeri. Veicoli più grandi o più nuovi potrebbero rendere di più.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Le entrate sono scese a {recent} all'anno negli ultimi 3 anni, da {before} nei 5 precedenti: controlla cosa è cambiato intorno alla linea.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Mostra solo le linee che prima erano in attivo e le cui entrate sono calate di un quarto o più negli ultimi 3 anni",
-        "Declining ↘": "In calo ↘"
+        "Declining ↘": "In calo ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Veicoli cambiati {age} fa: i numeri includono ancora la configurazione precedente.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Nascondi le linee i cui veicoli sono cambiati negli ultimi 3 mesi. Vendite e spostamenti contano dall'avvio del gioco.",
+        "Hide changed": "Nascondi modificate"
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -489,7 +501,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "ただし収支は運行費用の{percent}にすぎません（昨年の運行費用：{costs}）。車両を追加すると運行費用が増えますが、乗客は同じです。より大きい、または新しい車両の方が採算が合うかもしれません。",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "過去3年間の収入は年{recent}に減少しました（その前の5年間は{before}）。路線の周辺で何が変わったか確認してください。",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "以前は黒字で、過去3年間に収入が4分の1以上減った路線のみ表示",
-        "Declining ↘": "減少傾向 ↘"
+        "Declining ↘": "減少傾向 ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "{age}前に車両が変更されました：数値にはまだ以前の構成が含まれています。",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "過去3か月に車両が変更された路線を非表示にします。売却と移動はゲーム起動時から数えます。",
+        "Hide changed": "変更を非表示"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -575,7 +590,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "하지만 수지는 운영비의 {percent}에 불과합니다(작년 운영비 {costs}). 운송 수단을 추가하면 운영비가 늘지만 승객은 그대로입니다. 더 크거나 새로운 운송 수단이 더 수익성이 좋을 수 있습니다.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "최근 3년간 수입이 연 {recent}(으)로 줄었습니다(그 이전 5년간 {before}). 노선 주변에서 무엇이 바뀌었는지 확인하세요.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "이전에 흑자였고 최근 3년간 수입이 4분의 1 이상 줄어든 노선만 표시",
-        "Declining ↘": "감소 추세 ↘"
+        "Declining ↘": "감소 추세 ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "{age} 전에 운송 수단이 바뀌었습니다: 수치에는 아직 이전 구성이 포함되어 있습니다.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "최근 3개월 안에 운송 수단이 바뀐 노선을 숨깁니다. 판매와 이동은 게임을 시작한 시점부터 계산합니다.",
+        "Hide changed": "변경된 노선 숨기기"
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -671,7 +689,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Maar de balans is maar {percent} van de bedrijfskosten ({costs} vorig jaar): een extra voertuig brengt eigen bedrijfskosten mee en deelt dezelfde reizigers. Grotere of nieuwere voertuigen leveren misschien meer op.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "De inkomsten zijn de laatste 3 jaar gedaald tot {recent} per jaar, van {before} in de 5 jaar daarvoor: kijk wat er rond de lijn is veranderd.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Alleen lijnen tonen die eerder winst maakten en waarvan de inkomsten de laatste 3 jaar met een kwart of meer zijn gedaald",
-        "Declining ↘": "Dalend ↘"
+        "Declining ↘": "Dalend ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Voertuigen {age} geleden gewijzigd: de cijfers bevatten nog de oude opzet.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Lijnen verbergen waarvan de voertuigen de laatste 3 maanden zijn gewijzigd. Verkopen en verplaatsingen tellen vanaf het starten van het spel.",
+        "Hide changed": "Gewijzigde verbergen"
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -777,7 +798,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Ale bilans to tylko {percent} kosztów eksploatacji ({costs} w zeszłym roku): kolejny pojazd dodaje własne koszty i dzieli tych samych pasażerów. Większe lub nowsze pojazdy mogą się bardziej opłacać.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Przychody spadły do {recent} rocznie w ostatnich 3 latach, z {before} w 5 latach wcześniej: sprawdź, co zmieniło się wokół linii.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Pokaż tylko linie, które wcześniej przynosiły zysk, a ich przychody spadły o jedną czwartą lub więcej w ostatnich 3 latach",
-        "Declining ↘": "Spadek ↘"
+        "Declining ↘": "Spadek ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Pojazdy zmieniono {age} temu: liczby wciąż obejmują poprzedni układ.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ukryj linie, których pojazdy zmieniły się w ostatnich 3 miesiącach. Sprzedaże i przeniesienia liczą się od uruchomienia gry.",
+        "Hide changed": "Ukryj zmienione"
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -873,7 +897,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Mas o saldo é só {percent} dos custos operacionais ({costs} no ano passado): outro veículo adiciona seus próprios custos e divide os mesmos passageiros. Veículos maiores ou mais novos podem compensar mais.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "A receita caiu para {recent} por ano nos últimos 3 anos, de {before} nos 5 anteriores: verifique o que mudou em torno da linha.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Mostrar apenas linhas que davam lucro antes e cuja receita caiu um quarto ou mais nos últimos 3 anos",
-        "Declining ↘": "Em queda ↘"
+        "Declining ↘": "Em queda ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Veículos alterados há {age}: os números ainda incluem a configuração anterior.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ocultar linhas cujos veículos mudaram nos últimos 3 meses. Vendas e transferências contam a partir de quando o jogo foi iniciado.",
+        "Hide changed": "Ocultar alteradas"
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -979,7 +1006,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Но баланс составляет лишь {percent} эксплуатационных расходов ({costs} за прошлый год): ещё один транспорт добавит свои расходы и будет делить тех же пассажиров. Более вместительный или новый транспорт может окупиться лучше.",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "За последние 3 года доход упал до {recent} в год, с {before} за 5 лет до этого: проверьте, что изменилось вокруг линии.",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Показать только линии, которые раньше приносили прибыль и чей доход упал на четверть или больше за последние 3 года",
-        "Declining ↘": "Спад ↘"
+        "Declining ↘": "Спад ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "Транспорт изменён {age} назад: в цифрах ещё учтён прежний состав.",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Скрыть линии, у которых транспорт менялся за последние 3 месяца. Продажи и перемещения учитываются с момента запуска игры.",
+        "Hide changed": "Скрыть изменённые"
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -1065,7 +1095,10 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "但收支仅为运营成本的{percent}（去年运营成本 {costs}）：再加一辆载具会增加其运营成本，乘客却还是这么多。更大或更新的载具可能更划算。",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "过去 3 年收入降至每年 {recent}，之前 5 年为 {before}：请检查线路周边发生了什么变化。",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "仅显示以前盈利、但过去 3 年收入下降四分之一或以上的线路",
-        "Declining ↘": "下滑 ↘"
+        "Declining ↘": "下滑 ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "载具于 {age}前变更：数据仍包含旧的配置。",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "隐藏过去 3 个月内载具有变更的线路。出售和转移从游戏启动时开始计算。",
+        "Hide changed": "隐藏已变更"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -1151,6 +1184,9 @@
         "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "但收支僅為營運成本的{percent}（去年營運成本 {costs}）：再加一輛車輛會增加其營運成本，乘客卻還是這麼多。更大或更新的車輛可能更划算。",
         "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "過去 3 年收入降至每年 {recent}，之前 5 年為 {before}：請檢查路線周邊發生了什麼變化。",
         "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "僅顯示以前獲利、但過去 3 年收入下降四分之一或以上的路線",
-        "Declining ↘": "下滑 ↘"
+        "Declining ↘": "下滑 ↘",
+        "Vehicles changed {age} ago: the numbers still include the old setup.": "車輛於 {age}前變更：數據仍包含舊的配置。",
+        "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "隱藏過去 3 個月內車輛有變更的路線。出售和轉移從遊戲啟動時開始計算。",
+        "Hide changed": "隱藏已變更"
     }
 }

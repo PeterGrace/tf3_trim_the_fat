@@ -230,3 +230,10 @@ overview later.
   decides. Sorted by percentage, the top of the list was lines that always lost money, so a line must also have
   made money over the earlier 5 years. Under `DECLINE_RATIO = 0.75` that flagged 4 of 151 lines, three of them
   through one town. 151 lines took 18.5 ms. It's a marker (↘, a card hint and an overview filter), not a verdict.
+- **Recently changed** (2026-10-11): a line's LOG_BOOK holds `itemsTransported`, `itemsTransported0` and per stop
+  `itemsAtStop<stop>_c<cargo>` and `itemsAtStopUnsatisfied<stop>_c<cargo>`, but no vehicle count. A sold vehicle
+  leaves no trace. So additions and replacements come from purchase times, which are saved with the game, while
+  sales and vehicles moved between lines come from a per-session memory of each line's vehicle list in `line_data`,
+  which starts empty after a restart. A change younger than `RECENT_CHANGE_FRACTION = 0.25` of a year gives
+  `changedRecently`: a card note and the overview's "Hide changed" toggle. The unsatisfied-at-stop logs may be a
+  better backlog signal than the waiting snapshot; not explored yet.

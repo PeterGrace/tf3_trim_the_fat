@@ -13,6 +13,7 @@ metrics.THIN_MARGIN = 0.2
 metrics.TREND_RECENT_YEARS = 3
 metrics.TREND_BEFORE_YEARS = 5
 metrics.DECLINE_RATIO = 0.75
+metrics.RECENT_CHANGE_FRACTION = 0.25
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -150,8 +151,11 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		backlog = false,
 		queueLimited = false,
 		thinMargin = false,
+		changedRecently = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
+	a.changedRecently = input.lastChangeMs ~= nil and input.nowMs ~= nil
+		and input.nowMs - input.lastChangeMs < input.yearMs * metrics.RECENT_CHANGE_FRACTION
 	-- Only lines that made money before: income swings on lines that always lost money said little (seen in-game).
 	a.trend = metrics.trend(input.incomeByYear, input.costsByYear)
 	a.declining = a.trend ~= nil and a.trend.beforeBalance > 0
