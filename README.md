@@ -3,7 +3,9 @@
 Shows which lines lose money, run more vehicles than they need, or need more. A **Line efficiency** card in every
 line window compares the line's balance with its average load over the same 12 months and gives a verdict with a
 suggestion of how many vehicles to remove; a button at the top left opens a sortable overview of every line, with
-verdict and transport filters and a search. On the Mod Hub as "Trim the Fat" (mod.io id in
+verdict and transport filters and a search. It also marks lines whose income has been falling
+(Declining ↘), warns when another vehicle on a busy line would likely lose money, and can hide lines whose vehicles
+changed in the last 3 months. On the Mod Hub as "Trim the Fat" (mod.io id in
 `mod/pgrace_trim_the_fat/_metadata/mod.io_fileid.txt`).
 
 - Mod ID: `pgrace_trim_the_fat`
