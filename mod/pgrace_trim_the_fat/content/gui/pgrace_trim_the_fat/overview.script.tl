@@ -188,6 +188,27 @@ local function buildOverview(cats : {Category}) : OverviewData
 	return data
 end
 
+-- Our own pin, as the base LocateButton draws it. Other mods may replace the base one (Supply Chain Manager adds a
+-- planner button to it for lines), which pushed the names out of line in this table (seen in-game).
+local LocateButton = react.RegisterRecipe("PgraceTrimTheFatLocateButton", function(params : Builtin.TableCellParam) : TreeNodeId
+	return builtin.BoxLayout{
+		children = {
+			builtin.Button{
+				meta = { tooltip = _("Locate") },
+				content = builtin.ImageView{
+					path = "::/gui/line_vehicle_mgmt/icons/symbol_locate.tga",
+					scaling = builtin.type.ImageViewScaling.AutoFit,
+				},
+				onClick = function()
+					if api.engine.entityExists(params.rowKey) then
+						api.gui.camera.followEntity(params.rowKey, true)
+					end
+				end,
+			},
+		},
+	}
+end)
+
 local LineCell = react.RegisterRecipe("PgraceTrimTheFatOverviewLineCell", function(params : Builtin.TableCellParam) : TreeNodeId
 	-- A line deleted while the window is open keeps its row until a refresh; the base widgets would read its missing
 	-- components (an uncatchable error that takes down the UI) or, once its ID is reused, act on another entity.
@@ -195,15 +216,23 @@ local LineCell = react.RegisterRecipe("PgraceTrimTheFatOverviewLineCell", functi
 		local ok, existsOrError = pcall(api.engine.entityExists, params.rowKey)
 		return ok and existsOrError as boolean
 	end, 1.0)
-	if not existsState:old() then
-		local row = (params.userParam as OverviewData).rows[params.rowKey]
+	local row = (params.userParam as OverviewData).rows[params.rowKey]
+	if row == nil or not existsState:old() then
 		return ui.textRow(row ~= nil and row.name or "", "font-scale-body")
 	end
 	return builtin.BoxLayout{
 		orientation = builtin.type.Orientation.Horizontal,
 		children = {
 			line_react_util.ColorWidget{ entity = params.rowKey },
-			line_react_util.NameTextView{ entity = params.rowKey, locationButton = true, stackEntityOpen = true },
+			LocateButton(params),
+			-- The base name button (opens the line's window), without NameTextView's base LocateButton.
+			builtin.Component{
+				layout = builtin.BoxLayout{
+					children = {
+						line_react_util.makeEntityWindowButton(row.name, params.rowKey, nil, nil, true),
+					},
+				},
+			},
 		},
 	}
 end)
