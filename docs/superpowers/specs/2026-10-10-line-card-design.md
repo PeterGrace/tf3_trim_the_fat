@@ -209,3 +209,37 @@ overview later.
 - **Young vehicles:** "Per year" for a vehicle shows "Too new" until it has half a year of data
   (`MIN_VEHICLE_DATA_FRACTION = 0.5`). One month still showed a 2-month-old bus at -116,492* (its depot run and
   first trips scaled up 6×); the user chose six months over three. A whole line's Too new stays at one month.
+- **Queue-limited trim:** on CouClu lines with a big backlog at the train station, a bus added for the backlog was
+  suggested for removal once the queue cleared (the low average load decided the trim alone), and removing it brought
+  the backlog back. Fewer vehicles stretch the interval by count ÷ keep, and the queues grow with it, so a trim now
+  keeps at least `ceil(count × waitingMax ÷ (TRIM_QUEUE_LIMIT × capacity per vehicle))` vehicles, with
+  `TRIM_QUEUE_LIMIT = 0.5`. The gap between half a busload (trim stops) and a whole busload (Busy) is the hysteresis.
+  `queueLimited` marks it; the verdict tooltip says how many are waiting. The waiting count is a snapshot: a look
+  just after a pickup reads low. If that proves too jumpy, remember each line's largest queue for the session.
+- **Thin margin** (2026-10-11): a one-bus line with 26 waiting read Busy at +$115 a year; its running costs were
+  $108k a year and its income about $100k, so a second bus would have lost money. Probe: `getAccountChart(line,
+  config)` (what the Balance card draws) returns `series = { {years, income}, {years, running costs} }`, one entry
+  per calendar year for the line's whole life (186 years here), the current partial year last. Costs are positive.
+  A Busy line whose balance is under `THIN_MARGIN = 0.2` of its last full year's running costs now reads "Busy, but
+  another vehicle would likely lose money" (overview: "Busy · thin margin") and leaves the busy count.
+- **Purchases** aren't in `calculateBalance` for the line or its vehicles, with either flag: a lifetime balance only
+  says whether the line covered its running costs.
+- **Declining** (2026-10-11): comparing the last full year with the 5 before flagged noise. A freight line earns in
+  batches of about $151k (three, two or one a year), and a bus line swung ±60% a year. The last 3 full years against
+  the 5 before them (`metrics.trend`) fixed both. Running costs stayed within about 2% on every line, so income
+  decides. Sorted by percentage, the top of the list was lines that always lost money, so a line must also have
+  made money over the earlier 5 years. Under `DECLINE_RATIO = 0.75` that flagged 4 of 151 lines, three of them
+  through one town. 151 lines took 18.5 ms. It's a marker (↘, a card hint and an overview filter), not a verdict.
+- **Recently changed** (2026-10-11): a line's LOG_BOOK holds `itemsTransported`, `itemsTransported0` and per stop
+  `itemsAtStop<stop>_c<cargo>` and `itemsAtStopUnsatisfied<stop>_c<cargo>`, but no vehicle count. A sold vehicle
+  leaves no trace. So additions and replacements come from purchase times, which are saved with the game, while
+  sales and vehicles moved between lines come from a per-session memory of each line's vehicle list in `line_data`,
+  which starts empty after a restart. A change younger than `RECENT_CHANGE_FRACTION = 0.25` of a year gives
+  `changedRecently`: a card note and the overview's "Hide changed" toggle. The unsatisfied-at-stop logs may be a
+  better backlog signal than the waiting snapshot; not explored yet.
+- **Deep queues** (2026-10-11): CouClu-LO-3 (8 buses, 7 stops, $17k per bus, 237 waiting) read "another vehicle
+  would likely lose money". With several busloads waiting, another bus fills from passengers left behind now and
+  doesn't share the same riders, so from `DEEP_QUEUE_VEHICLES = 2` busloads a thin margin no longer counts. The line
+  stays plain Busy, and its tooltip notes the margin and suggests bigger vehicles. Declining also moves with the
+  calendar: after the year rolled over, FaiOak-SouVal's 5-year window took in its first bad year and the line left
+  the list (it reads Losing money); Elk-Chi stayed.

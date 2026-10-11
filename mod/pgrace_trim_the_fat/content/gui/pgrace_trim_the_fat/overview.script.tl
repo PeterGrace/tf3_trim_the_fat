@@ -92,7 +92,7 @@ local function verdictGroups() : {VerdictGroup}
 		{ label = _("Too many"), tooltip = _("Show profitable lines that could run with fewer vehicles"),
 			class = "font-scale-body, warning", kinds = { TooMany = true } },
 		{ label = _("Busy"), tooltip = _("Show lines that may need more vehicles"), class = "font-scale-body, warning",
-			kinds = { Busy = true } },
+			kinds = { Busy = true, BusyThin = true } },
 		{ label = _("OK"), tooltip = _("Show profitable lines with a good load"), class = "font-scale-body, positive",
 			kinds = { Ok = true } },
 	}
@@ -110,6 +110,8 @@ local function verdictText(kind : VerdictKind, a : Assessment) : string, string
 		return ui.fill(_("Too many (−{count})"), { count = trim }), "font-scale-body, warning"
 	elseif kind == "Busy" then
 		return _("Busy"), "font-scale-body, warning"
+	elseif kind == "BusyThin" then
+		return _("Busy · thin margin"), "font-scale-body, warning"
 	elseif kind == "TooNew" then
 		return _("Too new"), "font-scale-body"
 	elseif kind == "NoVehicles" then
@@ -138,6 +140,9 @@ local function buildRow(line : Engine.Entity, cats : {Category}) : Row
 		row.vehicleCount = facts.input.vehicleCount
 		row.kind = kind
 		row.verdictText, row.verdictClass = verdictText(kind, a)
+		if a.declining then
+			row.verdictText = row.verdictText .. " ↘"
+		end
 		row.verdictSort = metrics.severity(kind) * SEVERITY_SCALE + (a.balancePerYear or 0)
 		-- A few days of money scaled up to a year would mislead (the card hides it for TooNew lines too).
 		if kind == "TooNew" then
@@ -341,6 +346,11 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	local verdictState = react.useStateLazy(function() : {integer : boolean}
 		return {}
 	end)
+	-- Declining is a marker, not a verdict: on, it narrows whatever the verdict filters show.
+	local decliningState = react.useState(false)
+	local decliningOnly = decliningState:old()
+	local hideChangedState = react.useState(false)
+	local hideChanged = hideChangedState:old()
 	local data = dataState:old()
 	local enabled = enabledState:old()
 	local verdictEnabled = verdictState:old()
@@ -386,6 +396,24 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			end,
 		}
 	end
+	filterKey = filterKey .. (decliningOnly and "d" or "")
+	verdictButtons[#verdictButtons + 1] = builtin.ToggleButton{
+		meta = { class = "verdict", tooltip = _("Show only lines that made money before and whose income fell by a quarter or more over the last 3 years") },
+		value = decliningOnly and 1 or 0,
+		content = builtin.TextView{ meta = { class = "font-scale-body, warning" }, text = _("Declining ↘") },
+		onValueChange = function(value : integer)
+			decliningState:set(value == 1)
+		end,
+	}
+	filterKey = filterKey .. (hideChanged and "h" or "")
+	verdictButtons[#verdictButtons + 1] = builtin.ToggleButton{
+		meta = { class = "verdict", tooltip = _("Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.") },
+		value = hideChanged and 1 or 0,
+		content = builtin.TextView{ meta = { class = "font-scale-body" }, text = _("Hide changed") },
+		onValueChange = function(value : integer)
+			hideChangedState:set(value == 1)
+		end,
+	}
 	-- The search text is part of the table's key, so typing remounts it with the matching rows.
 	filterKey = filterKey .. "_" .. search .. "_"
 	for i, cat in ipairs(cats) do
@@ -495,7 +523,8 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			for i = 1, #groups do
 				verdictMatch = verdictMatch or (verdictEnabled[i] == true and row.kind ~= nil and groups[i].kinds[row.kind] == true)
 			end
-			match = match and verdictMatch
+			match = match and verdictMatch and (not decliningOnly or (row.assessment ~= nil and row.assessment.declining))
+				and not (hideChanged and row.assessment ~= nil and row.assessment.changedRecently)
 			if match and search ~= "" then
 				local ok, found = pcall(lang_util.stringContains, row.name, search)
 				match = ok and found as boolean

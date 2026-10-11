@@ -107,6 +107,12 @@ end
 
 -- Which vehicles the line has and when each was bought. Changes when a vehicle is bought, sold or replaced
 -- (replacing keeps the entity but resets its purchase time).
+-- Sorts `parts` ("vehicle:purchaseTime") in place.
+local function signatureOf(parts : {string}) : string
+	table.sort(parts)
+	return table.concat(parts, ",")
+end
+
 function line_data.vehicleSignature(line : Engine.Entity) : string
 	local parts : {string} = {}
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
@@ -115,8 +121,7 @@ function line_data.vehicleSignature(line : Engine.Entity) : string
 			parts[#parts + 1] = tostring(vehicle) .. ":" .. tostring(purchaseTime(tv))
 		end
 	end
-	table.sort(parts)
-	return table.concat(parts, ",")
+	return signatureOf(parts)
 end
 
 -- How long money has been booked on `entities` within the last year (metrics.dataSpan).
@@ -143,6 +148,47 @@ local function waitingMax(line : Engine.Entity, stopCount : integer) : integer
 	return ok and result as integer or nil
 end
 
+-- The line's income and running costs per calendar year, oldest first, the current (partial) year last, as the
+-- line window's Balance chart draws them; nil when the chart can't be read. Costs are positive.
+local function accountYears(line : Engine.Entity, years : integer) : {number}, {number}
+	local ok, result = pcall(function() : {{number}}
+		local config : ChartConfig = api.type.ChartConfig.new()
+		config.count = years
+		-- Seen in-game: series[1] is income and series[2] running costs, each { years, values }.
+		local series = api.engine.util.finance.getAccountChart(line, config).series
+		return { series[1][2], series[2][2] }
+	end)
+	if not ok then
+		return nil, nil
+	end
+	local pair = result as {{number}}
+	return pair[1], pair[2]
+end
+
+-- Each line's vehicles when last read, and when they were last seen to change. Sales and vehicles moved between lines
+-- leave no trace in the game's data, so this is the only way to see them; it starts empty after a restart.
+local record Seen
+	signature : string
+	changedAt : integer
+end
+local seen : {Engine.Entity : Seen} = {}
+
+-- When the line's vehicles last changed: the newest purchase (or replacement), or a change in the vehicle list
+-- since the line was last read; nil when neither is known.
+local function lastChange(line : Engine.Entity, signature : string, newestPurchase : integer, now : integer) : integer
+	local entry = seen[line]
+	if entry == nil then
+		seen[line] = { signature = signature }
+	elseif entry.signature ~= signature then
+		seen[line] = { signature = signature, changedAt = now }
+	end
+	local changedAt = seen[line].changedAt
+	if changedAt == nil or (newestPurchase ~= nil and newestPurchase > changedAt) then
+		return newestPurchase
+	end
+	return changedAt
+end
+
 -- The line-level numbers, and the vehicle rows when withRows is set (the overview skips them).
 local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimTheFatLineData.LineFacts, {VehicleRow}
 	local now = nowMs()
@@ -153,6 +199,8 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 	local oldest : integer = nil
 	local vehicleDataMs = 0
 	local carrier : Carrier = nil
+	local newest : integer = nil
+	local parts : {string} = {}
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
 		local tv = transportVehicle(vehicle)
 		if tv ~= nil then
@@ -161,6 +209,10 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			if oldest == nil or bought < oldest then
 				oldest = bought
 			end
+			if newest == nil or bought > newest then
+				newest = bought
+			end
+			parts[#parts + 1] = tostring(vehicle) .. ":" .. tostring(bought)
 			if carrier == nil then
 				carrier = tv.carrier
 			end
@@ -184,6 +236,7 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
 	local frequency = api.engine.util.line.getMaxFrequency(line)
 	local lineComponent = api.engine.getComponent(line, api.type.ComponentType.LINE) as Engine.Component.Line
+	local income, costs = accountYears(line, metrics.TREND_RECENT_YEARS + metrics.TREND_BEFORE_YEARS + 2)
 	local facts : PgraceTrimTheFatLineData.LineFacts = {
 		input = {
 			vehicleCount = count,
@@ -200,6 +253,11 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			loadNow = line_data.lineLoadNow(line),
 			carriesPassengers = passengers,
 			waitingMax = (passengers and lineComponent ~= nil) and waitingMax(line, #lineComponent.stops) or nil,
+			runningCostsPerYear = metrics.lastFullYear(costs),
+			incomeByYear = income,
+			costsByYear = costs,
+			lastChangeMs = lastChange(line, signatureOf(parts), newest, now),
+			nowMs = now,
 		},
 		noun = nounFor(carrier, passengers),
 	}

@@ -327,6 +327,10 @@ t.test("verdictKind: losing with a trim or not delivering", function()
 	t.eq(metrics.verdictKind(assessment({ verdict = "Losing", notDelivering = true })), "LosingStuck")
 end)
 
+t.test("verdictKind: busy on a thin margin", function()
+	t.eq(metrics.verdictKind(assessment({ verdict = "Busy", thinMargin = true })), "BusyThin")
+end)
+
 t.test("severity: losing first, OK last", function()
 	local order = { "LosingStuck", "TooMany", "Busy", "TooNew", "NoVehicles", "Ok" }
 	for i = 2, #order do
@@ -334,6 +338,7 @@ t.test("severity: losing first, OK last", function()
 	end
 	t.eq(metrics.severity("Losing"), metrics.severity("LosingTrim"))
 	t.eq(metrics.severity("Losing"), metrics.severity("LosingStuck"))
+	t.eq(metrics.severity("Busy"), metrics.severity("BusyThin"))
 end)
 
 t.test("summarise: counts and sums", function()
@@ -358,6 +363,14 @@ t.test("summarise: busy lines", function()
 	})
 	t.eq(s.busyCount, 2)
 	t.eq(s.losingCount, 0)
+end)
+
+t.test("summarise: a thin margin doesn't count as needing vehicles", function()
+	local s = metrics.summarise({
+		assessment({ verdict = "Busy", balancePerYear = 100, thinMargin = true }),
+		assessment({ verdict = "Busy", balancePerYear = 200 }),
+	})
+	t.eq(s.busyCount, 1)
 end)
 
 t.test("summarise: empty", function()
@@ -399,10 +412,46 @@ t.test("assess: a busload waiting at a stop makes the line Busy, with no trim", 
 	t.eq(a.keep, nil)
 end)
 
-t.test("assess: fewer than a busload waiting changes nothing", function()
+t.test("constants: queue limit for a trim", function()
+	t.eq(metrics.TRIM_QUEUE_LIMIT, 0.5)
+end)
+
+-- The load alone keeps ceil(8 × 0.34 ÷ 0.5) = 6. Each queue grows by count ÷ keep when vehicles are removed, and
+-- must stay under half a vehicle's capacity (50).
+t.test("assess: a small queue leaves the trim alone", function()
+	local a = metrics.assess(line({ waitingMax = 20 })) -- 6 vehicles: 20 × 8 ÷ 6 ≈ 27 waiting
+	t.eq(a.backlog, false)
+	t.eq(a.keep, 6)
+	t.eq(a.trim, 2)
+	t.eq(a.queueLimited, false)
+	t.eq(a.verdict, "TooMany")
+end)
+
+t.test("assess: a queue limits the trim", function()
+	local a = metrics.assess(line({ waitingMax = 40 })) -- 6 vehicles: 53 waiting; 7: ≈ 46
+	t.eq(a.keep, 7)
+	t.eq(a.trim, 1)
+	t.eq(a.queueLimited, true)
+	t.eq(a.verdict, "TooMany")
+end)
+
+t.test("assess: a queue just under a busload stops the trim, without Busy", function()
+	-- Seen in-game: a bus added for a backlog was suggested for removal once the queue cleared, and so on.
 	local a = metrics.assess(line({ waitingMax = 99 }))
 	t.eq(a.backlog, false)
-	t.eq(a.verdict, "TooMany")
+	t.eq(a.keep, nil)
+	t.eq(a.trim, 0)
+	t.eq(a.queueLimited, true)
+	t.eq(a.verdict, "Ok")
+end)
+
+t.test("assess: a queue exactly at the limit is allowed", function()
+	local a = metrics.assess(line({ waitingMax = 25, vehicleCount = 8 })) -- 4 vehicles would leave exactly 50
+	t.eq(a.keep, 6)
+	t.eq(a.queueLimited, false)
+	a = metrics.assess(line({ waitingMax = 0 }))
+	t.eq(a.keep, 6)
+	t.eq(a.queueLimited, false)
 end)
 
 t.test("assess: a losing line with a backlog stays Losing, with no trim", function()
@@ -415,4 +464,138 @@ end)
 t.test("assess: unknown waiting is no backlog", function()
 	local a = metrics.assess(line({ waitingMax = NIL }))
 	t.eq(a.backlog, false)
+	t.eq(a.trim, 2)
+	t.eq(a.queueLimited, false)
+end)
+
+-- Running costs: 1,000 a year. The fixture's balance is 400 (40% of running costs).
+t.test("constants: thin margin", function()
+	t.eq(metrics.THIN_MARGIN, 0.2)
+end)
+
+t.test("assess: busy with a healthy margin stays plain Busy", function()
+	local a = metrics.assess(line({ waitingMax = 150, runningCostsPerYear = 1000 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, false)
+end)
+
+t.test("assess: busy on a thin margin", function()
+	-- Seen in-game: one bus, 26 waiting, +$115 a year on $108k running costs.
+	local a = metrics.assess(line({ waitingMax = 150, runningCostsPerYear = 1000, balance = 199 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, true)
+	near(a.margin, 0.199)
+end)
+
+t.test("assess: busy from load on a thin margin", function()
+	local a = metrics.assess(line({ itemsTransported = 1200, runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, true)
+end)
+
+t.test("assess: thin margin only matters for Busy", function()
+	local a = metrics.assess(line({ runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.verdict, "TooMany")
+	t.eq(a.thinMargin, false)
+	near(a.margin, 0.1)
+end)
+
+t.test("assess: unknown running costs are no thin margin", function()
+	local a = metrics.assess(line({ waitingMax = 150, balance = 1 }))
+	t.eq(a.thinMargin, false)
+	t.eq(a.margin, nil)
+	a = metrics.assess(line({ waitingMax = 150, balance = 1, runningCostsPerYear = 0 }))
+	t.eq(a.thinMargin, false)
+	t.eq(a.margin, nil)
+end)
+
+-- Trend: yearly series oldest first, the current (partial) year last.
+t.test("constants: trend", function()
+	t.eq(metrics.TREND_RECENT_YEARS, 3)
+	t.eq(metrics.TREND_BEFORE_YEARS, 5)
+	t.eq(metrics.DECLINE_RATIO, 0.75)
+end)
+
+t.test("lastFullYear: the year before the current one, once there's a full one", function()
+	t.eq(metrics.lastFullYear({ 10, 20, 30 }), 20)
+	t.eq(metrics.lastFullYear({ 10, 20 }), nil, "first year usually partial")
+	t.eq(metrics.lastFullYear(nil), nil)
+end)
+
+-- partial, 5 before (income 100, costs 60), 3 recent (income 60, costs 60), current partial
+local INCOME = { 1, 100, 100, 100, 100, 100, 60, 60, 60, 5 }
+local COSTS = { 1, 60, 60, 60, 60, 60, 60, 60, 60, 5 }
+
+t.test("trend: averages the last 3 full years and the 5 before", function()
+	local tr = metrics.trend(INCOME, COSTS)
+	near(tr.recentIncome, 60)
+	near(tr.beforeIncome, 100)
+	near(tr.beforeBalance, 40)
+end)
+
+t.test("trend: nil without 10 years of history", function()
+	t.eq(metrics.trend({ 100, 100, 100, 100, 100, 60, 60, 60, 5 }, COSTS), nil)
+	t.eq(metrics.trend(nil, nil), nil)
+	t.eq(metrics.trend(INCOME, { 1, 2 }), nil, "series of different lengths")
+end)
+
+t.test("assess: a profitable line whose income fell is declining", function()
+	-- Seen in-game: FaiOak-SouVal income 695k a year, then 411k (59%), from +86k to -225k.
+	local a = metrics.assess(line({ incomeByYear = INCOME, costsByYear = COSTS }))
+	t.eq(a.declining, true)
+	near(a.trend.recentIncome, 60)
+	t.eq(a.verdict, "TooMany", "the verdict is unchanged")
+end)
+
+t.test("assess: a line that lost money before isn't declining", function()
+	-- Seen in-game: lines that always lost money topped a plain income ranking.
+	local costs = { 1, 120, 120, 120, 120, 120, 120, 120, 120, 5 }
+	local a = metrics.assess(line({ incomeByYear = INCOME, costsByYear = costs }))
+	t.eq(a.declining, false)
+end)
+
+t.test("assess: a fall to exactly 75% isn't declining", function()
+	local income = { 1, 100, 100, 100, 100, 100, 75, 75, 75, 5 }
+	t.eq(metrics.assess(line({ incomeByYear = income, costsByYear = COSTS })).declining, false)
+	income[9] = 74
+	t.eq(metrics.assess(line({ incomeByYear = income, costsByYear = COSTS })).declining, true)
+end)
+
+t.test("assess: no history, no trend", function()
+	local a = metrics.assess(line())
+	t.eq(a.declining, false)
+	t.eq(a.trend, nil)
+end)
+
+t.test("constants: recent change", function()
+	t.eq(metrics.RECENT_CHANGE_FRACTION, 0.25)
+end)
+
+t.test("assess: vehicles changed within a quarter of a year", function()
+	-- yearMs 1200: a quarter is 300.
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 1299 })).changedRecently, true)
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 1300 })).changedRecently, false)
+	t.eq(metrics.assess(line({ lastChangeMs = NIL, nowMs = 1300 })).changedRecently, false, "never changed")
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = NIL })).changedRecently, false, "unknown time")
+end)
+
+t.test("assess: a recent change doesn't touch the verdict", function()
+	local a = metrics.assess(line({ lastChangeMs = 1000, nowMs = 1100 }))
+	t.eq(a.verdict, "TooMany")
+	t.eq(a.trim, 2)
+end)
+
+t.test("constants: deep queue", function()
+	t.eq(metrics.DEEP_QUEUE_VEHICLES, 2)
+end)
+
+t.test("assess: a deep queue keeps a thin line plain Busy", function()
+	-- Seen in-game: CouClu-LO-3, 8 buses, 237 waiting (several busloads), a thin margin; another bus would fill
+	-- from the queue rather than share the same riders.
+	local a = metrics.assess(line({ waitingMax = 200, runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, false)
+	near(a.margin, 0.1)
+	a = metrics.assess(line({ waitingMax = 199, runningCostsPerYear = 1000, balance = 100 }))
+	t.eq(a.thinMargin, true)
 end)

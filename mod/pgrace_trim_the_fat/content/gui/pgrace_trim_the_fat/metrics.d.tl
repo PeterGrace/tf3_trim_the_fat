@@ -16,9 +16,18 @@ global record PgraceTrimTheFatMetrics
 		"LosingStuck"
 		"TooMany"
 		"Busy"
+		"BusyThin"
 		"TooNew"
 		"NoVehicles"
 		"Ok"
+	end
+
+	-- Average yearly income over the last TREND_RECENT_YEARS full years, and income and balance over the
+	-- TREND_BEFORE_YEARS before them.
+	record Trend
+		recentIncome : number
+		beforeIncome : number
+		beforeBalance : number
 	end
 
 	-- What line_data.tl reads from the engine for one line. Times are game time in milliseconds.
@@ -51,6 +60,16 @@ global record PgraceTrimTheFatMetrics
 		-- The most passengers waiting for the line at any one of its stops right now; nil when unknown or not a
 		-- passenger line.
 		waitingMax : integer
+		-- The line's running costs in the last full calendar year (a positive number); nil before its first full year.
+		runningCostsPerYear : number
+		-- Income and running costs (positive) per calendar year, oldest first, the current (partial) year last, as
+		-- the line window's Balance chart; nil when unknown. At least 10 years for a trend.
+		incomeByYear : {number}
+		costsByYear : {number}
+		-- When the line's vehicles last changed (bought, replaced, sold or moved), as far as is known; nil for never.
+		lastChangeMs : integer
+		-- The game time the input was read at.
+		nowMs : integer
 	end
 
 	record Assessment
@@ -73,6 +92,21 @@ global record PgraceTrimTheFatMetrics
 		-- True when waitingMax is at least BACKLOG_VEHICLES vehicles' worth of capacity: no trim, and Busy unless
 		-- Losing.
 		backlog : boolean
+		-- True when waiting passengers kept the trim smaller than the load alone suggests (possibly 0).
+		queueLimited : boolean
+		-- balancePerYear ÷ runningCostsPerYear; nil when the running costs are unknown.
+		margin : number
+		-- True when the verdict is Busy but margin is under THIN_MARGIN, with fewer than DEEP_QUEUE_VEHICLES
+		-- vehicles' worth waiting: another vehicle would likely lose money.
+		thinMargin : boolean
+		-- nil without enough history (metrics.trend).
+		trend : Trend
+		-- True when the line made money over the earlier years and its recent income is under DECLINE_RATIO of
+		-- theirs. A marker beside the verdict, which it doesn't change.
+		declining : boolean
+		-- True when the vehicles changed less than RECENT_CHANGE_FRACTION of a year ago: the 12-month numbers still
+		-- mix the old setup in. The verdict is unchanged.
+		changedRecently : boolean
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -83,7 +117,7 @@ global record PgraceTrimTheFatMetrics
 		-- Lines with a trim suggestion (losing or not), and the sum of the trims.
 		tooManyCount : integer
 		trimTotal : integer
-		-- Lines whose verdict is Busy.
+		-- Lines whose verdict is Busy, without a thin margin (lines that may need more vehicles).
 		busyCount : integer
 	end
 
@@ -105,6 +139,21 @@ global record PgraceTrimTheFatMetrics
 	-- Below this share of a year of data a vehicle's balance per year is "too new": a vehicle's first trips (from the
 	-- depot, a few round trips) scaled up mislead for longer than a whole line's money does.
 	MIN_VEHICLE_DATA_FRACTION : number
+	-- A trim keeps enough vehicles that each stop's queue, grown by count ÷ keep, stays at or under this many
+	-- vehicles' worth of capacity. Below BACKLOG_VEHICLES, so adding and removing a vehicle doesn't go back and forth.
+	TRIM_QUEUE_LIMIT : number
+	-- Under this balance ÷ running costs, a Busy line is too thin for another vehicle to pay for itself.
+	THIN_MARGIN : number
+	-- Waiting passengers, in vehicles' worth of capacity, from which another vehicle fills from the queue: a thin
+	-- margin no longer counts.
+	DEEP_QUEUE_VEHICLES : number
+	-- Years averaged for a trend: the recent ones, and the ones before them.
+	TREND_RECENT_YEARS : integer
+	TREND_BEFORE_YEARS : integer
+	-- Recent income under this share of the earlier income is a decline.
+	DECLINE_RATIO : number
+	-- A vehicle change younger than this share of a year counts as recent.
+	RECENT_CHANGE_FRACTION : number
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
@@ -121,17 +170,23 @@ global record PgraceTrimTheFatMetrics
 	-- this looks for money booked before `bought`, a twelfth of a year at a time.
 	dataSpan : function(balanceBetween : function(integer, integer) : number, bought : integer, now : integer,
 		yearMs : integer) : integer
+	-- The year before the current one in a yearly series (current year last); nil before the first full year.
+	lastFullYear : function(values : {number}) : number
+	-- Averages over the last TREND_RECENT_YEARS full years and the TREND_BEFORE_YEARS before them; nil when the
+	-- series are missing, differ in length or are too short (the first and current years don't count).
+	trend : function(income : {number}, costs : {number}) : Trend
 	-- The verdict and the numbers behind it.
-	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), Busy (backlog), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
+	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), Busy (backlog), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion, limited by TRIM_QUEUE_LIMIT. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
 	assess : function(input : LineInput) : Assessment
 	-- Whole percent, rounded half up (0.344 → 34); nil for nil.
 	percent : function(fraction : number) : integer
 	-- The plural form a language uses for a count: "one", "few", "many" or "other" (CLDR integer rules).
 	-- The language is a TF3 code such as "de" or "pt_BR"; unknown ones get English's one/other.
 	pluralCategory : function(language : string, count : integer) : string
-	-- Losing becomes LosingStuck when not delivering, LosingTrim when it carries a trim; other verdicts map 1:1.
+	-- Losing becomes LosingStuck when not delivering, LosingTrim when it carries a trim; Busy becomes BusyThin on a thin
+	-- margin; other verdicts map 1:1.
 	verdictKind : function(a : Assessment) : VerdictKind
-	-- Sort rank, lowest first: Losing kinds 1, TooMany 2, Busy 3, TooNew 4, NoVehicles 5, Ok 6.
+	-- Sort rank, lowest first: Losing kinds 1, TooMany 2, Busy kinds 3, TooNew 4, NoVehicles 5, Ok 6.
 	severity : function(kind : VerdictKind) : integer
 	summarise : function(assessments : {Assessment}) : Summary
 end

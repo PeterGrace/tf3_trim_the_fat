@@ -87,8 +87,11 @@ end
 
 -- Verdict -------------------------------------------------------------------------------------------------------
 
-local function verdictLabel(verdict : PgraceTrimTheFatMetrics.Verdict) : string, string
-	if verdict == "NoVehicles" then
+local function verdictLabel(a : PgraceTrimTheFatMetrics.Assessment) : string, string
+	local verdict = a.verdict
+	if a.thinMargin then
+		return _("Busy, but another vehicle would likely lose money"), "font-scale-body, warning"
+	elseif verdict == "NoVehicles" then
 		return _("No vehicles on this line"), "font-scale-body"
 	elseif verdict == "TooNew" then
 		return _("Too new to judge"), "font-scale-body"
@@ -112,7 +115,18 @@ local function verdictTooltip(data : CardData) : string
 	if a.verdict == "Losing" then
 		parts[#parts + 1] = _("The balance over the last 12 months is negative: income minus running and maintenance costs, without the purchase price.")
 	end
-	if a.trim > 0 then
+	if a.queueLimited then
+		parts[#parts + 1] = ui.fill(_("{count} × {load} ÷ {target} = {exact}."), {
+			count = ui.formatCount(count),
+			load = ui.formatPercent(a.load),
+			target = ui.formatPercent(a.target),
+			exact = ui.formatOneDecimal(count * a.load / a.target),
+		})
+		parts[#parts + 1] = ui.fill(_("With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load."), {
+			passengers = passengersText(data.snapshot.input.waitingMax),
+			keep = ui.formatCount(a.keep or count),
+		})
+	elseif a.trim > 0 then
 		parts[#parts + 1] = ui.fill(_("{count} × {load} ÷ {target} = {exact}, so keep {keep}."), {
 			count = ui.formatCount(count),
 			load = ui.formatPercent(a.load),
@@ -120,6 +134,8 @@ local function verdictTooltip(data : CardData) : string
 			exact = ui.formatOneDecimal(count * a.load / a.target),
 			keep = ui.formatCount(a.keep),
 		})
+	end
+	if a.trim > 0 then
 		parts[#parts + 1] = _("Fewer vehicles means a longer wait, which can cost passengers or cargo.")
 	end
 	if a.backlog then
@@ -128,7 +144,17 @@ local function verdictTooltip(data : CardData) : string
 		parts[#parts + 1] = ui.fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
 			{ busy = ui.formatPercent(metrics.BUSY_LOAD) })
 	end
-	if a.verdict == "Ok" then
+	if a.verdict == "Busy" and not a.thinMargin and a.margin ~= nil and a.margin < metrics.THIN_MARGIN then
+		parts[#parts + 1] = ui.fill(_("The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them."),
+			{ percent = ui.formatPercent(a.margin) })
+	end
+	if a.thinMargin then
+		parts[#parts + 1] = ui.fill(_("But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better."), {
+			percent = ui.formatPercent(a.margin),
+			costs = ui.formatMoney(data.snapshot.input.runningCostsPerYear),
+		})
+	end
+	if a.verdict == "Ok" and not a.queueLimited then
 		parts[#parts + 1] = _("Profitable, and the average load is close to or above the target.")
 	end
 	return table.concat(parts, "\n")
@@ -325,7 +351,7 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 		children[#children + 1] = node
 	end
 
-	local label, class = verdictLabel(a.verdict)
+	local label, class = verdictLabel(a)
 	local tooltip = verdictTooltip(data)
 	add(tooltip ~= "" and ui.tooltipRow(label, class, tooltip) or ui.textRow(label, class))
 	local signature = signatureState:old()
@@ -359,6 +385,15 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 	end
 	if a.notDelivering then
 		add(ui.textRow(_("Vehicles are full but deliver little: check where the cargo is unloaded."),
+			"font-scale-body, warning"))
+	end
+	if a.changedRecently then
+		add(ui.textRow(ui.fill(_("Vehicles changed {age} ago: the numbers still include the old setup."),
+			{ age = api.engine.util.formatAge(input.lastChangeMs, input.nowMs) }), "font-scale-body"))
+	end
+	if a.declining then
+		add(ui.textRow(ui.fill(_("Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line."),
+			{ recent = ui.formatMoney(a.trend.recentIncome), before = ui.formatMoney(a.trend.beforeIncome) }),
 			"font-scale-body, warning"))
 	end
 	if a.verdict == "NoVehicles" then

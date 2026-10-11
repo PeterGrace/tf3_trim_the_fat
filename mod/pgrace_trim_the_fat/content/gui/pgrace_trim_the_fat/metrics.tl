@@ -8,6 +8,13 @@ metrics.STUCK_LOAD_NOW = 0.75
 metrics.STUCK_AVERAGE_LOAD = 0.25
 metrics.BACKLOG_VEHICLES = 1
 metrics.MIN_VEHICLE_DATA_FRACTION = 0.5
+metrics.TRIM_QUEUE_LIMIT = 0.5
+metrics.THIN_MARGIN = 0.2
+metrics.DEEP_QUEUE_VEHICLES = 2
+metrics.TREND_RECENT_YEARS = 3
+metrics.TREND_BEFORE_YEARS = 5
+metrics.DECLINE_RATIO = 0.75
+metrics.RECENT_CHANGE_FRACTION = 0.25
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -108,6 +115,31 @@ function metrics.vehiclePerYear(balance : number, spanMs : number, yearMs : numb
 	return metrics.annualise(balance, spanMs, yearMs)
 end
 
+function metrics.lastFullYear(values : {number}) : number
+	if values == nil or #values < 3 then
+		return nil
+	end
+	return values[#values - 1]
+end
+
+function metrics.trend(income : {number}, costs : {number}) : PgraceTrimTheFatMetrics.Trend
+	local recentYears, beforeYears = metrics.TREND_RECENT_YEARS, metrics.TREND_BEFORE_YEARS
+	-- The current year and the first year are usually partial, so neither counts.
+	if income == nil or costs == nil or #income ~= #costs or #income < recentYears + beforeYears + 2 then
+		return nil
+	end
+	local last = #income - 1
+	local tr : PgraceTrimTheFatMetrics.Trend = { recentIncome = 0, beforeIncome = 0, beforeBalance = 0 }
+	for i = last - recentYears + 1, last do
+		tr.recentIncome = tr.recentIncome + income[i] / recentYears
+	end
+	for i = last - recentYears - beforeYears + 1, last - recentYears do
+		tr.beforeIncome = tr.beforeIncome + income[i] / beforeYears
+		tr.beforeBalance = tr.beforeBalance + (income[i] - costs[i]) / beforeYears
+	end
+	return tr
+end
+
 -- Guards ceil() against float noise: 8 × 0.25 ÷ 0.5 may come out as 4.000000001.
 local EPSILON = 1e-9
 
@@ -118,14 +150,26 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		trim = 0,
 		notDelivering = false,
 		backlog = false,
+		queueLimited = false,
+		thinMargin = false,
+		changedRecently = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
+	a.changedRecently = input.lastChangeMs ~= nil and input.nowMs ~= nil
+		and input.nowMs - input.lastChangeMs < input.yearMs * metrics.RECENT_CHANGE_FRACTION
+	-- Only lines that made money before: income swings on lines that always lost money said little (seen in-game).
+	a.trend = metrics.trend(input.incomeByYear, input.costsByYear)
+	a.declining = a.trend ~= nil and a.trend.beforeBalance > 0
+		and a.trend.recentIncome < a.trend.beforeIncome * metrics.DECLINE_RATIO
 	local count = input.vehicleCount or 0
 	if count <= 0 then
 		a.verdict = "NoVehicles"
 		return a
 	end
 	a.profitPerVehicle = a.balancePerYear / count
+	if input.runningCostsPerYear ~= nil and input.runningCostsPerYear > 0 then
+		a.margin = a.balancePerYear / input.runningCostsPerYear
+	end
 	a.load = metrics.averageLoad(input)
 	if input.dataMs == nil or input.dataMs < input.yearMs * metrics.MIN_DATA_FRACTION then
 		a.verdict = "TooNew"
@@ -140,6 +184,16 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	a.backlog = input.waitingMax ~= nil and perVehicle > 0 and input.waitingMax >= perVehicle * metrics.BACKLOG_VEHICLES
 	if a.load ~= nil and a.load < a.target and count > 1 and not a.notDelivering and not a.backlog then
 		local keep = math.max(1, math.ceil(count * a.load / a.target - EPSILON))
+		-- Fewer vehicles stretch the interval by count ÷ keep, and the queues with it. Keeping each queue under
+		-- TRIM_QUEUE_LIMIT, well below the backlog threshold, stops a vehicle added for a backlog from being
+		-- suggested for removal once the queue clears.
+		if input.waitingMax ~= nil and input.waitingMax > 0 then
+			local queueKeep = math.ceil(count * input.waitingMax / (perVehicle * metrics.TRIM_QUEUE_LIMIT) - EPSILON)
+			if queueKeep > keep then
+				keep = queueKeep
+				a.queueLimited = true
+			end
+		end
 		if keep < count then
 			a.keep = keep
 			a.trim = count - keep
@@ -154,6 +208,12 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	elseif a.load ~= nil and a.load >= metrics.BUSY_LOAD then
 		a.verdict = "Busy"
 	end
+	-- Another vehicle adds a whole vehicle's running costs but shares the line's riders, so it earns less than the
+	-- average vehicle. When the average barely covers its costs, the extra one would lose money. Not with several
+	-- busloads waiting: then it fills from passengers left behind now (seen in-game: 237 waiting on 8 buses).
+	local deepQueue = input.waitingMax ~= nil and perVehicle > 0
+		and input.waitingMax >= perVehicle * metrics.DEEP_QUEUE_VEHICLES
+	a.thinMargin = a.verdict == "Busy" and a.margin ~= nil and a.margin < metrics.THIN_MARGIN and not deepQueue
 	return a
 end
 
@@ -166,12 +226,15 @@ function metrics.verdictKind(a : PgraceTrimTheFatMetrics.Assessment) : PgraceTri
 		end
 		return "Losing"
 	end
+	if a.verdict == "Busy" and a.thinMargin then
+		return "BusyThin"
+	end
 	return a.verdict as PgraceTrimTheFatMetrics.VerdictKind
 end
 
 local SEVERITY : {PgraceTrimTheFatMetrics.VerdictKind : integer} = {
 	Losing = 1, LosingTrim = 1, LosingStuck = 1,
-	TooMany = 2, Busy = 3, TooNew = 4, NoVehicles = 5, Ok = 6,
+	TooMany = 2, Busy = 3, BusyThin = 3, TooNew = 4, NoVehicles = 5, Ok = 6,
 }
 
 function metrics.severity(kind : PgraceTrimTheFatMetrics.VerdictKind) : integer
@@ -186,7 +249,7 @@ function metrics.summarise(assessments : {PgraceTrimTheFatMetrics.Assessment}) :
 			s.losingCount = s.losingCount + 1
 			s.losingPerYear = s.losingPerYear + (a.balancePerYear or 0)
 		end
-		if a.verdict == "Busy" then
+		if a.verdict == "Busy" and not a.thinMargin then
 			s.busyCount = s.busyCount + 1
 		end
 		if a.trim > 0 then
