@@ -70,8 +70,9 @@ global record PgraceTrimTheFatMetrics
 		lastChangeMs : integer
 		-- The game time the input was read at.
 		nowMs : integer
-		-- At the stop whose departures over the last year most often left full (passengers boarded = a vehicle's
-		-- passenger capacity): how many did, out of how many; nil when unknown or not a passenger line.
+		-- At the stop and cargo type whose departures over the last year most often left full (loaded a vehicle's
+		-- capacity for that cargo; stops set to wait for a full load don't count): how many did, out of how many; nil
+		-- when unknown.
 		fullDepartures : integer
 		departures : integer
 	end

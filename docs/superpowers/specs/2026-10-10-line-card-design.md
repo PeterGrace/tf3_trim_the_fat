@@ -257,3 +257,13 @@ overview later.
   SouVal-LO-1 (33 waiting, under two busloads, every departure from one stop full, $5k per bus) then read "another
   vehicle would likely lose money". Departures that mostly leave full mean an extra vehicle fills from passengers
   left behind, as with a deep queue, so a full-departure backlog now also lifts the thin-margin verdict.
+- **Freight backlog** (2026-10-11): freight stops keep the same `itemsAtStop<k>_c<cargo>` logs, capped at a
+  vehicle's capacity for that cargo (+18 on 18-unit trucks, +40 on 40-unit ones). `getLineStopSimEntitiesCount`
+  returns 0 for freight at every stop, so the full-departure share is the only freight backlog signal.
+  `TransportVehicle.config.capacities` lists only the cargo a vehicle is set up for now; `config.allCaps` (indexed by
+  cargo type + 1) has its capacity for every cargo it can switch to. Stops can wait for a full load
+  (`Line.Stop.loadMode`: 0 load if available, 2 seen for full load), which makes every departure full by design. A
+  test settled the numbering: full load set on `stops[0]` of a ship line (terminal lookup: stop 0) turned its
+  `itemsAtStop1` log to +20, +20, +20, while `itemsAtStop0` stayed at +4 to +11. So `k` is the stop index plus one,
+  wrapping, and the waiting count takes the stop index itself. The check now covers every cargo type, counts a
+  departure full at the vehicles' average `allCaps` for that cargo, and skips full-load stops.

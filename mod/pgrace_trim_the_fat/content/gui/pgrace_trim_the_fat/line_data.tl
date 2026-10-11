@@ -47,12 +47,10 @@ end
 
 -- Used and total capacity over the cargo types the vehicles currently carry, how many such types, and whether
 -- passengers are among them.
--- Used and total capacity over all cargo types, how many types, whether passengers are one, and the passenger
--- capacity alone.
-local function capacityTotals(line : Engine.Entity, allCapacities : boolean) : number, number, integer, boolean, number
+local function capacityTotals(line : Engine.Entity, allCapacities : boolean) : number, number, integer, boolean
 	local usages = api.engine.util.line.getLineCapacityUsages(line, allCapacities)
 	local passengerIndex = api.res.cargoTypeRep.getPassengerCargoTypeId() + 1
-	local used, capacity, types, passengers, passengerCapacity = 0.0, 0.0, 0, false, 0.0
+	local used, capacity, types, passengers = 0.0, 0.0, 0, false
 	-- Keys are cargoTypeId + 1 (as in the base cargo_util), despite the tealdef's key type.
 	for index, usage in pairs(usages or {}) do
 		if usage.capacity > 0 then
@@ -61,11 +59,10 @@ local function capacityTotals(line : Engine.Entity, allCapacities : boolean) : n
 			types = types + 1
 			if index == passengerIndex then
 				passengers = true
-				passengerCapacity = usage.capacity
 			end
 		end
 	end
-	return used, capacity, types, passengers, passengerCapacity
+	return used, capacity, types, passengers
 end
 
 function line_data.lineLoadNow(line : Engine.Entity) : number
@@ -168,23 +165,48 @@ local function accountYears(line : Engine.Entity, years : integer) : {number}, {
 	return pair[1], pair[2]
 end
 
--- Over the last year, at the stop whose departures most often left full: how many did, out of how many departures
--- (nil, nil when unknown). The line logs a running total of boarders per stop, one entry per departure
--- ("itemsAtStop<stop>_c<cargo>"; its stop number runs one ahead of the line's stop index, which doesn't matter here).
-local function fullDepartures(line : Engine.Entity, capacityPerVehicle : number, now : integer, yearMs : integer) : integer, integer
+-- Over the last year, at the stop and cargo type whose departures most often left full: how many did, out of how
+-- many departures (nil, nil when unknown). The line logs a running total loaded per stop and cargo type, one entry
+-- per departure ("itemsAtStop<k>_c<cargo>"); k is the line's stop index plus one, the last stop wrapping to 0
+-- (seen in-game with a full-load stop). Stops set to wait for a full load are skipped: they leave full by design.
+-- A departure is full when it loaded the vehicles' average capacity for that cargo (TransportVehicle allCaps, which
+-- covers every cargo a vehicle can switch to).
+local function fullDepartures(line : Engine.Entity, lineComponent : Engine.Component.Line, now : integer,
+		yearMs : integer) : integer, integer
 	local ok, best = pcall(function() : {integer}
 		local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
-		if book == nil then
+		local stopCount = #lineComponent.stops
+		if book == nil or stopCount == 0 then
 			return nil
 		end
-		local suffix = "_c" .. api.res.cargoTypeRep.getPassengerCargoTypeId()
+		-- Average capacity per vehicle for each cargo type (allCaps is indexed by cargo type + 1).
+		local capacity : {integer : number} = {}
+		local vehicles = 0
+		for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
+			local tv = transportVehicle(vehicle)
+			if tv ~= nil then
+				vehicles = vehicles + 1
+				for index, cap in ipairs(tv.config.allCaps or {}) do
+					capacity[index - 1] = (capacity[index - 1] or 0) + cap
+				end
+			end
+		end
+		if vehicles == 0 then
+			return nil
+		end
 		local result : {integer} = nil
 		for name, log in pairs(book.name2log_native:asTable()) do
-			if name:sub(1, 11) == "itemsAtStop" and name:sub(-#suffix) == suffix and name:find("Unsatisfied") == nil then
-				local full, count = metrics.countFullDepartures(log.times_native:asTable(), log.values_native:asTable(),
-					capacityPerVehicle, now - yearMs)
-				if count >= metrics.MIN_DEPARTURES and (result == nil or full / count > result[1] / result[2]) then
-					result = { full, count }
+			local k, cargo = name:match("^itemsAtStop(%d+)_c(%d+)$")
+			if k ~= nil then
+				local stop = lineComponent.stops[((tonumber(k) as integer) - 1) % stopCount + 1]
+				local perVehicle = (capacity[tonumber(cargo) as integer] or 0) / vehicles
+				-- 0 is LOAD_IF_AVAILABLE (the engine hands the mode over as a number; seen in-game: 0, and 2 for full load).
+				if stop ~= nil and stop.loadMode as any as integer == 0 and perVehicle > 0 then
+					local full, count = metrics.countFullDepartures(log.times_native:asTable(), log.values_native:asTable(),
+						perVehicle, now - yearMs)
+					if count >= metrics.MIN_DEPARTURES and (result == nil or full / count > result[1] / result[2]) then
+						result = { full, count }
+					end
 				end
 			end
 		end
@@ -265,13 +287,13 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			end
 		end
 	end
-	local __, capacity, cargoTypes, passengers, passengerCapacity = capacityTotals(line, false)
+	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
+	local lineComponent = api.engine.getComponent(line, api.type.ComponentType.LINE) as Engine.Component.Line
 	local full, departures : integer, integer = nil, nil
-	if passengers and count > 0 then
-		full, departures = fullDepartures(line, passengerCapacity / count, now, yearMs)
+	if lineComponent ~= nil and count > 0 then
+		full, departures = fullDepartures(line, lineComponent, now, yearMs)
 	end
 	local frequency = api.engine.util.line.getMaxFrequency(line)
-	local lineComponent = api.engine.getComponent(line, api.type.ComponentType.LINE) as Engine.Component.Line
 	local income, costs = accountYears(line, metrics.TREND_RECENT_YEARS + metrics.TREND_BEFORE_YEARS + 2)
 	local facts : PgraceTrimTheFatLineData.LineFacts = {
 		input = {

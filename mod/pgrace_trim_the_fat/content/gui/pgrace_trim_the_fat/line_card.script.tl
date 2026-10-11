@@ -138,8 +138,10 @@ local function verdictTooltip(data : CardData) : string
 	if a.trim > 0 then
 		parts[#parts + 1] = _("Fewer vehicles means a longer wait, which can cost passengers or cargo.")
 	end
-	if a.backlog then
+	if a.waitingBacklog then
 		parts[#parts + 1] = _("Passengers are piling up at a stop, so the line needs more vehicles, whatever the average load says.")
+	elseif a.fullBacklog then
+		parts[#parts + 1] = _("Vehicles keep leaving a stop full, so the line needs more vehicles, whatever the average load says.")
 	elseif a.verdict == "Busy" then
 		parts[#parts + 1] = ui.fill(_("The average load is {busy} or more, so vehicles may leave passengers or cargo behind."),
 			{ busy = ui.formatPercent(metrics.BUSY_LOAD) })
