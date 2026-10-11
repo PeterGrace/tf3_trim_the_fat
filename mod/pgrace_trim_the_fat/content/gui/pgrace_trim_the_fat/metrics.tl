@@ -6,6 +6,8 @@ metrics.BUSY_LOAD = 0.95
 metrics.MIN_DATA_FRACTION = 1 / 12
 metrics.STUCK_LOAD_NOW = 0.75
 metrics.STUCK_AVERAGE_LOAD = 0.25
+metrics.BACKLOG_VEHICLES = 1
+metrics.MIN_VEHICLE_DATA_FRACTION = 0.5
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -100,7 +102,7 @@ function metrics.dataSpan(balanceBetween : function(integer, integer) : number, 
 end
 
 function metrics.vehiclePerYear(balance : number, spanMs : number, yearMs : number) : number, boolean
-	if spanMs == nil or spanMs < yearMs * metrics.MIN_DATA_FRACTION then
+	if spanMs == nil or spanMs < yearMs * metrics.MIN_VEHICLE_DATA_FRACTION then
 		return nil, false
 	end
 	return metrics.annualise(balance, spanMs, yearMs)
@@ -115,6 +117,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		target = metrics.targetFor(input.cargoTypeCount, input.carriesPassengers),
 		trim = 0,
 		notDelivering = false,
+		backlog = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	local count = input.vehicleCount or 0
@@ -131,7 +134,11 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	-- Full right now but little carried over the window: the cargo isn't being unloaded, so fewer vehicles won't help.
 	a.notDelivering = input.loadNow ~= nil and input.loadNow >= metrics.STUCK_LOAD_NOW
 		and a.load ~= nil and a.load < metrics.STUCK_AVERAGE_LOAD
-	if a.load ~= nil and a.load < a.target and count > 1 and not a.notDelivering then
+	-- A busload or more waiting at a stop: the line is short of vehicles, whatever the average says (on a line with
+	-- many stops the average reads low; seen in-game: 290 waiting while it read 35%).
+	local perVehicle = (input.totalCapacity or 0) / count
+	a.backlog = input.waitingMax ~= nil and perVehicle > 0 and input.waitingMax >= perVehicle * metrics.BACKLOG_VEHICLES
+	if a.load ~= nil and a.load < a.target and count > 1 and not a.notDelivering and not a.backlog then
 		local keep = math.max(1, math.ceil(count * a.load / a.target - EPSILON))
 		if keep < count then
 			a.keep = keep
@@ -140,6 +147,8 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	end
 	if a.balancePerYear < 0 then
 		a.verdict = "Losing"
+	elseif a.backlog then
+		a.verdict = "Busy"
 	elseif a.trim > 0 then
 		a.verdict = "TooMany"
 	elseif a.load ~= nil and a.load >= metrics.BUSY_LOAD then

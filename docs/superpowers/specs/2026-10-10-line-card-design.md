@@ -201,3 +201,11 @@ overview later.
 - **Selling a vehicle** with the card open: the row's locate button disappeared, then came back seconds later
   (presumably its ID was reused), so the row checks that the vehicle is still listed on the line, not only that
   the entity exists.
+- **Backlog** (2026-10-10): a 7-stop bus line with 290 passengers waiting at its hub read an average load of 35% and
+  got "Too many vehicles". The average undercounts on lines with many stops, and it never looked at waiting
+  passengers. `line_data` now reads the most passengers waiting at any of the line's stops
+  (`getLineStopSimEntitiesCount`), and `assess` treats a busload or more (`BACKLOG_VEHICLES = 1` × capacity per
+  vehicle) as a backlog: no trim, verdict Busy unless Losing, and the card shows how many are waiting.
+- **Young vehicles:** "Per year" for a vehicle shows "Too new" until it has half a year of data
+  (`MIN_VEHICLE_DATA_FRACTION = 0.5`). One month still showed a 2-month-old bus at -116,492* (its depot run and
+  first trips scaled up 6×); the user chose six months over three. A whole line's Too new stays at one month.
