@@ -119,7 +119,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Fahrzeuge vor {age} geändert: Die Zahlen enthalten noch die alte Aufstellung.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Linien ausblenden, deren Fahrzeuge sich in den letzten 3 Monaten geändert haben. Verkäufe und Verschiebungen zählen ab dem Spielstart.",
         "Hide changed": "Geänderte ausblenden",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Die Bilanz beträgt nur {percent} der Betriebskosten: Größere Fahrzeuge lohnen sich womöglich mehr als zusätzliche."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Die Bilanz beträgt nur {percent} der Betriebskosten: Größere Fahrzeuge lohnen sich womöglich mehr als zusätzliche.",
+        "Full on {percent} of departures from one stop over the last year.": "Im letzten Jahr bei {percent} der Abfahrten an einer Haltestelle voll.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "Im letzten Jahr bei {percent} der Abfahrten an einer Haltestelle voll: Mit weniger Fahrzeugen bleiben noch mehr zurück."
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -219,7 +221,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Vehículos cambiados hace {age}: las cifras aún incluyen la configuración anterior.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ocultar líneas cuyos vehículos cambiaron en los últimos 3 meses. Las ventas y traslados cuentan desde que se inició el juego.",
         "Hide changed": "Ocultar cambiadas",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "El balance es solo el {percent} de los costes de funcionamiento: vehículos más grandes pueden salir más rentables que añadir más."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "El balance es solo el {percent} de los costes de funcionamiento: vehículos más grandes pueden salir más rentables que añadir más.",
+        "Full on {percent} of departures from one stop over the last year.": "Lleno en el {percent} de las salidas de una parada durante el último año.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "Lleno en el {percent} de las salidas de una parada durante el último año: con menos vehículos se quedarían más atrás."
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -319,7 +323,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Véhicules modifiés il y a {age} : les chiffres incluent encore l'ancienne configuration.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Masquer les lignes dont les véhicules ont changé au cours des 3 derniers mois. Les ventes et déplacements comptent depuis le lancement du jeu.",
         "Hide changed": "Masquer modifiées",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Le bilan ne représente que {percent} des coûts d'exploitation : des véhicules plus grands pourraient être plus rentables que davantage de véhicules."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Le bilan ne représente que {percent} des coûts d'exploitation : des véhicules plus grands pourraient être plus rentables que davantage de véhicules.",
+        "Full on {percent} of departures from one stop over the last year.": "Plein pour {percent} des départs d'un arrêt au cours de la dernière année.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "Plein pour {percent} des départs d'un arrêt au cours de la dernière année : avec moins de véhicules, davantage resteraient à quai."
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -419,7 +425,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Veicoli cambiati {age} fa: i numeri includono ancora la configurazione precedente.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Nascondi le linee i cui veicoli sono cambiati negli ultimi 3 mesi. Vendite e spostamenti contano dall'avvio del gioco.",
         "Hide changed": "Nascondi modificate",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Il bilancio è solo il {percent} dei costi di esercizio: veicoli più grandi potrebbero rendere più che aggiungerne altri."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Il bilancio è solo il {percent} dei costi di esercizio: veicoli più grandi potrebbero rendere più che aggiungerne altri.",
+        "Full on {percent} of departures from one stop over the last year.": "Pieno nel {percent} delle partenze da una fermata nell'ultimo anno.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "Pieno nel {percent} delle partenze da una fermata nell'ultimo anno: con meno veicoli ne resterebbero a terra ancora di più."
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -509,7 +517,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "{age}前に車両が変更されました：数値にはまだ以前の構成が含まれています。",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "過去3か月に車両が変更された路線を非表示にします。売却と移動はゲーム起動時から数えます。",
         "Hide changed": "変更を非表示",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "収支は運行費用の{percent}にすぎません。車両を増やすより、大きい車両にする方が採算が合うかもしれません。"
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "収支は運行費用の{percent}にすぎません。車両を増やすより、大きい車両にする方が採算が合うかもしれません。",
+        "Full on {percent} of departures from one stop over the last year.": "過去1年間、1つの停留所からの発車の{percent}が満員でした。",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "過去1年間、1つの停留所からの発車の{percent}が満員でした：車両を減らすとさらに取り残されます。"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -599,7 +609,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "{age} 전에 운송 수단이 바뀌었습니다: 수치에는 아직 이전 구성이 포함되어 있습니다.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "최근 3개월 안에 운송 수단이 바뀐 노선을 숨깁니다. 판매와 이동은 게임을 시작한 시점부터 계산합니다.",
         "Hide changed": "변경된 노선 숨기기",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "수지가 운영비의 {percent}에 불과합니다. 운송 수단을 늘리기보다 더 큰 운송 수단이 수익성이 좋을 수 있습니다."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "수지가 운영비의 {percent}에 불과합니다. 운송 수단을 늘리기보다 더 큰 운송 수단이 수익성이 좋을 수 있습니다.",
+        "Full on {percent} of departures from one stop over the last year.": "지난 1년간 한 정류장 출발의 {percent}가 만석이었습니다.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "지난 1년간 한 정류장 출발의 {percent}가 만석이었습니다: 운송 수단을 줄이면 더 많은 승객이 남겨집니다."
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -699,7 +711,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Voertuigen {age} geleden gewijzigd: de cijfers bevatten nog de oude opzet.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Lijnen verbergen waarvan de voertuigen de laatste 3 maanden zijn gewijzigd. Verkopen en verplaatsingen tellen vanaf het starten van het spel.",
         "Hide changed": "Gewijzigde verbergen",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "De balans is maar {percent} van de bedrijfskosten: grotere voertuigen leveren misschien meer op dan extra voertuigen."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "De balans is maar {percent} van de bedrijfskosten: grotere voertuigen leveren misschien meer op dan extra voertuigen.",
+        "Full on {percent} of departures from one stop over the last year.": "Het afgelopen jaar vol bij {percent} van de vertrekken van één halte.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "Het afgelopen jaar vol bij {percent} van de vertrekken van één halte: met minder voertuigen blijven er nog meer achter."
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -809,7 +823,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Pojazdy zmieniono {age} temu: liczby wciąż obejmują poprzedni układ.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ukryj linie, których pojazdy zmieniły się w ostatnich 3 miesiącach. Sprzedaże i przeniesienia liczą się od uruchomienia gry.",
         "Hide changed": "Ukryj zmienione",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Bilans to tylko {percent} kosztów eksploatacji: większe pojazdy mogą się bardziej opłacać niż dodatkowe."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Bilans to tylko {percent} kosztów eksploatacji: większe pojazdy mogą się bardziej opłacać niż dodatkowe.",
+        "Full on {percent} of departures from one stop over the last year.": "W ostatnim roku pełny przy {percent} odjazdów z jednego przystanku.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "W ostatnim roku pełny przy {percent} odjazdów z jednego przystanku. Mniej pojazdów zostawi jeszcze więcej osób."
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -909,7 +925,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Veículos alterados há {age}: os números ainda incluem a configuração anterior.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Ocultar linhas cujos veículos mudaram nos últimos 3 meses. Vendas e transferências contam a partir de quando o jogo foi iniciado.",
         "Hide changed": "Ocultar alteradas",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "O saldo é só {percent} dos custos operacionais: veículos maiores podem compensar mais do que adicionar outros."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "O saldo é só {percent} dos custos operacionais: veículos maiores podem compensar mais do que adicionar outros.",
+        "Full on {percent} of departures from one stop over the last year.": "Lotado em {percent} das partidas de uma parada no último ano.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "Lotado em {percent} das partidas de uma parada no último ano: com menos veículos, mais ficariam para trás."
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -1019,7 +1037,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "Транспорт изменён {age} назад: в цифрах ещё учтён прежний состав.",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "Скрыть линии, у которых транспорт менялся за последние 3 месяца. Продажи и перемещения учитываются с момента запуска игры.",
         "Hide changed": "Скрыть изменённые",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Баланс составляет лишь {percent} эксплуатационных расходов: более вместительный транспорт может окупиться лучше, чем дополнительный."
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "Баланс составляет лишь {percent} эксплуатационных расходов: более вместительный транспорт может окупиться лучше, чем дополнительный.",
+        "Full on {percent} of departures from one stop over the last year.": "За последний год {percent} отправлений с одной остановки были полными.",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "За последний год {percent} отправлений с одной остановки были полными. С меньшим числом транспорта останется ещё больше."
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -1109,7 +1129,9 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "载具于 {age}前变更：数据仍包含旧的配置。",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "隐藏过去 3 个月内载具有变更的线路。出售和转移从游戏启动时开始计算。",
         "Hide changed": "隐藏已变更",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "收支仅为运营成本的{percent}：换用更大的载具可能比增加载具更划算。"
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "收支仅为运营成本的{percent}：换用更大的载具可能比增加载具更划算。",
+        "Full on {percent} of departures from one stop over the last year.": "过去一年，一个站点 {percent} 的发车满载。",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "过去一年，一个站点 {percent} 的发车满载：减少载具会留下更多乘客。"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -1199,6 +1221,8 @@
         "Vehicles changed {age} ago: the numbers still include the old setup.": "車輛於 {age}前變更：數據仍包含舊的配置。",
         "Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.": "隱藏過去 3 個月內車輛有變更的路線。出售和轉移從遊戲啟動時開始計算。",
         "Hide changed": "隱藏已變更",
-        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "收支僅為營運成本的{percent}：換用更大的車輛可能比增加車輛更划算。"
+        "The balance is only {percent} of the running costs: bigger vehicles may pay off better than more of them.": "收支僅為營運成本的{percent}：換用更大的車輛可能比增加車輛更划算。",
+        "Full on {percent} of departures from one stop over the last year.": "過去一年，一個站點 {percent} 的發車滿載。",
+        "Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.": "過去一年，一個站點 {percent} 的發車滿載：減少車輛會留下更多乘客。"
     }
 }
