@@ -279,3 +279,8 @@ overview later.
   money" and then "needs more vehicles", from its full departures. A Losing line whose departures leave full now
   says each trip earns less than it costs, so more vehicles would add to the loss. A Losing line with only a queue
   no longer says it needs more vehicles.
+  With the 3-year rule that ship read plain Busy at −$9.8k a year (full on 67% of departures), because full
+  departures lifted the thin margin. When an extra vehicle fills from what's left behind, it earns about what the
+  average vehicle does, so it only pays when the line makes money. The lift (`deepQueue`) now needs a margin of at
+  least 0. CouClu-LO-3 (+$17k a bus) stays plain Busy; the ship reads "another vehicle would likely lose money", with
+  a tooltip variant that doesn't say the extra vehicle "shares the same riders".

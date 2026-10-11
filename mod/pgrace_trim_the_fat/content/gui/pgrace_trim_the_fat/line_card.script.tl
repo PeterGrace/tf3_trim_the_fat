@@ -158,7 +158,11 @@ local function verdictTooltip(data : CardData) : string
 			{ percent = ui.formatPercent(a.margin) })
 	end
 	if a.thinMargin then
-		parts[#parts + 1] = ui.fill(_("But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better."), {
+		-- Both keys stay literal, so both stay translated.
+		local template = a.deepQueue
+			and _("But the balance is only {percent} of the running costs ({costs} last year): even full, another vehicle would earn about as little as the others. Bigger or newer vehicles may pay off better.")
+			or _("But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.")
+		parts[#parts + 1] = ui.fill(template, {
 			percent = ui.formatPercent(a.margin),
 			costs = ui.formatMoney(data.snapshot.input.runningCostsPerYear),
 		})

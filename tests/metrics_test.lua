@@ -718,3 +718,13 @@ t.test("assess: a young line's loss is Losing", function()
 		incomeByYear = { 1, 1100, 5 }, costsByYear = { 1, 1000, 5 } }))
 	t.eq(a.verdict, "Losing")
 end)
+
+t.test("assess: a deep queue doesn't lift the thin margin on a line that loses money", function()
+	-- Seen in-game: a one-ship line at -$9.8k a year, full on 67% of departures, read plain Busy. Full, an extra
+	-- vehicle earns about what the average one does, so it only pays when the line makes money.
+	local a = metrics.assess(line({ balance = -100, runningCostsPerYear = 1000, fullDepartures = 4, departures = 6,
+		incomeByYear = { 1, 1100, 1100, 1100, 5 }, costsByYear = { 1, 1000, 1000, 1000, 5 } }))
+	t.eq(a.verdict, "Busy")
+	t.eq(a.thinMargin, true)
+	t.eq(a.deepQueue, true)
+end)

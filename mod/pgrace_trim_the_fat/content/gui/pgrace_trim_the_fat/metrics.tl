@@ -189,6 +189,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		changedRecently = false,
 		breakEven = false,
 		shortLoss = false,
+		deepQueue = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	a.changedRecently = input.lastChangeMs ~= nil and input.nowMs ~= nil
@@ -264,9 +265,12 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	-- average vehicle. When the average barely covers its costs, the extra one would lose money. Not with several
 	-- busloads waiting, or with departures that mostly leave full: then it fills from passengers left behind (seen
 	-- in-game: 237 waiting on 8 buses; 33 waiting with every departure full).
-	local deepQueue = a.fullBacklog or (input.waitingMax ~= nil and perVehicle > 0
+	-- Then it earns about what the average vehicle does, so it pays only when the line makes money (seen in-game: a
+	-- ship at -$9.8k a year, full on 67% of departures, read plain Busy).
+	a.deepQueue = a.fullBacklog or (input.waitingMax ~= nil and perVehicle > 0
 		and input.waitingMax >= perVehicle * metrics.DEEP_QUEUE_VEHICLES)
-	a.thinMargin = a.verdict == "Busy" and a.margin ~= nil and a.margin < metrics.THIN_MARGIN and not deepQueue
+	a.thinMargin = a.verdict == "Busy" and a.margin ~= nil and a.margin < metrics.THIN_MARGIN
+		and not (a.deepQueue and a.margin >= 0)
 	return a
 end
 

@@ -104,8 +104,11 @@ global record PgraceTrimTheFatMetrics
 		queueLimited : boolean
 		-- balancePerYear ÷ runningCostsPerYear; nil when the running costs are unknown.
 		margin : number
-		-- True when the verdict is Busy but margin is under THIN_MARGIN, with fewer than DEEP_QUEUE_VEHICLES
-		-- vehicles' worth waiting and no fullBacklog: another vehicle would likely lose money.
+		-- True when another vehicle fills from passengers or cargo left behind: DEEP_QUEUE_VEHICLES vehicles' worth
+		-- waiting, or fullBacklog. It then earns about what the average vehicle does.
+		deepQueue : boolean
+		-- True when the verdict is Busy but margin is under THIN_MARGIN, unless deepQueue on a line that makes
+		-- money: another vehicle would likely lose money.
 		thinMargin : boolean
 		-- nil without enough history (metrics.trend).
 		trend : Trend
