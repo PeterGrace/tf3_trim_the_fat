@@ -17,6 +17,7 @@ metrics.DECLINE_RATIO = 0.75
 metrics.RECENT_CHANGE_FRACTION = 0.25
 metrics.FULL_DEPARTURE_SHARE = 0.6
 metrics.MIN_DEPARTURES = 3
+metrics.BREAK_EVEN_BAND = 0.05
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -173,6 +174,7 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		queueLimited = false,
 		thinMargin = false,
 		changedRecently = false,
+		breakEven = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
 	a.changedRecently = input.lastChangeMs ~= nil and input.nowMs ~= nil
@@ -225,7 +227,12 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 			a.trim = count - keep
 		end
 	end
-	if a.balancePerYear < 0 then
+	-- A small loss is break-even, not Losing: a line paid in lumps (one ship, a few deliveries a year) crossed zero
+	-- back and forth (seen in-game). Without running costs any loss counts.
+	local costs = input.runningCostsPerYear
+	a.breakEven = a.balancePerYear < 0 and costs ~= nil and costs > 0
+		and a.balancePerYear >= -costs * metrics.BREAK_EVEN_BAND
+	if a.balancePerYear < 0 and not a.breakEven then
 		a.verdict = "Losing"
 	elseif a.backlog then
 		a.verdict = "Busy"

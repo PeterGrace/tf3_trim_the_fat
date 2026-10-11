@@ -660,3 +660,27 @@ t.test("assess: departures that mostly leave full keep a thin line plain Busy", 
 	t.eq(a.verdict, "Busy")
 	t.eq(a.thinMargin, false)
 end)
+
+t.test("constants: break-even band", function()
+	t.eq(metrics.BREAK_EVEN_BAND, 0.05)
+end)
+
+t.test("assess: a small loss within the band isn't Losing", function()
+	-- Seen in-game: a one-ship line paid per delivery flipped between OK and Losing as its balance crossed zero.
+	local a = metrics.assess(line({ balance = -50, runningCostsPerYear = 1000 }))
+	t.eq(a.verdict, "TooMany", "exactly -5% is still within the band")
+	t.eq(a.breakEven, true)
+	a = metrics.assess(line({ balance = -51, runningCostsPerYear = 1000 }))
+	t.eq(a.verdict, "Losing")
+	t.eq(a.breakEven, false)
+end)
+
+t.test("assess: without running costs any loss is Losing", function()
+	local a = metrics.assess(line({ balance = -1 }))
+	t.eq(a.verdict, "Losing")
+	t.eq(a.breakEven, false)
+end)
+
+t.test("assess: a profit is never break-even", function()
+	t.eq(metrics.assess(line({ balance = 10, runningCostsPerYear = 1000 })).breakEven, false)
+end)

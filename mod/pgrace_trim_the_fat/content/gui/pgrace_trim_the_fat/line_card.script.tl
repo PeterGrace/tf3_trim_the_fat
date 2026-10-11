@@ -156,7 +156,11 @@ local function verdictTooltip(data : CardData) : string
 			costs = ui.formatMoney(data.snapshot.input.runningCostsPerYear),
 		})
 	end
-	if a.verdict == "Ok" and not a.queueLimited then
+	if a.breakEven then
+		parts[#parts + 1] = ui.fill(_("About break-even: a loss of up to {band} of the running costs doesn't count as losing money."),
+			{ band = ui.formatPercent(metrics.BREAK_EVEN_BAND) })
+	end
+	if a.verdict == "Ok" and not a.queueLimited and not a.breakEven then
 		parts[#parts + 1] = _("Profitable, and the average load is close to or above the target.")
 	end
 	return table.concat(parts, "\n")

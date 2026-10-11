@@ -267,3 +267,8 @@ overview later.
   `itemsAtStop1` log to +20, +20, +20, while `itemsAtStop0` stayed at +4 to +11. So `k` is the stop index plus one,
   wrapping, and the waiting count takes the stop index itself. The check now covers every cargo type, counts a
   departure full at the vehicles' average `allCaps` for that cargo, and skips full-load stops.
+- **Break-even band** (2026-10-11): a one-ship line paid per delivery flipped between OK and "Losing · not
+  delivering" as its 12-month balance crossed zero between deliveries. A loss down to `BREAK_EVEN_BAND = 0.05` of the
+  last full year's running costs is now break-even, not Losing: the line falls through to the load checks, and its
+  verdict tooltip says so. Without known running costs, any loss is still Losing. ForWay-LO-1 (−$7k on $108k,
+  about −6%) still reads Losing.
