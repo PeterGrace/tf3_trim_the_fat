@@ -379,9 +379,15 @@ local Body = react.RegisterRecipe("PgraceTrimTheFatBody", function(params : Body
 			},
 		})
 	end
-	if a.backlog then
+	if a.waitingBacklog then
 		add(ui.textRow(ui.fill(_("{passengers} waiting at one stop: fewer vehicles would leave more behind."),
 			{ passengers = passengersText(input.waitingMax) }), "font-scale-body, warning"))
+	end
+	if a.fullBacklog then
+		-- Both keys stay literal, so both stay translated.
+		local template = a.waitingBacklog and _("Full on {percent} of departures from one stop over the last year.")
+			or _("Full on {percent} of departures from one stop over the last year: fewer vehicles would leave more behind.")
+		add(ui.textRow(ui.fill(template, { percent = ui.formatPercent(a.fullShare) }), "font-scale-body, warning"))
 	end
 	if a.notDelivering then
 		add(ui.textRow(_("Vehicles are full but deliver little: check where the cargo is unloaded."),

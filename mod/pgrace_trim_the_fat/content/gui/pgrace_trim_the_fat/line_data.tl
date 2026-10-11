@@ -47,10 +47,12 @@ end
 
 -- Used and total capacity over the cargo types the vehicles currently carry, how many such types, and whether
 -- passengers are among them.
-local function capacityTotals(line : Engine.Entity, allCapacities : boolean) : number, number, integer, boolean
+-- Used and total capacity over all cargo types, how many types, whether passengers are one, and the passenger
+-- capacity alone.
+local function capacityTotals(line : Engine.Entity, allCapacities : boolean) : number, number, integer, boolean, number
 	local usages = api.engine.util.line.getLineCapacityUsages(line, allCapacities)
 	local passengerIndex = api.res.cargoTypeRep.getPassengerCargoTypeId() + 1
-	local used, capacity, types, passengers = 0.0, 0.0, 0, false
+	local used, capacity, types, passengers, passengerCapacity = 0.0, 0.0, 0, false, 0.0
 	-- Keys are cargoTypeId + 1 (as in the base cargo_util), despite the tealdef's key type.
 	for index, usage in pairs(usages or {}) do
 		if usage.capacity > 0 then
@@ -59,10 +61,11 @@ local function capacityTotals(line : Engine.Entity, allCapacities : boolean) : n
 			types = types + 1
 			if index == passengerIndex then
 				passengers = true
+				passengerCapacity = usage.capacity
 			end
 		end
 	end
-	return used, capacity, types, passengers
+	return used, capacity, types, passengers, passengerCapacity
 end
 
 function line_data.lineLoadNow(line : Engine.Entity) : number
@@ -165,6 +168,35 @@ local function accountYears(line : Engine.Entity, years : integer) : {number}, {
 	return pair[1], pair[2]
 end
 
+-- Over the last year, at the stop whose departures most often left full: how many did, out of how many departures
+-- (nil, nil when unknown). The line logs a running total of boarders per stop, one entry per departure
+-- ("itemsAtStop<stop>_c<cargo>"; its stop number runs one ahead of the line's stop index, which doesn't matter here).
+local function fullDepartures(line : Engine.Entity, capacityPerVehicle : number, now : integer, yearMs : integer) : integer, integer
+	local ok, best = pcall(function() : {integer}
+		local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
+		if book == nil then
+			return nil
+		end
+		local suffix = "_c" .. api.res.cargoTypeRep.getPassengerCargoTypeId()
+		local result : {integer} = nil
+		for name, log in pairs(book.name2log_native:asTable()) do
+			if name:sub(1, 11) == "itemsAtStop" and name:sub(-#suffix) == suffix and name:find("Unsatisfied") == nil then
+				local full, count = metrics.countFullDepartures(log.times_native:asTable(), log.values_native:asTable(),
+					capacityPerVehicle, now - yearMs)
+				if count >= metrics.MIN_DEPARTURES and (result == nil or full / count > result[1] / result[2]) then
+					result = { full, count }
+				end
+			end
+		end
+		return result
+	end)
+	if not ok or best == nil then
+		return nil, nil
+	end
+	local pair = best as {integer}
+	return pair[1], pair[2]
+end
+
 -- Each line's vehicles when last read, and when they were last seen to change. Sales and vehicles moved between lines
 -- leave no trace in the game's data, so this is the only way to see them; it starts empty after a restart.
 local record Seen
@@ -233,7 +265,11 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			end
 		end
 	end
-	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
+	local __, capacity, cargoTypes, passengers, passengerCapacity = capacityTotals(line, false)
+	local full, departures : integer, integer = nil, nil
+	if passengers and count > 0 then
+		full, departures = fullDepartures(line, passengerCapacity / count, now, yearMs)
+	end
 	local frequency = api.engine.util.line.getMaxFrequency(line)
 	local lineComponent = api.engine.getComponent(line, api.type.ComponentType.LINE) as Engine.Component.Line
 	local income, costs = accountYears(line, metrics.TREND_RECENT_YEARS + metrics.TREND_BEFORE_YEARS + 2)
@@ -258,6 +294,8 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			costsByYear = costs,
 			lastChangeMs = lastChange(line, signatureOf(parts), newest, now),
 			nowMs = now,
+			fullDepartures = full,
+			departures = departures,
 		},
 		noun = nounFor(carrier, passengers),
 	}

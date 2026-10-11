@@ -243,3 +243,17 @@ overview later.
   stays plain Busy, and its tooltip notes the margin and suggests bigger vehicles. Declining also moves with the
   calendar: after the year rolled over, FaiOak-SouVal's 5-year window took in its first bad year and the line left
   the list (it reads Losing money); Elk-Chi stayed.
+- **Stop logs** (2026-10-11): a line's `itemsAtStop<k>_c<cargo>` is a running total of passengers boarded, one entry
+  per departure from that stop, about a year of entries kept. It never exceeds a vehicle's capacity (+20 on 20-seat
+  buses, +30 on 30-seat ones, +38 to +70 on 70-seat trains). Its `k` runs one ahead of the stop index that
+  `getLineStopSimEntitiesCount` takes (the last stop wraps to 0): only then do the long queues (237, 184, 160, 138
+  waiting) line up with stops whose every departure left full. `itemsAtStopUnsatisfied...` matched the left-behind
+  count on queued bus lines, but a train line logged 57–294 per departure while leaving half full with almost no one
+  waiting, so it isn't "left behind" and isn't used. The line window's sad face is unhappy passengers on board,
+  something else. A line now also has a backlog when at least `FULL_DEPARTURE_SHARE = 0.6` of the departures from
+  one stop over the last year left full (`MIN_DEPARTURES = 3`). Unlike the waiting snapshot, this doesn't depend on
+  when the window is opened, and it survives restarts. Freight stops weren't seen in the probe, so freight isn't
+  covered yet.
+  SouVal-LO-1 (33 waiting, under two busloads, every departure from one stop full, $5k per bus) then read "another
+  vehicle would likely lose money". Departures that mostly leave full mean an extra vehicle fills from passengers
+  left behind, as with a deep queue, so a full-departure backlog now also lifts the thin-margin verdict.

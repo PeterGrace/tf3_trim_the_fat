@@ -70,6 +70,10 @@ global record PgraceTrimTheFatMetrics
 		lastChangeMs : integer
 		-- The game time the input was read at.
 		nowMs : integer
+		-- At the stop whose departures over the last year most often left full (passengers boarded = a vehicle's
+		-- passenger capacity): how many did, out of how many; nil when unknown or not a passenger line.
+		fullDepartures : integer
+		departures : integer
 	end
 
 	record Assessment
@@ -89,15 +93,18 @@ global record PgraceTrimTheFatMetrics
 		-- True when the vehicles are full now but carried little over the window: cargo is on board but not being
 		-- unloaded. No trim is suggested then.
 		notDelivering : boolean
-		-- True when waitingMax is at least BACKLOG_VEHICLES vehicles' worth of capacity: no trim, and Busy unless
-		-- Losing.
+		-- True when waitingMax is at least BACKLOG_VEHICLES vehicles' worth of capacity, or fullShare is at least
+		-- FULL_DEPARTURE_SHARE: no trim, and Busy unless Losing.
 		backlog : boolean
+		-- Which made it a backlog: waitingMax, or fullShare (either or both).
+		waitingBacklog : boolean
+		fullBacklog : boolean
 		-- True when waiting passengers kept the trim smaller than the load alone suggests (possibly 0).
 		queueLimited : boolean
 		-- balancePerYear ÷ runningCostsPerYear; nil when the running costs are unknown.
 		margin : number
 		-- True when the verdict is Busy but margin is under THIN_MARGIN, with fewer than DEEP_QUEUE_VEHICLES
-		-- vehicles' worth waiting: another vehicle would likely lose money.
+		-- vehicles' worth waiting and no fullBacklog: another vehicle would likely lose money.
 		thinMargin : boolean
 		-- nil without enough history (metrics.trend).
 		trend : Trend
@@ -107,6 +114,8 @@ global record PgraceTrimTheFatMetrics
 		-- True when the vehicles changed less than RECENT_CHANGE_FRACTION of a year ago: the 12-month numbers still
 		-- mix the old setup in. The verdict is unchanged.
 		changedRecently : boolean
+		-- fullDepartures ÷ departures; nil under MIN_DEPARTURES departures.
+		fullShare : number
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -154,6 +163,10 @@ global record PgraceTrimTheFatMetrics
 	DECLINE_RATIO : number
 	-- A vehicle change younger than this share of a year counts as recent.
 	RECENT_CHANGE_FRACTION : number
+	-- At or above this share of full departures from one stop, the line has a backlog.
+	FULL_DEPARTURE_SHARE : number
+	-- Fewer departures than this say nothing.
+	MIN_DEPARTURES : integer
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
@@ -175,6 +188,9 @@ global record PgraceTrimTheFatMetrics
 	-- Averages over the last TREND_RECENT_YEARS full years and the TREND_BEFORE_YEARS before them; nil when the
 	-- series are missing, differ in length or are too short (the first and current years don't count).
 	trend : function(income : {number}, costs : {number}) : Trend
+	-- From a stop's itemsAtStop log (a running total of boarders, one entry per departure): the departures after
+	-- `since`, and how many of them boarded at least `capacity`. 0, 0 without a log or capacity.
+	countFullDepartures : function(times : {integer}, values : {integer}, capacity : number, since : integer) : integer, integer
 	-- The verdict and the numbers behind it.
 	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), Busy (backlog), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion, limited by TRIM_QUEUE_LIMIT. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
 	assess : function(input : LineInput) : Assessment
