@@ -216,3 +216,17 @@ overview later.
   `TRIM_QUEUE_LIMIT = 0.5`. The gap between half a busload (trim stops) and a whole busload (Busy) is the hysteresis.
   `queueLimited` marks it; the verdict tooltip says how many are waiting. The waiting count is a snapshot: a look
   just after a pickup reads low. If that proves too jumpy, remember each line's largest queue for the session.
+- **Thin margin** (2026-10-11): a one-bus line with 26 waiting read Busy at +$115 a year; its running costs were
+  $108k a year and its income about $100k, so a second bus would have lost money. Probe: `getAccountChart(line,
+  config)` (what the Balance card draws) returns `series = { {years, income}, {years, running costs} }`, one entry
+  per calendar year for the line's whole life (186 years here), the current partial year last. Costs are positive.
+  A Busy line whose balance is under `THIN_MARGIN = 0.2` of its last full year's running costs now reads "Busy, but
+  another vehicle would likely lose money" (overview: "Busy · thin margin") and leaves the busy count.
+- **Purchases** aren't in `calculateBalance` for the line or its vehicles, with either flag: a lifetime balance only
+  says whether the line covered its running costs.
+- **Declining** (2026-10-11): comparing the last full year with the 5 before flagged noise. A freight line earns in
+  batches of about $151k (three, two or one a year), and a bus line swung ±60% a year. The last 3 full years against
+  the 5 before them (`metrics.trend`) fixed both. Running costs stayed within about 2% on every line, so income
+  decides. Sorted by percentage, the top of the list was lines that always lost money, so a line must also have
+  made money over the earlier 5 years. Under `DECLINE_RATIO = 0.75` that flagged 4 of 151 lines, three of them
+  through one town. 151 lines took 18.5 ms. It's a marker (↘, a card hint and an overview filter), not a verdict.

@@ -160,15 +160,6 @@ local function accountYears(line : Engine.Entity, years : integer) : {number}, {
 	return pair[1], pair[2]
 end
 
--- Running costs in the last full calendar year; nil until the line has one (its first year is usually partial).
-local function runningCostsPerYear(line : Engine.Entity) : number
-	local __, costs = accountYears(line, 3)
-	if costs == nil or #costs < 3 then
-		return nil
-	end
-	return costs[#costs - 1]
-end
-
 -- The line-level numbers, and the vehicle rows when withRows is set (the overview skips them).
 local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimTheFatLineData.LineFacts, {VehicleRow}
 	local now = nowMs()
@@ -210,6 +201,7 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 	local __, capacity, cargoTypes, passengers = capacityTotals(line, false)
 	local frequency = api.engine.util.line.getMaxFrequency(line)
 	local lineComponent = api.engine.getComponent(line, api.type.ComponentType.LINE) as Engine.Component.Line
+	local income, costs = accountYears(line, metrics.TREND_RECENT_YEARS + metrics.TREND_BEFORE_YEARS + 2)
 	local facts : PgraceTrimTheFatLineData.LineFacts = {
 		input = {
 			vehicleCount = count,
@@ -226,7 +218,9 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			loadNow = line_data.lineLoadNow(line),
 			carriesPassengers = passengers,
 			waitingMax = (passengers and lineComponent ~= nil) and waitingMax(line, #lineComponent.stops) or nil,
-			runningCostsPerYear = runningCostsPerYear(line),
+			runningCostsPerYear = metrics.lastFullYear(costs),
+			incomeByYear = income,
+			costsByYear = costs,
 		},
 		noun = nounFor(carrier, passengers),
 	}

@@ -140,6 +140,9 @@ local function buildRow(line : Engine.Entity, cats : {Category}) : Row
 		row.vehicleCount = facts.input.vehicleCount
 		row.kind = kind
 		row.verdictText, row.verdictClass = verdictText(kind, a)
+		if a.declining then
+			row.verdictText = row.verdictText .. " ↘"
+		end
 		row.verdictSort = metrics.severity(kind) * SEVERITY_SCALE + (a.balancePerYear or 0)
 		-- A few days of money scaled up to a year would mislead (the card hides it for TooNew lines too).
 		if kind == "TooNew" then
@@ -343,6 +346,9 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	local verdictState = react.useStateLazy(function() : {integer : boolean}
 		return {}
 	end)
+	-- Declining is a marker, not a verdict: on, it narrows whatever the verdict filters show.
+	local decliningState = react.useState(false)
+	local decliningOnly = decliningState:old()
 	local data = dataState:old()
 	local enabled = enabledState:old()
 	local verdictEnabled = verdictState:old()
@@ -388,6 +394,15 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			end,
 		}
 	end
+	filterKey = filterKey .. (decliningOnly and "d" or "")
+	verdictButtons[#verdictButtons + 1] = builtin.ToggleButton{
+		meta = { class = "verdict", tooltip = _("Show only lines that made money before and whose income fell by a quarter or more over the last 3 years") },
+		value = decliningOnly and 1 or 0,
+		content = builtin.TextView{ meta = { class = "font-scale-body, warning" }, text = _("Declining ↘") },
+		onValueChange = function(value : integer)
+			decliningState:set(value == 1)
+		end,
+	}
 	-- The search text is part of the table's key, so typing remounts it with the matching rows.
 	filterKey = filterKey .. "_" .. search .. "_"
 	for i, cat in ipairs(cats) do
@@ -497,7 +512,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 			for i = 1, #groups do
 				verdictMatch = verdictMatch or (verdictEnabled[i] == true and row.kind ~= nil and groups[i].kinds[row.kind] == true)
 			end
-			match = match and verdictMatch
+			match = match and verdictMatch and (not decliningOnly or (row.assessment ~= nil and row.assessment.declining))
 			if match and search ~= "" then
 				local ok, found = pcall(lang_util.stringContains, row.name, search)
 				match = ok and found as boolean

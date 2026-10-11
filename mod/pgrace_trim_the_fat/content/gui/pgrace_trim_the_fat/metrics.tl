@@ -10,6 +10,9 @@ metrics.BACKLOG_VEHICLES = 1
 metrics.MIN_VEHICLE_DATA_FRACTION = 0.5
 metrics.TRIM_QUEUE_LIMIT = 0.5
 metrics.THIN_MARGIN = 0.2
+metrics.TREND_RECENT_YEARS = 3
+metrics.TREND_BEFORE_YEARS = 5
+metrics.DECLINE_RATIO = 0.75
 
 function metrics.targetFor(cargoTypeCount : integer, carriesPassengers : boolean) : number
 	if cargoTypeCount == 1 and not carriesPassengers then
@@ -110,6 +113,31 @@ function metrics.vehiclePerYear(balance : number, spanMs : number, yearMs : numb
 	return metrics.annualise(balance, spanMs, yearMs)
 end
 
+function metrics.lastFullYear(values : {number}) : number
+	if values == nil or #values < 3 then
+		return nil
+	end
+	return values[#values - 1]
+end
+
+function metrics.trend(income : {number}, costs : {number}) : PgraceTrimTheFatMetrics.Trend
+	local recentYears, beforeYears = metrics.TREND_RECENT_YEARS, metrics.TREND_BEFORE_YEARS
+	-- The current year and the first year are usually partial, so neither counts.
+	if income == nil or costs == nil or #income ~= #costs or #income < recentYears + beforeYears + 2 then
+		return nil
+	end
+	local last = #income - 1
+	local tr : PgraceTrimTheFatMetrics.Trend = { recentIncome = 0, beforeIncome = 0, beforeBalance = 0 }
+	for i = last - recentYears + 1, last do
+		tr.recentIncome = tr.recentIncome + income[i] / recentYears
+	end
+	for i = last - recentYears - beforeYears + 1, last - recentYears do
+		tr.beforeIncome = tr.beforeIncome + income[i] / beforeYears
+		tr.beforeBalance = tr.beforeBalance + (income[i] - costs[i]) / beforeYears
+	end
+	return tr
+end
+
 -- Guards ceil() against float noise: 8 × 0.25 ÷ 0.5 may come out as 4.000000001.
 local EPSILON = 1e-9
 
@@ -124,6 +152,10 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		thinMargin = false,
 	}
 	a.balancePerYear, a.annualised = metrics.annualise(input.balance or 0, input.dataMs, input.yearMs)
+	-- Only lines that made money before: income swings on lines that always lost money said little (seen in-game).
+	a.trend = metrics.trend(input.incomeByYear, input.costsByYear)
+	a.declining = a.trend ~= nil and a.trend.beforeBalance > 0
+		and a.trend.recentIncome < a.trend.beforeIncome * metrics.DECLINE_RATIO
 	local count = input.vehicleCount or 0
 	if count <= 0 then
 		a.verdict = "NoVehicles"

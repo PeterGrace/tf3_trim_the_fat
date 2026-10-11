@@ -112,7 +112,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "{passengers} warten an einer Haltestelle: Mit weniger als {keep} Fahrzeugen würde die Schlange auf mehr als eine halbe Fahrzeugladung wachsen.",
         "Busy, but another vehicle would likely lose money": "Ausgelastet, aber ein weiteres Fahrzeug würde wohl Verlust machen",
         "Busy · thin margin": "Ausgelastet · knappe Marge",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Aber die Bilanz beträgt nur {percent} der Betriebskosten ({costs} im letzten Jahr): Ein weiteres Fahrzeug bringt eigene Betriebskosten und teilt sich dieselben Fahrgäste. Größere oder neuere Fahrzeuge lohnen sich womöglich eher."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Aber die Bilanz beträgt nur {percent} der Betriebskosten ({costs} im letzten Jahr): Ein weiteres Fahrzeug bringt eigene Betriebskosten und teilt sich dieselben Fahrgäste. Größere oder neuere Fahrzeuge lohnen sich womöglich eher.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Die Einnahmen sind in den letzten 3 Jahren auf {recent} pro Jahr gesunken, von {before} in den 5 Jahren davor: Prüfe, was sich an der Linie verändert hat.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Nur Linien zeigen, die vorher Gewinn machten und deren Einnahmen in den letzten 3 Jahren um ein Viertel oder mehr gesunken sind",
+        "Declining ↘": "Rückläufig ↘"
     },
     "es": {
         "Line efficiency": "Eficiencia de la línea",
@@ -205,7 +208,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Con {passengers} esperando en una parada, con menos de {keep} la cola superaría media carga de un vehículo.",
         "Busy, but another vehicle would likely lose money": "Saturada, pero otro vehículo probablemente perdería dinero",
         "Busy · thin margin": "Saturada · margen escaso",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Pero el balance es solo el {percent} de los costes de funcionamiento ({costs} el año pasado): otro vehículo añade sus propios costes y comparte los mismos pasajeros. Vehículos más grandes o modernos pueden salir más rentables."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Pero el balance es solo el {percent} de los costes de funcionamiento ({costs} el año pasado): otro vehículo añade sus propios costes y comparte los mismos pasajeros. Vehículos más grandes o modernos pueden salir más rentables.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Los ingresos bajaron a {recent} al año en los últimos 3 años, desde {before} en los 5 anteriores: revisa qué ha cambiado en torno a la línea.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Mostrar solo líneas que antes daban beneficios y cuyos ingresos han caído una cuarta parte o más en los últimos 3 años",
+        "Declining ↘": "En declive ↘"
     },
     "fr": {
         "Line efficiency": "Efficacité de la ligne",
@@ -298,7 +304,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Avec {passengers} en attente à un arrêt, en dessous de {keep} la file dépasserait la moitié de la capacité d'un véhicule.",
         "Busy, but another vehicle would likely lose money": "Saturée, mais un véhicule de plus perdrait sans doute de l'argent",
         "Busy · thin margin": "Saturée · marge faible",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Mais le bilan ne représente que {percent} des coûts d'exploitation ({costs} l'an dernier) : un véhicule de plus ajoute ses propres coûts et partage les mêmes passagers. Des véhicules plus grands ou plus récents pourraient être plus rentables."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Mais le bilan ne représente que {percent} des coûts d'exploitation ({costs} l'an dernier) : un véhicule de plus ajoute ses propres coûts et partage les mêmes passagers. Des véhicules plus grands ou plus récents pourraient être plus rentables.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Les revenus sont tombés à {recent} par an sur les 3 dernières années, contre {before} sur les 5 précédentes : vérifiez ce qui a changé autour de la ligne.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Afficher uniquement les lignes rentables auparavant dont les revenus ont baissé d'un quart ou plus sur les 3 dernières années",
+        "Declining ↘": "En déclin ↘"
     },
     "it": {
         "Line efficiency": "Efficienza della linea",
@@ -391,7 +400,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Con {passengers} in attesa a una fermata, con meno di {keep} la coda supererebbe metà del carico di un veicolo.",
         "Busy, but another vehicle would likely lose money": "Satura, ma un altro veicolo probabilmente sarebbe in perdita",
         "Busy · thin margin": "Satura · margine ridotto",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Ma il bilancio è solo il {percent} dei costi di esercizio ({costs} l'anno scorso): un altro veicolo aggiunge i propri costi e si divide gli stessi passeggeri. Veicoli più grandi o più nuovi potrebbero rendere di più."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Ma il bilancio è solo il {percent} dei costi di esercizio ({costs} l'anno scorso): un altro veicolo aggiunge i propri costi e si divide gli stessi passeggeri. Veicoli più grandi o più nuovi potrebbero rendere di più.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Le entrate sono scese a {recent} all'anno negli ultimi 3 anni, da {before} nei 5 precedenti: controlla cosa è cambiato intorno alla linea.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Mostra solo le linee che prima erano in attivo e le cui entrate sono calate di un quarto o più negli ultimi 3 anni",
+        "Declining ↘": "In calo ↘"
     },
     "ja": {
         "Line efficiency": "路線効率",
@@ -474,7 +486,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "1つの停留所で{passengers}が待機中：{keep}未満にすると、待ち行列が車両1台の定員の半分を超えます。",
         "Busy, but another vehicle would likely lose money": "混雑していますが、車両を追加すると赤字になる可能性が高いです",
         "Busy · thin margin": "混雑・利益率が低い",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "ただし収支は運行費用の{percent}にすぎません（昨年の運行費用：{costs}）。車両を追加すると運行費用が増えますが、乗客は同じです。より大きい、または新しい車両の方が採算が合うかもしれません。"
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "ただし収支は運行費用の{percent}にすぎません（昨年の運行費用：{costs}）。車両を追加すると運行費用が増えますが、乗客は同じです。より大きい、または新しい車両の方が採算が合うかもしれません。",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "過去3年間の収入は年{recent}に減少しました（その前の5年間は{before}）。路線の周辺で何が変わったか確認してください。",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "以前は黒字で、過去3年間に収入が4分の1以上減った路線のみ表示",
+        "Declining ↘": "減少傾向 ↘"
     },
     "ko": {
         "Line efficiency": "노선 효율",
@@ -557,7 +572,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "한 정류장에서 {passengers} 대기 중: {keep} 미만이면 대기열이 운송 수단 1대 정원의 절반을 넘게 됩니다.",
         "Busy, but another vehicle would likely lose money": "혼잡하지만 운송 수단을 추가하면 적자가 날 가능성이 높음",
         "Busy · thin margin": "혼잡 · 낮은 이익률",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "하지만 수지는 운영비의 {percent}에 불과합니다(작년 운영비 {costs}). 운송 수단을 추가하면 운영비가 늘지만 승객은 그대로입니다. 더 크거나 새로운 운송 수단이 더 수익성이 좋을 수 있습니다."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "하지만 수지는 운영비의 {percent}에 불과합니다(작년 운영비 {costs}). 운송 수단을 추가하면 운영비가 늘지만 승객은 그대로입니다. 더 크거나 새로운 운송 수단이 더 수익성이 좋을 수 있습니다.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "최근 3년간 수입이 연 {recent}(으)로 줄었습니다(그 이전 5년간 {before}). 노선 주변에서 무엇이 바뀌었는지 확인하세요.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "이전에 흑자였고 최근 3년간 수입이 4분의 1 이상 줄어든 노선만 표시",
+        "Declining ↘": "감소 추세 ↘"
     },
     "nl": {
         "Line efficiency": "Lijnefficiëntie",
@@ -650,7 +668,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Met {passengers} wachtend bij één halte zou de rij met minder dan {keep} groeien tot meer dan een halve voertuiglading.",
         "Busy, but another vehicle would likely lose money": "Druk, maar een extra voertuig zou waarschijnlijk verlies maken",
         "Busy · thin margin": "Druk · krappe marge",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Maar de balans is maar {percent} van de bedrijfskosten ({costs} vorig jaar): een extra voertuig brengt eigen bedrijfskosten mee en deelt dezelfde reizigers. Grotere of nieuwere voertuigen leveren misschien meer op."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Maar de balans is maar {percent} van de bedrijfskosten ({costs} vorig jaar): een extra voertuig brengt eigen bedrijfskosten mee en deelt dezelfde reizigers. Grotere of nieuwere voertuigen leveren misschien meer op.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "De inkomsten zijn de laatste 3 jaar gedaald tot {recent} per jaar, van {before} in de 5 jaar daarvoor: kijk wat er rond de lijn is veranderd.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Alleen lijnen tonen die eerder winst maakten en waarvan de inkomsten de laatste 3 jaar met een kwart of meer zijn gedaald",
+        "Declining ↘": "Dalend ↘"
     },
     "pl": {
         "Line efficiency": "Efektywność linii",
@@ -753,7 +774,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Na jednym przystanku czeka: {passengers}. Przy mniej niż {keep} kolejka przekroczyłaby połowę pojemności pojazdu.",
         "Busy, but another vehicle would likely lose money": "Obłożona, ale kolejny pojazd prawdopodobnie przynosiłby straty",
         "Busy · thin margin": "Obłożona · niska marża",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Ale bilans to tylko {percent} kosztów eksploatacji ({costs} w zeszłym roku): kolejny pojazd dodaje własne koszty i dzieli tych samych pasażerów. Większe lub nowsze pojazdy mogą się bardziej opłacać."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Ale bilans to tylko {percent} kosztów eksploatacji ({costs} w zeszłym roku): kolejny pojazd dodaje własne koszty i dzieli tych samych pasażerów. Większe lub nowsze pojazdy mogą się bardziej opłacać.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "Przychody spadły do {recent} rocznie w ostatnich 3 latach, z {before} w 5 latach wcześniej: sprawdź, co zmieniło się wokół linii.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Pokaż tylko linie, które wcześniej przynosiły zysk, a ich przychody spadły o jedną czwartą lub więcej w ostatnich 3 latach",
+        "Declining ↘": "Spadek ↘"
     },
     "pt_BR": {
         "Line efficiency": "Eficiência da linha",
@@ -846,7 +870,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "Com {passengers} esperando em uma parada, com menos de {keep} a fila passaria de meia carga de um veículo.",
         "Busy, but another vehicle would likely lose money": "Lotada, mas outro veículo provavelmente daria prejuízo",
         "Busy · thin margin": "Lotada · margem baixa",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Mas o saldo é só {percent} dos custos operacionais ({costs} no ano passado): outro veículo adiciona seus próprios custos e divide os mesmos passageiros. Veículos maiores ou mais novos podem compensar mais."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Mas o saldo é só {percent} dos custos operacionais ({costs} no ano passado): outro veículo adiciona seus próprios custos e divide os mesmos passageiros. Veículos maiores ou mais novos podem compensar mais.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "A receita caiu para {recent} por ano nos últimos 3 anos, de {before} nos 5 anteriores: verifique o que mudou em torno da linha.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Mostrar apenas linhas que davam lucro antes e cuja receita caiu um quarto ou mais nos últimos 3 anos",
+        "Declining ↘": "Em queda ↘"
     },
     "ru": {
         "Line efficiency": "Эффективность маршрута",
@@ -949,7 +976,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "На одной остановке ждут: {passengers}. Если оставить меньше {keep}, очередь превысит половину вместимости одного транспортного средства.",
         "Busy, but another vehicle would likely lose money": "Загружен, но ещё один транспорт, скорее всего, будет убыточным",
         "Busy · thin margin": "Загружен · низкая маржа",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Но баланс составляет лишь {percent} эксплуатационных расходов ({costs} за прошлый год): ещё один транспорт добавит свои расходы и будет делить тех же пассажиров. Более вместительный или новый транспорт может окупиться лучше."
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "Но баланс составляет лишь {percent} эксплуатационных расходов ({costs} за прошлый год): ещё один транспорт добавит свои расходы и будет делить тех же пассажиров. Более вместительный или новый транспорт может окупиться лучше.",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "За последние 3 года доход упал до {recent} в год, с {before} за 5 лет до этого: проверьте, что изменилось вокруг линии.",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "Показать только линии, которые раньше приносили прибыль и чей доход упал на четверть или больше за последние 3 года",
+        "Declining ↘": "Спад ↘"
     },
     "zh_CN": {
         "Line efficiency": "线路效率",
@@ -1032,7 +1062,10 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "一个站点有{passengers}在等待：少于 {keep} 时，排队人数会超过一辆载具容量的一半。",
         "Busy, but another vehicle would likely lose money": "繁忙，但再加一辆载具可能会亏损",
         "Busy · thin margin": "繁忙 · 利润微薄",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "但收支仅为运营成本的{percent}（去年运营成本 {costs}）：再加一辆载具会增加其运营成本，乘客却还是这么多。更大或更新的载具可能更划算。"
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "但收支仅为运营成本的{percent}（去年运营成本 {costs}）：再加一辆载具会增加其运营成本，乘客却还是这么多。更大或更新的载具可能更划算。",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "过去 3 年收入降至每年 {recent}，之前 5 年为 {before}：请检查线路周边发生了什么变化。",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "仅显示以前盈利、但过去 3 年收入下降四分之一或以上的线路",
+        "Declining ↘": "下滑 ↘"
     },
     "zh_TW": {
         "Line efficiency": "路線效率",
@@ -1115,6 +1148,9 @@
         "With {passengers} waiting at one stop, fewer than {keep} would let the queue grow past half a vehicle's load.": "一個站點有{passengers}在等待：少於 {keep} 時，排隊人數會超過一輛車輛容量的一半。",
         "Busy, but another vehicle would likely lose money": "繁忙，但再加一輛車輛可能會虧損",
         "Busy · thin margin": "繁忙 · 利潤微薄",
-        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "但收支僅為營運成本的{percent}（去年營運成本 {costs}）：再加一輛車輛會增加其營運成本，乘客卻還是這麼多。更大或更新的車輛可能更划算。"
+        "But the balance is only {percent} of the running costs ({costs} last year): another vehicle adds its own running costs and shares the same riders. Bigger or newer vehicles may pay off better.": "但收支僅為營運成本的{percent}（去年營運成本 {costs}）：再加一輛車輛會增加其營運成本，乘客卻還是這麼多。更大或更新的車輛可能更划算。",
+        "Income fell to {recent} a year over the last 3 years, from {before} in the 5 before: check what changed around the line.": "過去 3 年收入降至每年 {recent}，之前 5 年為 {before}：請檢查路線周邊發生了什麼變化。",
+        "Show only lines that made money before and whose income fell by a quarter or more over the last 3 years": "僅顯示以前獲利、但過去 3 年收入下降四分之一或以上的路線",
+        "Declining ↘": "下滑 ↘"
     }
 }

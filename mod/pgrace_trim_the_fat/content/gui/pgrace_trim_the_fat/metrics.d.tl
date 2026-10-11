@@ -22,6 +22,14 @@ global record PgraceTrimTheFatMetrics
 		"Ok"
 	end
 
+	-- Average yearly income over the last TREND_RECENT_YEARS full years, and income and balance over the
+	-- TREND_BEFORE_YEARS before them.
+	record Trend
+		recentIncome : number
+		beforeIncome : number
+		beforeBalance : number
+	end
+
 	-- What line_data.tl reads from the engine for one line. Times are game time in milliseconds.
 	record LineInput
 		vehicleCount : integer
@@ -54,6 +62,10 @@ global record PgraceTrimTheFatMetrics
 		waitingMax : integer
 		-- The line's running costs in the last full calendar year (a positive number); nil before its first full year.
 		runningCostsPerYear : number
+		-- Income and running costs (positive) per calendar year, oldest first, the current (partial) year last, as
+		-- the line window's Balance chart; nil when unknown. At least 10 years for a trend.
+		incomeByYear : {number}
+		costsByYear : {number}
 	end
 
 	record Assessment
@@ -82,6 +94,11 @@ global record PgraceTrimTheFatMetrics
 		margin : number
 		-- True when the verdict is Busy but margin is under THIN_MARGIN: another vehicle would likely lose money.
 		thinMargin : boolean
+		-- nil without enough history (metrics.trend).
+		trend : Trend
+		-- True when the line made money over the earlier years and its recent income is under DECLINE_RATIO of
+		-- theirs. A marker beside the verdict, which it doesn't change.
+		declining : boolean
 	end
 
 	-- Totals over a set of lines, for the overview's summary line.
@@ -119,6 +136,11 @@ global record PgraceTrimTheFatMetrics
 	TRIM_QUEUE_LIMIT : number
 	-- Under this balance ÷ running costs, a Busy line is too thin for another vehicle to pay for itself.
 	THIN_MARGIN : number
+	-- Years averaged for a trend: the recent ones, and the ones before them.
+	TREND_RECENT_YEARS : integer
+	TREND_BEFORE_YEARS : integer
+	-- Recent income under this share of the earlier income is a decline.
+	DECLINE_RATIO : number
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
@@ -135,6 +157,11 @@ global record PgraceTrimTheFatMetrics
 	-- this looks for money booked before `bought`, a twelfth of a year at a time.
 	dataSpan : function(balanceBetween : function(integer, integer) : number, bought : integer, now : integer,
 		yearMs : integer) : integer
+	-- The year before the current one in a yearly series (current year last); nil before the first full year.
+	lastFullYear : function(values : {number}) : number
+	-- Averages over the last TREND_RECENT_YEARS full years and the TREND_BEFORE_YEARS before them; nil when the
+	-- series are missing, differ in length or are too short (the first and current years don't count).
+	trend : function(income : {number}, costs : {number}) : Trend
 	-- The verdict and the numbers behind it.
 	-- First match wins: NoVehicles (0 vehicles), TooNew (dataMs < yearMs × MIN_DATA_FRACTION), Losing (balancePerYear < 0), Busy (backlog), TooMany (trim > 0), Busy (load >= BUSY_LOAD), Ok. Losing still carries a trim suggestion, limited by TRIM_QUEUE_LIMIT. A line that is not delivering (loadNow >= STUCK_LOAD_NOW and a known load < STUCK_AVERAGE_LOAD) gets notDelivering and no trim, its verdict otherwise unchanged.
 	assess : function(input : LineInput) : Assessment

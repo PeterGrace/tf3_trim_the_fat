@@ -508,3 +508,61 @@ t.test("assess: unknown running costs are no thin margin", function()
 	t.eq(a.thinMargin, false)
 	t.eq(a.margin, nil)
 end)
+
+-- Trend: yearly series oldest first, the current (partial) year last.
+t.test("constants: trend", function()
+	t.eq(metrics.TREND_RECENT_YEARS, 3)
+	t.eq(metrics.TREND_BEFORE_YEARS, 5)
+	t.eq(metrics.DECLINE_RATIO, 0.75)
+end)
+
+t.test("lastFullYear: the year before the current one, once there's a full one", function()
+	t.eq(metrics.lastFullYear({ 10, 20, 30 }), 20)
+	t.eq(metrics.lastFullYear({ 10, 20 }), nil, "first year usually partial")
+	t.eq(metrics.lastFullYear(nil), nil)
+end)
+
+-- partial, 5 before (income 100, costs 60), 3 recent (income 60, costs 60), current partial
+local INCOME = { 1, 100, 100, 100, 100, 100, 60, 60, 60, 5 }
+local COSTS = { 1, 60, 60, 60, 60, 60, 60, 60, 60, 5 }
+
+t.test("trend: averages the last 3 full years and the 5 before", function()
+	local tr = metrics.trend(INCOME, COSTS)
+	near(tr.recentIncome, 60)
+	near(tr.beforeIncome, 100)
+	near(tr.beforeBalance, 40)
+end)
+
+t.test("trend: nil without 10 years of history", function()
+	t.eq(metrics.trend({ 100, 100, 100, 100, 100, 60, 60, 60, 5 }, COSTS), nil)
+	t.eq(metrics.trend(nil, nil), nil)
+	t.eq(metrics.trend(INCOME, { 1, 2 }), nil, "series of different lengths")
+end)
+
+t.test("assess: a profitable line whose income fell is declining", function()
+	-- Seen in-game: FaiOak-SouVal income 695k a year, then 411k (59%), from +86k to -225k.
+	local a = metrics.assess(line({ incomeByYear = INCOME, costsByYear = COSTS }))
+	t.eq(a.declining, true)
+	near(a.trend.recentIncome, 60)
+	t.eq(a.verdict, "TooMany", "the verdict is unchanged")
+end)
+
+t.test("assess: a line that lost money before isn't declining", function()
+	-- Seen in-game: lines that always lost money topped a plain income ranking.
+	local costs = { 1, 120, 120, 120, 120, 120, 120, 120, 120, 5 }
+	local a = metrics.assess(line({ incomeByYear = INCOME, costsByYear = costs }))
+	t.eq(a.declining, false)
+end)
+
+t.test("assess: a fall to exactly 75% isn't declining", function()
+	local income = { 1, 100, 100, 100, 100, 100, 75, 75, 75, 5 }
+	t.eq(metrics.assess(line({ incomeByYear = income, costsByYear = COSTS })).declining, false)
+	income[9] = 74
+	t.eq(metrics.assess(line({ incomeByYear = income, costsByYear = COSTS })).declining, true)
+end)
+
+t.test("assess: no history, no trend", function()
+	local a = metrics.assess(line())
+	t.eq(a.declining, false)
+	t.eq(a.trend, nil)
+end)
