@@ -195,51 +195,8 @@ local record LoadLineParams
 	target : number
 end
 
--- PROBE (remove before release): does a stop-log entry count everyone on board at a departure, or only those who
--- boarded? Logs each vehicle's stop changes and departures (with who is on board) and each new stop-log entry, all
--- with the game time, to line up afterwards.
-local probeVehicle : {Engine.Entity : string} = {}
-local probeLogLast : {string : integer} = {}
-
-local function probeDepartures(line : Engine.Entity) : boolean
-	local passenger = api.res.cargoTypeRep.getPassengerCargoTypeId()
-	local gameTime = api.engine.getComponent(api.engine.util.getWorld(), api.type.ComponentType.GAME_TIME) as Engine.Component.GameTime
-	local now = tostring(gameTime.gameTime)
-	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
-		local tv = api.engine.getComponent(vehicle, api.type.ComponentType.TRANSPORT_VEHICLE) as Engine.Component.TransportVehicle
-		if tv ~= nil then
-			local onBoard = api.engine.system.simEntityAtVehicleSystem.getVehicleSimEntitiesCountForCargoType(vehicle, passenger)
-			local key = tostring(tv.stopIndex) .. "/" .. tostring(tv.lastLineStopDeparture) .. "/" .. tostring(tv.loadState)
-			if probeVehicle[vehicle] ~= key then
-				debugPrint(LOG_PREFIX .. "probe veh now=" .. now .. " vehicle=" .. tostring(vehicle) .. " stopIndex="
-					.. tostring(tv.stopIndex) .. " lastDep=" .. tostring(tv.lastLineStopDeparture) .. " loadState="
-					.. tostring(tv.loadState) .. " onBoard=" .. tostring(onBoard))
-				probeVehicle[vehicle] = key
-			end
-		end
-	end
-	local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
-	for logName, log in pairs(book ~= nil and book.name2log_native:asTable() or {}) do
-		if logName:match("^itemsAtStop%d+_c0$") then
-			local times, values = log.times_native:asTable(), log.values_native:asTable()
-			local last = #times
-			local seen = probeLogLast[logName]
-			if seen ~= nil and last > 0 and times[last] ~= seen then
-				debugPrint(LOG_PREFIX .. "probe log now=" .. now .. " " .. logName .. " n=" .. last .. " time="
-					.. tostring(times[last]) .. " delta=" .. tostring(last > 1 and values[last] - values[last - 1] or nil))
-			end
-			probeLogLast[logName] = last > 0 and times[last] or nil
-		end
-	end
-	return true
-end
-
 local LoadLine = react.RegisterRecipe("PgraceTrimTheFatLoadLine", function(params : LoadLineParams) : TreeNodeId
 	local nowState = engine_react_util.useStepStateTimer(function() : string
-		local probeOk, probeErr = pcall(probeDepartures, params.line) -- PROBE (remove before release)
-		if not probeOk then
-			debugPrint(LOG_PREFIX .. "probe error: " .. tostring(probeErr))
-		end
 		local ok, loadOrError = pcall(line_data.lineLoadNow, params.line)
 		return ok and ui.formatPercent(loadOrError as number) or ui.UNKNOWN
 	end, LIVE_POLL_SECONDS)
@@ -257,7 +214,7 @@ local LoadLine = react.RegisterRecipe("PgraceTrimTheFatLoadLine", function(param
 			now = nowState:old(),
 		}),
 		"font-scale-body",
-		_("Average load: items carried in the last 12 months ÷ capacity offered (capacity × departures × stops). A passenger riding several stops counts once, so on lines with many stops this reads lower than seat occupancy.")
+		_("Average load: what the vehicles carried between stops in the last 12 months ÷ their capacity on those legs. A passenger riding several stops counts on each leg, as in seat occupancy.")
 	)
 end)
 
