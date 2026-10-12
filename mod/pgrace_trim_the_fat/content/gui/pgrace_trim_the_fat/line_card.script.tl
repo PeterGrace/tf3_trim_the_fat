@@ -195,8 +195,85 @@ local record LoadLineParams
 	target : number
 end
 
+-- PROBE (remove before release): does a stop-log entry count everyone on board at a departure, or only those who
+-- boarded? On each departure (lastLineStopDeparture changes), note who is on board, then find the log entry.
+local record ProbeDeparture
+	vehicle : Engine.Entity
+	time : integer
+	stopIndex : integer
+	onBoard : integer
+	polls : integer
+end
+local probeLastDeparture : {Engine.Entity : integer} = {}
+local probePending : {ProbeDeparture} = {}
+
+local function probeDepartures(line : Engine.Entity) : boolean
+	local passenger = api.res.cargoTypeRep.getPassengerCargoTypeId()
+	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
+		local tv = api.engine.getComponent(vehicle, api.type.ComponentType.TRANSPORT_VEHICLE) as Engine.Component.TransportVehicle
+		if tv ~= nil then
+			local last = probeLastDeparture[vehicle]
+			if last ~= nil and tv.lastLineStopDeparture ~= last then
+				probePending[#probePending + 1] = {
+					vehicle = vehicle, time = tv.lastLineStopDeparture, stopIndex = tv.stopIndex, polls = 0,
+					onBoard = api.engine.system.simEntityAtVehicleSystem.getVehicleSimEntitiesCountForCargoType(vehicle, passenger),
+				}
+			end
+			probeLastDeparture[vehicle] = tv.lastLineStopDeparture
+		end
+	end
+	if #probePending == 0 then
+		return true
+	end
+	local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
+	local logs = book ~= nil and book.name2log_native:asTable() or {}
+	local still : {ProbeDeparture} = {}
+	for __, dep in ipairs(probePending) do
+		dep.polls = dep.polls + 1
+		local found = false
+		local nearestName, nearestDiff : string, integer = nil, nil
+		for logName, log in pairs(logs) do
+			if logName:match("^itemsAtStop%d+_c0$") then
+				local times, values = log.times_native:asTable(), log.values_native:asTable()
+				for i = #times, 1, -1 do
+					local diff = math.abs(times[i] - dep.time)
+					if nearestDiff == nil or diff < nearestDiff then
+						nearestName, nearestDiff = logName, diff
+					end
+					if times[i] == dep.time then
+						found = true
+						debugPrint(LOG_PREFIX .. "probe depart vehicle=" .. tostring(dep.vehicle) .. " stopIndex="
+							.. tostring(dep.stopIndex) .. " time=" .. tostring(dep.time) .. " onBoard=" .. tostring(dep.onBoard)
+							.. " log=" .. logName .. " delta=" .. tostring(i > 1 and values[i] - values[i - 1] or nil)
+							.. " polls=" .. tostring(dep.polls))
+						break
+					end
+					if times[i] < dep.time then
+						break
+					end
+				end
+			end
+		end
+		if not found then
+			if dep.polls >= 40 then
+				debugPrint(LOG_PREFIX .. "probe depart vehicle=" .. tostring(dep.vehicle) .. " stopIndex="
+					.. tostring(dep.stopIndex) .. " time=" .. tostring(dep.time) .. " onBoard=" .. tostring(dep.onBoard)
+					.. " no entry; nearest " .. tostring(nearestName) .. " off by " .. tostring(nearestDiff))
+			else
+				still[#still + 1] = dep
+			end
+		end
+	end
+	probePending = still
+	return true
+end
+
 local LoadLine = react.RegisterRecipe("PgraceTrimTheFatLoadLine", function(params : LoadLineParams) : TreeNodeId
 	local nowState = engine_react_util.useStepStateTimer(function() : string
+		local probeOk, probeErr = pcall(probeDepartures, params.line) -- PROBE (remove before release)
+		if not probeOk then
+			debugPrint(LOG_PREFIX .. "probe error: " .. tostring(probeErr))
+		end
 		local ok, loadOrError = pcall(line_data.lineLoadNow, params.line)
 		return ok and ui.formatPercent(loadOrError as number) or ui.UNKNOWN
 	end, LIVE_POLL_SECONDS)
