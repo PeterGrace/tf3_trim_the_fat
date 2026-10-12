@@ -30,6 +30,12 @@ global record PgraceTrimTheFatMetrics
 		beforeBalance : number
 	end
 
+	-- One itemsAtStop<k>_c<cargo> log: a running total of boarders, one entry per departure that boarded anyone.
+	record StopLog
+		times : {integer}
+		values : {integer}
+	end
+
 	-- What line_data.tl reads from the engine for one line. Times are game time in milliseconds.
 	record LineInput
 		vehicleCount : integer
@@ -75,9 +81,10 @@ global record PgraceTrimTheFatMetrics
 		-- when unknown.
 		fullDepartures : integer
 		departures : integer
-		-- The most departures logged at any one stop over the last year, each counted once across the stop's cargo
-		-- logs; nil or 0 when unknown (averageLoad then falls back to intervalMs).
-		stopDepartures : integer
+		-- From the stop logs over the last year (lineStopTotals): boarders at all stops, and the capacity offered at
+		-- the stop that offered the most; nil or 0 when nothing is logged (averageLoad then falls back to intervalMs).
+		loggedBoarded : number
+		busiestStopOffered : number
 	end
 
 	record Assessment
@@ -192,9 +199,9 @@ global record PgraceTrimTheFatMetrics
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
-	-- itemsTransported / (stopDepartures × stops × capacity per vehicle); without stopDepartures, round trips in the
-	-- window (from intervalMs) stand in for them. nil when unknown (no vehicles, capacity or stops; or no departures,
-	-- interval or data).
+	-- loggedBoarded / (stops × busiestStopOffered); without them, itemsTransported / (round trips in the window, from
+	-- intervalMs, × capacity per vehicle × stops). nil when unknown (no vehicles, capacity or stops; or nothing
+	-- logged and no interval or data).
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
@@ -214,8 +221,13 @@ global record PgraceTrimTheFatMetrics
 	-- From a stop's itemsAtStop log (a running total of boarders, one entry per departure): the departures after
 	-- `since`, and how many of them boarded at least `capacity`. 0, 0 without a log or capacity.
 	countFullDepartures : function(times : {integer}, values : {integer}, capacity : number, since : integer) : integer, integer
-	-- Departures after `since` in a stop's logs (one list of entry times per cargo type), each time counted once.
-	countDepartures : function(timeLists : {{integer}}, since : integer) : integer
+	-- Boarders and capacity offered at one stop over departures after `since`, from its itemsAtStop logs (one per
+	-- cargo type). Each entry's boarders are its rise over the entry before; entries at the same time in different
+	-- logs are one departure. A departure offered max(capacity, boarded): bunched vehicles share an entry, and a
+	-- vehicle replaced by a smaller one boarded up to its old capacity. 0, 0 without logs.
+	stopTotals : function(logs : {StopLog}, since : integer, capacity : number) : number, number
+	-- stopTotals over every stop (one list of logs per stop): boarders summed, and the most any one stop offered.
+	lineStopTotals : function(stops : {{StopLog}}, since : integer, capacity : number) : number, number
 	-- Average of income minus costs over the last `years` full years of yearly series (current year last); nil when
 	-- missing, of different lengths or too short (the first and current years don't count).
 	recentBalance : function(income : {number}, costs : {number}, years : integer) : number

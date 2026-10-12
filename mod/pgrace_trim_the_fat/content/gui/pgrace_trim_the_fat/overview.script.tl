@@ -167,7 +167,7 @@ local function buildRow(line : Engine.Entity, cats : {Category}) : Row
 			.. " vehicles=" .. tostring(input.vehicleCount) .. " stops=" .. tostring(input.stopCount)
 			.. " dataMs=" .. tostring(input.dataMs) .. " vehicleDataMs=" .. tostring(input.vehicleDataMs)
 			.. " departures=" .. tostring(input.departures) .. " full=" .. tostring(input.fullDepartures)
-			.. " stopDepartures=" .. tostring(input.stopDepartures))
+			.. " loggedBoarded=" .. tostring(input.loggedBoarded) .. " busiestStopOffered=" .. tostring(input.busiestStopOffered))
 		-- Per stop log: entries in the last year, how many boarded nobody, the oldest entry's age, and the boarders.
 		local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
 		local since = input.nowMs - math.floor(input.yearMs)

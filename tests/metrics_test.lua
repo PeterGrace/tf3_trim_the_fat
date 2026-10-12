@@ -773,32 +773,86 @@ t.test("assess: an ignored queue isn't a deep queue", function()
 	t.eq(a.thinMargin, true)
 end)
 
-t.test("countDepartures: distinct times after a time, across a stop's cargo logs", function()
-	t.eq(metrics.countDepartures({ { 100, 200, 300, 400 } }, 150), 3)
-	t.eq(metrics.countDepartures({ { 100, 200, 300 }, { 200, 300, 350 } }, 150), 3, "a departure logs in each cargo")
-	t.eq(metrics.countDepartures({ { 200 }, { 300 } }, 0), 2, "cargo carried on different departures")
+local function stopLog(times, values)
+	return { times = times, values = values }
+end
+
+t.test("stopTotals: boarded and offered per departure in the window", function()
+	local logs = { stopLog({ 100, 200, 300, 400 }, { 1000, 1015, 1035, 1040 }) }
+	local boarded, offered = metrics.stopTotals(logs, 150, 20)
+	t.eq(boarded, 40, "15 + 20 + 5; the entry at 100 is before the window")
+	t.eq(offered, 60, "three departures × 20")
+	boarded, offered = metrics.stopTotals(logs, 250, 20)
+	t.eq(boarded, 25)
+	t.eq(offered, 40)
 end)
 
-t.test("countDepartures: empty or missing logs", function()
-	t.eq(metrics.countDepartures({}, 0), 0)
-	t.eq(metrics.countDepartures({ {} }, 0), 0)
-	t.eq(metrics.countDepartures(nil, 0), 0)
+t.test("stopTotals: an entry holding more than a vehicle offered what boarded", function()
+	-- The first entry only gives the starting total. 40 is two bunched buses; 28 an old, bigger bus.
+	local boarded, offered = metrics.stopTotals({ stopLog({ 100, 200, 300, 400 }, { 0, 40, 68, 78 }) }, 0, 20)
+	t.eq(boarded, 78)
+	t.eq(offered, 88, "40 + 28 + 20")
 end)
 
-t.test("averageLoad: logged departures × stops × capacity per vehicle (Wyo-Pot-IC-1 in-game)", function()
-	-- 3 buses × 20 seats, 2 stops, 10 departures at the busiest stop, 361 carried: 361 ÷ 400.
-	local input = line({ vehicleCount = 3, totalCapacity = 60, stopCount = 2, itemsTransported = 361,
-		stopDepartures = 10, intervalMs = 166067, dataMs = 1461000, yearMs = 1461000, vehicleDataMs = 4383000 })
-	near(metrics.averageLoad(input), 0.9025)
+t.test("stopTotals: cargo logs at the same time are one departure", function()
+	local boarded, offered = metrics.stopTotals({
+		stopLog({ 100, 200, 300 }, { 0, 10, 15 }),
+		stopLog({ 100, 200, 300 }, { 0, 5, 10 }),
+	}, 0, 20)
+	t.eq(boarded, 25)
+	t.eq(offered, 40, "two departures, not four")
+	boarded, offered = metrics.stopTotals({
+		stopLog({ 100, 200 }, { 0, 15 }),
+		stopLog({ 100, 200 }, { 0, 10 }),
+	}, 0, 20)
+	t.eq(offered, 25, "25 boarded on one departure")
+	boarded, offered = metrics.stopTotals({
+		stopLog({ 100, 200 }, { 0, 8 }),
+		stopLog({ 150, 300 }, { 0, 6 }),
+	}, 0, 20)
+	t.eq(boarded, 14)
+	t.eq(offered, 40, "each cargo on its own departure")
 end)
 
-t.test("averageLoad: logged departures need no interval or data window", function()
-	local input = line({ stopDepartures = 6, intervalMs = NIL, dataMs = 0, vehicleDataMs = 0, itemsTransported = 600 })
+t.test("stopTotals: empty or missing logs", function()
+	local boarded, offered = metrics.stopTotals({}, 0, 20)
+	t.eq(boarded, 0)
+	t.eq(offered, 0)
+	boarded, offered = metrics.stopTotals({ stopLog({}, {}) }, 0, 20)
+	t.eq(offered, 0)
+	boarded, offered = metrics.stopTotals({ stopLog({ 100 }, { 5 }) }, 0, 20)
+	t.eq(offered, 0, "a single entry has no departure")
+	boarded, offered = metrics.stopTotals(nil, 0, 20)
+	t.eq(offered, 0)
+end)
+
+t.test("lineStopTotals: boarded at every stop, offered at the busiest", function()
+	-- The quiet stop logged only the departures where someone boarded.
+	local boarded, offered = metrics.lineStopTotals({
+		{ stopLog({ 100, 200, 300, 400 }, { 0, 20, 30, 50 }) },
+		{ stopLog({ 150, 350 }, { 0, 5 }) },
+	}, 0, 20)
+	t.eq(boarded, 55)
+	t.eq(offered, 60)
+	boarded, offered = metrics.lineStopTotals({}, 0, 20)
+	t.eq(boarded, 0)
+	t.eq(offered, 0)
+end)
+
+t.test("averageLoad: stop-log boarded ÷ (stops × offered at the busiest stop)", function()
+	local input = line({ loggedBoarded = 660, busiestStopOffered = 400 })
+	near(metrics.averageLoad(input), 0.825)
+end)
+
+t.test("averageLoad: stop logs need no interval or data window", function()
+	local input = line({ loggedBoarded = 600, busiestStopOffered = 600, intervalMs = NIL, dataMs = 0,
+		vehicleDataMs = 0 })
 	near(metrics.averageLoad(input), 0.5)
 end)
 
-t.test("averageLoad: no logged departures falls back to the interval", function()
-	near(metrics.averageLoad(line({ stopDepartures = 0, itemsTransported = 600 })), 0.5)
-	t.eq(metrics.averageLoad(line({ stopDepartures = 6, totalCapacity = 0 })), nil, "no capacity")
-	t.eq(metrics.averageLoad(line({ stopDepartures = 6, stopCount = 0 })), nil, "no stops")
+t.test("averageLoad: nothing in the stop logs falls back to the interval", function()
+	near(metrics.averageLoad(line({ loggedBoarded = 0, busiestStopOffered = 0, itemsTransported = 600 })), 0.5)
+	t.eq(metrics.averageLoad(line({ loggedBoarded = 600, busiestStopOffered = 600, vehicleCount = 0 })), nil,
+		"no vehicles")
+	t.eq(metrics.averageLoad(line({ loggedBoarded = 600, busiestStopOffered = 600, stopCount = 0 })), nil, "no stops")
 end)

@@ -71,12 +71,11 @@ function metrics.averageLoad(input : PgraceTrimTheFatMetrics.LineInput) : number
 		return nil
 	end
 	local count = input.vehicleCount
-	-- Departures actually made cover the same 12 months as itemsTransported, so the two rise and fall together; the
-	-- estimate below drifts from them on a sparse line (seen in-game: 9 departures a year at a stop read 91–103%).
-	-- Every vehicle leaves every stop once per round trip, so the busiest stop × stops is the legs run.
-	if input.stopDepartures ~= nil and input.stopDepartures > 0 then
-		local offered = input.stopDepartures * input.stopCount * (input.totalCapacity / count)
-		return (input.itemsTransported or 0) / offered
+	-- The stop logs give both sides over the same 12 months, so they rise and fall together; the estimate below drifts
+	-- from itemsTransported on a sparse line (seen in-game: 9 departures a year at a stop read 91–103%). Every vehicle
+	-- leaves every stop once per round trip, but quiet departures aren't logged, so the busiest stop stands for all.
+	if input.busiestStopOffered ~= nil and input.busiestStopOffered > 0 then
+		return (input.loggedBoarded or 0) / (input.stopCount * input.busiestStopOffered)
 	end
 	if input.intervalMs == nil or input.intervalMs <= 0 or input.dataMs == nil or input.dataMs <= 0 then
 		return nil
@@ -169,18 +168,33 @@ function metrics.countFullDepartures(times : {integer}, values : {integer}, capa
 	return full, count
 end
 
-function metrics.countDepartures(timeLists : {{integer}}, since : integer) : integer
-	local seen : {integer : boolean} = {}
-	local count = 0
-	for __, times in ipairs(timeLists or {}) do
-		for __, time in ipairs(times) do
-			if time > since and not seen[time] then
-				seen[time] = true
-				count = count + 1
+function metrics.stopTotals(logs : {PgraceTrimTheFatMetrics.StopLog}, since : integer, capacity : number) : number, number
+	-- Boarded per departure, by time: entries at the same time in different cargo logs are one departure.
+	local byTime : {integer : number} = {}
+	for __, log in ipairs(logs or {}) do
+		local times, values = log.times or {}, log.values or {}
+		for i = 2, math.min(#times, #values) do
+			if times[i] > since then
+				byTime[times[i]] = (byTime[times[i]] or 0) + values[i] - values[i - 1]
 			end
 		end
 	end
-	return count
+	local boarded, offered = 0.0, 0.0
+	for __, count in pairs(byTime) do
+		boarded = boarded + count
+		offered = offered + math.max(capacity or 0, count)
+	end
+	return boarded, offered
+end
+
+function metrics.lineStopTotals(stops : {{PgraceTrimTheFatMetrics.StopLog}}, since : integer, capacity : number) : number, number
+	local boarded, busiest = 0.0, 0.0
+	for __, logs in ipairs(stops or {}) do
+		local stopBoarded, stopOffered = metrics.stopTotals(logs, since, capacity)
+		boarded = boarded + stopBoarded
+		busiest = math.max(busiest, stopOffered)
+	end
+	return boarded, busiest
 end
 
 function metrics.recentBalance(income : {number}, costs : {number}, years : integer) : number

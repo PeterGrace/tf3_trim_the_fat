@@ -219,32 +219,34 @@ local function fullDepartures(line : Engine.Entity, lineComponent : Engine.Compo
 	return pair[1], pair[2]
 end
 
--- The most departures logged at any one stop over the last year (metrics.countDepartures over the stop's
--- itemsAtStop<k>_c<cargo> logs, one entry per departure); nil when unknown.
-local function stopDepartures(line : Engine.Entity, since : integer) : integer
-	local ok, best = pcall(function() : integer
+-- Boarders at all stops and the capacity offered at the busiest stop over the last year (metrics.lineStopTotals over
+-- the itemsAtStop<k>_c<cargo> logs); nil, nil when unknown.
+local function stopTotals(line : Engine.Entity, since : integer, capacity : number) : number, number
+	local ok, result = pcall(function() : {number}
 		local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
 		if book == nil then
 			return nil
 		end
-		local byStop : {string : {{integer}}} = {}
+		local byStop : {string : {PgraceTrimTheFatMetrics.StopLog}} = {}
 		for name, log in pairs(book.name2log_native:asTable()) do
 			local k = name:match("^itemsAtStop(%d+)_c%d+$")
 			if k ~= nil then
 				byStop[k] = byStop[k] or {}
-				table.insert(byStop[k], log.times_native:asTable())
+				table.insert(byStop[k], { times = log.times_native:asTable(), values = log.values_native:asTable() })
 			end
 		end
-		local most : integer = nil
-		for __, timeLists in pairs(byStop) do
-			local count = metrics.countDepartures(timeLists, since)
-			if most == nil or count > most then
-				most = count
-			end
+		local stops : {{PgraceTrimTheFatMetrics.StopLog}} = {}
+		for __, logs in pairs(byStop) do
+			stops[#stops + 1] = logs
 		end
-		return most
+		local boarded, offered = metrics.lineStopTotals(stops, since, capacity)
+		return { boarded, offered }
 	end)
-	return ok and best as integer or nil
+	if not ok or result == nil then
+		return nil, nil
+	end
+	local pair = result as {number}
+	return pair[1], pair[2]
 end
 
 -- Each line's vehicles when last read, and when they were last seen to change. Sales and vehicles moved between lines
@@ -321,6 +323,10 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 	if lineComponent ~= nil and count > 0 then
 		full, departures = fullDepartures(line, lineComponent, now, yearMs)
 	end
+	local boarded, offered : number, number = nil, nil
+	if count > 0 and capacity > 0 then
+		boarded, offered = stopTotals(line, now - yearMs, capacity / count)
+	end
 	local frequency = api.engine.util.line.getMaxFrequency(line)
 	local income, costs = accountYears(line, metrics.TREND_RECENT_YEARS + metrics.TREND_BEFORE_YEARS + 2)
 	local facts : PgraceTrimTheFatLineData.LineFacts = {
@@ -346,7 +352,8 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			nowMs = now,
 			fullDepartures = full,
 			departures = departures,
-			stopDepartures = stopDepartures(line, now - yearMs),
+			loggedBoarded = boarded,
+			busiestStopOffered = offered,
 		},
 		noun = nounFor(carrier, passengers),
 	}
