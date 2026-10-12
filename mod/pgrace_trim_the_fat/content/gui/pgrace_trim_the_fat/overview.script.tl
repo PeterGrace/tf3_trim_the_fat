@@ -154,6 +154,19 @@ local function buildRow(line : Engine.Entity, cats : {Category}) : Row
 			row.balanceClass = a.balancePerYear < 0 and "font-scale-body, negative" or "font-scale-body, positive"
 		end
 		row.loadText = ui.formatPercent(a.load)
+		-- PROBE (remove before release): which inputs of the average load move between opens.
+		local capAll = 0.0
+		for __, usage in pairs(api.engine.util.line.getLineCapacityUsages(line, true) or {}) do
+			capAll = capAll + usage.capacity
+		end
+		local input = facts.input
+		debugPrint(LOG_PREFIX .. "probe load line=" .. tostring(line) .. " name=" .. row.name
+			.. " now=" .. tostring(input.nowMs) .. " load=" .. tostring(a.load)
+			.. " items=" .. tostring(input.itemsTransported) .. " cap=" .. tostring(input.totalCapacity)
+			.. " capAll=" .. tostring(capAll) .. " intervalMs=" .. tostring(input.intervalMs)
+			.. " vehicles=" .. tostring(input.vehicleCount) .. " stops=" .. tostring(input.stopCount)
+			.. " dataMs=" .. tostring(input.dataMs) .. " vehicleDataMs=" .. tostring(input.vehicleDataMs)
+			.. " departures=" .. tostring(input.departures) .. " full=" .. tostring(input.fullDepartures))
 		row.vehiclesText = ui.vehiclesText(facts.noun, facts.input.vehicleCount)
 		row.error = false
 		return true
