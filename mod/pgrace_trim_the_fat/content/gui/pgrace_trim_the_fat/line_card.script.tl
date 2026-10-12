@@ -214,7 +214,7 @@ local LoadLine = react.RegisterRecipe("PgraceTrimTheFatLoadLine", function(param
 			now = nowState:old(),
 		}),
 		"font-scale-body",
-		_("Average load: items carried in the last 12 months ÷ capacity offered (capacity × departures × stops). A passenger riding several stops counts once, so on lines with many stops this reads lower than seat occupancy.")
+		_("Average load: what the vehicles carried between stops in the last 12 months ÷ their capacity on those legs. A passenger riding several stops counts on each leg, as in seat occupancy.")
 	)
 end)
 

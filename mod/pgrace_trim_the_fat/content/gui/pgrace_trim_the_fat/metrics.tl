@@ -67,16 +67,23 @@ end
 function metrics.averageLoad(input : PgraceTrimTheFatMetrics.LineInput) : number
 	if input.vehicleCount == nil or input.vehicleCount <= 0
 		or input.totalCapacity == nil or input.totalCapacity <= 0
-		or input.intervalMs == nil or input.intervalMs <= 0
-		or input.stopCount == nil or input.stopCount < 1
-		or input.dataMs == nil or input.dataMs <= 0 then
+		or input.stopCount == nil or input.stopCount < 1 then
+		return nil
+	end
+	local count = input.vehicleCount
+	-- The stop logs give both sides over the same 12 months, so they rise and fall together; the estimate below drifts
+	-- from itemsTransported on a sparse line (seen in-game: 9 departures a year at a stop read 91–103%). Every vehicle
+	-- arrives at every stop once per round trip, but empty arrivals aren't logged, so the busiest stop stands for all.
+	if input.busiestStopOffered ~= nil and input.busiestStopOffered > 0 then
+		return (input.loggedCarried or 0) / (input.stopCount * input.busiestStopOffered)
+	end
+	if input.intervalMs == nil or input.intervalMs <= 0 or input.dataMs == nil or input.dataMs <= 0 then
 		return nil
 	end
 	-- A round trip takes intervalMs × vehicles (the interval is the time between departures at one stop). Each
 	-- vehicle completes vehicleDataMs / roundTripMs round trips in total, each running one leg per stop, and every
 	-- leg offers the vehicle's capacity. Counting each vehicle's own time keeps vehicles bought recently from
 	-- inflating the capacity offered over the year.
-	local count = input.vehicleCount
 	local vehicleDataMs = input.vehicleDataMs or input.dataMs * count
 	if vehicleDataMs <= 0 then
 		return nil
@@ -161,6 +168,35 @@ function metrics.countFullDepartures(times : {integer}, values : {integer}, capa
 	return full, count
 end
 
+function metrics.stopTotals(logs : {PgraceTrimTheFatMetrics.StopLog}, since : integer, capacity : number) : number, number
+	-- Carried per arrival, by time: entries at the same time in different cargo logs are one arrival.
+	local byTime : {integer : number} = {}
+	for __, log in ipairs(logs or {}) do
+		local times, values = log.times or {}, log.values or {}
+		for i = 2, math.min(#times, #values) do
+			if times[i] > since then
+				byTime[times[i]] = (byTime[times[i]] or 0) + values[i] - values[i - 1]
+			end
+		end
+	end
+	local carried, offered = 0.0, 0.0
+	for __, count in pairs(byTime) do
+		carried = carried + count
+		offered = offered + math.max(capacity or 0, count)
+	end
+	return carried, offered
+end
+
+function metrics.lineStopTotals(stops : {{PgraceTrimTheFatMetrics.StopLog}}, since : integer, capacity : number) : number, number
+	local carried, busiest = 0.0, 0.0
+	for __, logs in ipairs(stops or {}) do
+		local stopCarried, stopOffered = metrics.stopTotals(logs, since, capacity)
+		carried = carried + stopCarried
+		busiest = math.max(busiest, stopOffered)
+	end
+	return carried, busiest
+end
+
 function metrics.recentBalance(income : {number}, costs : {number}, years : integer) : number
 	-- The current year and the first year are usually partial, so neither counts.
 	if income == nil or costs == nil or #income ~= #costs or #income < years + 2 then
@@ -217,8 +253,8 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 	-- Full right now but little carried over the window: the cargo isn't being unloaded, so fewer vehicles won't help.
 	a.notDelivering = input.loadNow ~= nil and input.loadNow >= metrics.STUCK_LOAD_NOW
 		and a.load ~= nil and a.load < metrics.STUCK_AVERAGE_LOAD
-	-- A busload or more waiting at a stop: the line is short of vehicles, whatever the average says (on a line with
-	-- many stops the average reads low; seen in-game: 290 waiting while it read 35%).
+	-- A busload or more waiting at a stop: the line is short of vehicles, whatever the average says (seen in-game: 290
+	-- waiting while it read 35%).
 	local perVehicle = (input.totalCapacity or 0) / count
 	-- Or most departures from a stop over the last year left full: a backlog whenever the window is opened.
 	if input.departures ~= nil and input.departures >= metrics.MIN_DEPARTURES then

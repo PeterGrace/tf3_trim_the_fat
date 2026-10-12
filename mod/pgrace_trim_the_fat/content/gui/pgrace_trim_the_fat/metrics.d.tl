@@ -30,6 +30,13 @@ global record PgraceTrimTheFatMetrics
 		beforeBalance : number
 	end
 
+	-- One itemsAtStop<k>_c<cargo> log: a running total of what was on board arriving at stop k, one entry per arrival
+	-- with anything on board (seen in-game: 365 of 365 such arrivals matched, no entry for 19 empty ones).
+	record StopLog
+		times : {integer}
+		values : {integer}
+	end
+
 	-- What line_data.tl reads from the engine for one line. Times are game time in milliseconds.
 	record LineInput
 		vehicleCount : integer
@@ -75,11 +82,16 @@ global record PgraceTrimTheFatMetrics
 		-- when unknown.
 		fullDepartures : integer
 		departures : integer
+		-- From the stop logs over the last year (lineStopTotals): what was carried into all stops (a rider counts on each
+		-- leg), and the capacity offered at the stop that offered the most; nil or 0 when nothing is logged (averageLoad
+		-- then falls back to intervalMs).
+		loggedCarried : number
+		busiestStopOffered : number
 	end
 
 	record Assessment
 		verdict : Verdict
-		-- Average load over the data window, nil when unknown (no capacity, interval, stops or data).
+		-- Average load over the last 12 months (averageLoad), nil when unknown.
 		load : number
 		target : number
 		-- Balance scaled to a full year; equal to the balance once the window is a full year.
@@ -189,8 +201,9 @@ global record PgraceTrimTheFatMetrics
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
-	-- itemsTransported / (round trips in the window × capacity per vehicle × stops); nil when unknown
-	-- (no vehicles, capacity, interval, stops or data).
+	-- loggedCarried / (stops × busiestStopOffered); without them, itemsTransported / (round trips in the window, from
+	-- intervalMs, × capacity per vehicle × stops). nil when unknown (no vehicles, capacity or stops; or nothing
+	-- logged and no interval or data).
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
@@ -207,9 +220,16 @@ global record PgraceTrimTheFatMetrics
 	-- Averages over the last TREND_RECENT_YEARS full years and the TREND_BEFORE_YEARS before them; nil when the
 	-- series are missing, differ in length or are too short (the first and current years don't count).
 	trend : function(income : {number}, costs : {number}) : Trend
-	-- From a stop's itemsAtStop log (a running total of boarders, one entry per departure): the departures after
-	-- `since`, and how many of them boarded at least `capacity`. 0, 0 without a log or capacity.
+	-- From a stop's itemsAtStop log (one entry per arrival with anything on board): the departures from the stop
+	-- before, after `since`, and how many of them carried at least `capacity`. 0, 0 without a log or capacity.
 	countFullDepartures : function(times : {integer}, values : {integer}, capacity : number, since : integer) : integer, integer
+	-- What was carried into one stop, and the capacity offered, over arrivals after `since`, from its itemsAtStop logs
+	-- (one per cargo type). Each entry's load is its rise over the entry before; entries at the same time in different
+	-- logs are one arrival. An arrival offered max(capacity, carried): vehicles arriving together can share an entry,
+	-- and a vehicle replaced by a smaller one carried up to its old capacity. 0, 0 without logs.
+	stopTotals : function(logs : {StopLog}, since : integer, capacity : number) : number, number
+	-- stopTotals over every stop (one list of logs per stop): carried summed, and the most any one stop offered.
+	lineStopTotals : function(stops : {{StopLog}}, since : integer, capacity : number) : number, number
 	-- Average of income minus costs over the last `years` full years of yearly series (current year last); nil when
 	-- missing, of different lengths or too short (the first and current years don't count).
 	recentBalance : function(income : {number}, costs : {number}, years : integer) : number
