@@ -188,7 +188,9 @@ global record PgraceTrimTheFatMetrics
 	TREND_BEFORE_YEARS : integer
 	-- Recent income under this share of the earlier income is a decline.
 	DECLINE_RATIO : number
-	-- A vehicle change younger than this share of a year counts as recent.
+	-- A vehicle change younger than this share of a year counts as recent. A whole year: the balance and the average
+	-- load cover 12 months, so they settle only a year after the vehicles change (seen in-game: 3 → 5 buses, the load
+	-- had come down from 56% to 47% half a year later).
 	RECENT_CHANGE_FRACTION : number
 	-- At or above this share of full departures from one stop, the line has a backlog.
 	FULL_DEPARTURE_SHARE : number

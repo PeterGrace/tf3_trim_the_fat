@@ -570,14 +570,15 @@ t.test("assess: no history, no trend", function()
 end)
 
 t.test("constants: recent change", function()
-	t.eq(metrics.RECENT_CHANGE_FRACTION, 0.25)
+	t.eq(metrics.RECENT_CHANGE_FRACTION, 1)
 end)
 
-t.test("assess: vehicles changed within a quarter of a year", function()
-	-- yearMs 1200: a quarter is 300.
-	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 1299 })).changedRecently, true)
-	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 1300 })).changedRecently, false)
-	t.eq(metrics.assess(line({ lastChangeMs = NIL, nowMs = 1300 })).changedRecently, false, "never changed")
+t.test("assess: vehicles changed within a year, while the 12-month numbers still mix in the old setup", function()
+	-- yearMs 1200.
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 2199 })).changedRecently, true)
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 1300 })).changedRecently, true, "a quarter of a year")
+	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = 2200 })).changedRecently, false)
+	t.eq(metrics.assess(line({ lastChangeMs = NIL, nowMs = 2200 })).changedRecently, false, "never changed")
 	t.eq(metrics.assess(line({ lastChangeMs = 1000, nowMs = NIL })).changedRecently, false, "unknown time")
 end)
 

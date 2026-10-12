@@ -234,8 +234,10 @@ overview later.
   `itemsAtStop<stop>_c<cargo>` and `itemsAtStopUnsatisfied<stop>_c<cargo>`, but no vehicle count. A sold vehicle
   leaves no trace. So additions and replacements come from purchase times, which are saved with the game, while
   sales and vehicles moved between lines come from a per-session memory of each line's vehicle list in `line_data`,
-  which starts empty after a restart. A change younger than `RECENT_CHANGE_FRACTION = 0.25` of a year gives
-  `changedRecently`: a card note and the overview's "Hide changed" toggle. The unsatisfied-at-stop logs may be a
+  which starts empty after a restart. A change younger than `RECENT_CHANGE_FRACTION` of a year gives
+  `changedRecently`: a card note and the overview's "Hide changed" toggle. It was 0.25; since 2026-10-12 it's a
+  whole year, because the 12-month balance and load take that long to settle (3 months after adding a bus, a line
+  still read high). The unsatisfied-at-stop logs may be a
   better backlog signal than the waiting snapshot; not explored yet.
 - **Deep queues** (2026-10-11): CouClu-LO-3 (8 buses, 7 stops, $17k per bus, 237 waiting) read "another vehicle
   would likely lose money". With several busloads waiting, another bus fills from passengers left behind now and
