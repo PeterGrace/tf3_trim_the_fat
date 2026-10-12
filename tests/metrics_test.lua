@@ -249,6 +249,20 @@ t.test("assess: one of two vehicles part-loaded is still not delivering", functi
 	t.eq(a.trim, 0)
 end)
 
+-- Seen in-game: one 20-seat bus, 4 stops, 24% average, caught at 85% just after a busy stop; passengers always get
+-- off where they're going, so they can't be stuck aboard.
+t.test("assess: a passenger line full now is never not delivering", function()
+	local a = metrics.assess(line({ loadNow = 1.0, itemsTransported = 70, carriesPassengers = true }))
+	t.eq(a.notDelivering, false)
+	t.eq(a.trim > 0, true, "trim suggested")
+end)
+
+t.test("assess: passengers plus freight can still be not delivering", function()
+	local a = metrics.assess(line({ loadNow = 1.0, itemsTransported = 70, carriesPassengers = true,
+		cargoTypeCount = 2 }))
+	t.eq(a.notDelivering, true)
+end)
+
 t.test("assess: full now with a decent average is delivering", function()
 	local a = metrics.assess(line({ loadNow = 1.0 }))
 	t.eq(a.notDelivering, false)

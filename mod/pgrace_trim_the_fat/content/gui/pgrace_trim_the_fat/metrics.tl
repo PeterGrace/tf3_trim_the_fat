@@ -251,7 +251,10 @@ function metrics.assess(input : PgraceTrimTheFatMetrics.LineInput) : PgraceTrimT
 		return a
 	end
 	-- Full right now but little carried over the window: the cargo isn't being unloaded, so fewer vehicles won't help.
-	a.notDelivering = input.loadNow ~= nil and input.loadNow >= metrics.STUCK_LOAD_NOW
+	-- Not for passengers alone: they always get off where they're going, so a full bus was just caught after a busy
+	-- stop (seen in-game: one bus at 85% on opening, 15% a moment later, 24% average).
+	local passengersOnly = input.carriesPassengers and input.cargoTypeCount == 1
+	a.notDelivering = not passengersOnly and input.loadNow ~= nil and input.loadNow >= metrics.STUCK_LOAD_NOW
 		and a.load ~= nil and a.load < metrics.STUCK_AVERAGE_LOAD
 	-- A busload or more waiting at a stop: the line is short of vehicles, whatever the average says (seen in-game: 290
 	-- waiting while it read 35%).
