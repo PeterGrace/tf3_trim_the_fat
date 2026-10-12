@@ -1,6 +1,6 @@
 {
     "modId": "pgrace_trim_the_fat",
-    "revision": 9,
+    "revision": 10,
     "severityAdd": "None",
     "severityRemove": "None",
     "cosmetic": true,
