@@ -436,7 +436,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	}
 	filterKey = filterKey .. (hideChanged and "h" or "")
 	verdictButtons[#verdictButtons + 1] = builtin.ToggleButton{
-		meta = { class = "verdict", tooltip = _("Hide lines whose vehicles changed in the last 3 months. Sales and moves count from when the game was started.") },
+		meta = { class = "verdict", tooltip = _("Hide lines whose vehicles changed in the last 12 months. Sales and moves count from when the game was started.") },
 		value = hideChanged and 1 or 0,
 		content = builtin.TextView{ meta = { class = "font-scale-body" }, text = _("Hide changed") },
 		onValueChange = function(value : integer)
