@@ -772,3 +772,33 @@ t.test("assess: an ignored queue isn't a deep queue", function()
 	t.eq(a.deepQueue, false)
 	t.eq(a.thinMargin, true)
 end)
+
+t.test("countDepartures: distinct times after a time, across a stop's cargo logs", function()
+	t.eq(metrics.countDepartures({ { 100, 200, 300, 400 } }, 150), 3)
+	t.eq(metrics.countDepartures({ { 100, 200, 300 }, { 200, 300, 350 } }, 150), 3, "a departure logs in each cargo")
+	t.eq(metrics.countDepartures({ { 200 }, { 300 } }, 0), 2, "cargo carried on different departures")
+end)
+
+t.test("countDepartures: empty or missing logs", function()
+	t.eq(metrics.countDepartures({}, 0), 0)
+	t.eq(metrics.countDepartures({ {} }, 0), 0)
+	t.eq(metrics.countDepartures(nil, 0), 0)
+end)
+
+t.test("averageLoad: logged departures × stops × capacity per vehicle (Wyo-Pot-IC-1 in-game)", function()
+	-- 3 buses × 20 seats, 2 stops, 10 departures at the busiest stop, 361 carried: 361 ÷ 400.
+	local input = line({ vehicleCount = 3, totalCapacity = 60, stopCount = 2, itemsTransported = 361,
+		stopDepartures = 10, intervalMs = 166067, dataMs = 1461000, yearMs = 1461000, vehicleDataMs = 4383000 })
+	near(metrics.averageLoad(input), 0.9025)
+end)
+
+t.test("averageLoad: logged departures need no interval or data window", function()
+	local input = line({ stopDepartures = 6, intervalMs = NIL, dataMs = 0, vehicleDataMs = 0, itemsTransported = 600 })
+	near(metrics.averageLoad(input), 0.5)
+end)
+
+t.test("averageLoad: no logged departures falls back to the interval", function()
+	near(metrics.averageLoad(line({ stopDepartures = 0, itemsTransported = 600 })), 0.5)
+	t.eq(metrics.averageLoad(line({ stopDepartures = 6, totalCapacity = 0 })), nil, "no capacity")
+	t.eq(metrics.averageLoad(line({ stopDepartures = 6, stopCount = 0 })), nil, "no stops")
+end)

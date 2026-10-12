@@ -219,6 +219,34 @@ local function fullDepartures(line : Engine.Entity, lineComponent : Engine.Compo
 	return pair[1], pair[2]
 end
 
+-- The most departures logged at any one stop over the last year (metrics.countDepartures over the stop's
+-- itemsAtStop<k>_c<cargo> logs, one entry per departure); nil when unknown.
+local function stopDepartures(line : Engine.Entity, since : integer) : integer
+	local ok, best = pcall(function() : integer
+		local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
+		if book == nil then
+			return nil
+		end
+		local byStop : {string : {{integer}}} = {}
+		for name, log in pairs(book.name2log_native:asTable()) do
+			local k = name:match("^itemsAtStop(%d+)_c%d+$")
+			if k ~= nil then
+				byStop[k] = byStop[k] or {}
+				table.insert(byStop[k], log.times_native:asTable())
+			end
+		end
+		local most : integer = nil
+		for __, timeLists in pairs(byStop) do
+			local count = metrics.countDepartures(timeLists, since)
+			if most == nil or count > most then
+				most = count
+			end
+		end
+		return most
+	end)
+	return ok and best as integer or nil
+end
+
 -- Each line's vehicles when last read, and when they were last seen to change. Sales and vehicles moved between lines
 -- leave no trace in the game's data, so this is the only way to see them; it starts empty after a restart.
 local record Seen
@@ -318,6 +346,7 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			nowMs = now,
 			fullDepartures = full,
 			departures = departures,
+			stopDepartures = stopDepartures(line, now - yearMs),
 		},
 		noun = nounFor(carrier, passengers),
 	}

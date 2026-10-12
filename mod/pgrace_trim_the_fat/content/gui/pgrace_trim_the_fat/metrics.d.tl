@@ -75,11 +75,14 @@ global record PgraceTrimTheFatMetrics
 		-- when unknown.
 		fullDepartures : integer
 		departures : integer
+		-- The most departures logged at any one stop over the last year, each counted once across the stop's cargo
+		-- logs; nil or 0 when unknown (averageLoad then falls back to intervalMs).
+		stopDepartures : integer
 	end
 
 	record Assessment
 		verdict : Verdict
-		-- Average load over the data window, nil when unknown (no capacity, interval, stops or data).
+		-- Average load over the last 12 months (averageLoad), nil when unknown.
 		load : number
 		target : number
 		-- Balance scaled to a full year; equal to the balance once the window is a full year.
@@ -189,8 +192,9 @@ global record PgraceTrimTheFatMetrics
 
 	-- TARGET_SINGLE_CARGO for exactly one cargo type that isn't passengers, TARGET_DEFAULT otherwise.
 	targetFor : function(cargoTypeCount : integer, carriesPassengers : boolean) : number
-	-- itemsTransported / (round trips in the window × capacity per vehicle × stops); nil when unknown
-	-- (no vehicles, capacity, interval, stops or data).
+	-- itemsTransported / (stopDepartures × stops × capacity per vehicle); without stopDepartures, round trips in the
+	-- window (from intervalMs) stand in for them. nil when unknown (no vehicles, capacity or stops; or no departures,
+	-- interval or data).
 	averageLoad : function(input : LineInput) : number
 	-- amount × yearMs / spanMs and true when 0 < spanMs < yearMs; otherwise amount and false.
 	annualise : function(amount : number, spanMs : number, yearMs : number) : number, boolean
@@ -210,6 +214,8 @@ global record PgraceTrimTheFatMetrics
 	-- From a stop's itemsAtStop log (a running total of boarders, one entry per departure): the departures after
 	-- `since`, and how many of them boarded at least `capacity`. 0, 0 without a log or capacity.
 	countFullDepartures : function(times : {integer}, values : {integer}, capacity : number, since : integer) : integer, integer
+	-- Departures after `since` in a stop's logs (one list of entry times per cargo type), each time counted once.
+	countDepartures : function(timeLists : {{integer}}, since : integer) : integer
 	-- Average of income minus costs over the last `years` full years of yearly series (current year last); nil when
 	-- missing, of different lengths or too short (the first and current years don't count).
 	recentBalance : function(income : {number}, costs : {number}, years : integer) : number
