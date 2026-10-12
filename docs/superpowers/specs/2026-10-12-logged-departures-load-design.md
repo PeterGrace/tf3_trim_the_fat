@@ -60,8 +60,8 @@ in all 12 languages.
 - **What an entry is:** on PerHal-LO-2 (4 stops, 5 buses), a probe logged each bus's arrivals and loading states and
   each new stop-log entry. 364 of 372 entries equalled the passengers on board as a bus arrived at that stop (one
   mismatch; 7 arrivals missed by the probe). All 365 arrivals with people aboard had an entry; none of the 19 empty
-  arrivals did. An entry's timestamp is the arrival, not `TransportVehicle.lastLineStopDeparture` (which runs on a
-  different clock).
+  arrivals did. An entry's timestamp is the arrival, not `TransportVehicle.lastLineStopDeparture` (which read
+  about 360 s behind the game time).
 - **Why the logs run above `itemsTransported`:** the median ratio of the logs' total to `itemsTransported` was 1.00
   on 2-stop lines, 1.20 with 3 stops, 1.32 with 4 and 1.41 with 5. Riders staying aboard through a stop are counted
   on each leg.
