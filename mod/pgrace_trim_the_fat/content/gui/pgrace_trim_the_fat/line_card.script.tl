@@ -196,75 +196,41 @@ local record LoadLineParams
 end
 
 -- PROBE (remove before release): does a stop-log entry count everyone on board at a departure, or only those who
--- boarded? On each departure (lastLineStopDeparture changes), note who is on board, then find the log entry.
-local record ProbeDeparture
-	vehicle : Engine.Entity
-	time : integer
-	stopIndex : integer
-	onBoard : integer
-	polls : integer
-end
-local probeLastDeparture : {Engine.Entity : integer} = {}
-local probePending : {ProbeDeparture} = {}
+-- boarded? Logs each vehicle's stop changes and departures (with who is on board) and each new stop-log entry, all
+-- with the game time, to line up afterwards.
+local probeVehicle : {Engine.Entity : string} = {}
+local probeLogLast : {string : integer} = {}
 
 local function probeDepartures(line : Engine.Entity) : boolean
 	local passenger = api.res.cargoTypeRep.getPassengerCargoTypeId()
+	local gameTime = api.engine.getComponent(api.engine.util.getWorld(), api.type.ComponentType.GAME_TIME) as Engine.Component.GameTime
+	local now = tostring(gameTime.gameTime)
 	for __, vehicle in ipairs(api.engine.system.transportVehicleSystem.getLineVehicles(line)) do
 		local tv = api.engine.getComponent(vehicle, api.type.ComponentType.TRANSPORT_VEHICLE) as Engine.Component.TransportVehicle
 		if tv ~= nil then
-			local last = probeLastDeparture[vehicle]
-			if last ~= nil and tv.lastLineStopDeparture ~= last then
-				probePending[#probePending + 1] = {
-					vehicle = vehicle, time = tv.lastLineStopDeparture, stopIndex = tv.stopIndex, polls = 0,
-					onBoard = api.engine.system.simEntityAtVehicleSystem.getVehicleSimEntitiesCountForCargoType(vehicle, passenger),
-				}
+			local onBoard = api.engine.system.simEntityAtVehicleSystem.getVehicleSimEntitiesCountForCargoType(vehicle, passenger)
+			local key = tostring(tv.stopIndex) .. "/" .. tostring(tv.lastLineStopDeparture) .. "/" .. tostring(tv.loadState)
+			if probeVehicle[vehicle] ~= key then
+				debugPrint(LOG_PREFIX .. "probe veh now=" .. now .. " vehicle=" .. tostring(vehicle) .. " stopIndex="
+					.. tostring(tv.stopIndex) .. " lastDep=" .. tostring(tv.lastLineStopDeparture) .. " loadState="
+					.. tostring(tv.loadState) .. " onBoard=" .. tostring(onBoard))
+				probeVehicle[vehicle] = key
 			end
-			probeLastDeparture[vehicle] = tv.lastLineStopDeparture
 		end
-	end
-	if #probePending == 0 then
-		return true
 	end
 	local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
-	local logs = book ~= nil and book.name2log_native:asTable() or {}
-	local still : {ProbeDeparture} = {}
-	for __, dep in ipairs(probePending) do
-		dep.polls = dep.polls + 1
-		local found = false
-		local nearestName, nearestDiff : string, integer = nil, nil
-		for logName, log in pairs(logs) do
-			if logName:match("^itemsAtStop%d+_c0$") then
-				local times, values = log.times_native:asTable(), log.values_native:asTable()
-				for i = #times, 1, -1 do
-					local diff = math.abs(times[i] - dep.time)
-					if nearestDiff == nil or diff < nearestDiff then
-						nearestName, nearestDiff = logName, diff
-					end
-					if times[i] == dep.time then
-						found = true
-						debugPrint(LOG_PREFIX .. "probe depart vehicle=" .. tostring(dep.vehicle) .. " stopIndex="
-							.. tostring(dep.stopIndex) .. " time=" .. tostring(dep.time) .. " onBoard=" .. tostring(dep.onBoard)
-							.. " log=" .. logName .. " delta=" .. tostring(i > 1 and values[i] - values[i - 1] or nil)
-							.. " polls=" .. tostring(dep.polls))
-						break
-					end
-					if times[i] < dep.time then
-						break
-					end
-				end
+	for logName, log in pairs(book ~= nil and book.name2log_native:asTable() or {}) do
+		if logName:match("^itemsAtStop%d+_c0$") then
+			local times, values = log.times_native:asTable(), log.values_native:asTable()
+			local last = #times
+			local seen = probeLogLast[logName]
+			if seen ~= nil and last > 0 and times[last] ~= seen then
+				debugPrint(LOG_PREFIX .. "probe log now=" .. now .. " " .. logName .. " n=" .. last .. " time="
+					.. tostring(times[last]) .. " delta=" .. tostring(last > 1 and values[last] - values[last - 1] or nil))
 			end
-		end
-		if not found then
-			if dep.polls >= 40 then
-				debugPrint(LOG_PREFIX .. "probe depart vehicle=" .. tostring(dep.vehicle) .. " stopIndex="
-					.. tostring(dep.stopIndex) .. " time=" .. tostring(dep.time) .. " onBoard=" .. tostring(dep.onBoard)
-					.. " no entry; nearest " .. tostring(nearestName) .. " off by " .. tostring(nearestDiff))
-			else
-				still[#still + 1] = dep
-			end
+			probeLogLast[logName] = last > 0 and times[last] or nil
 		end
 	end
-	probePending = still
 	return true
 end
 
