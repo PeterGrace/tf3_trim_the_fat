@@ -166,7 +166,36 @@ local function buildRow(line : Engine.Entity, cats : {Category}) : Row
 			.. " capAll=" .. tostring(capAll) .. " intervalMs=" .. tostring(input.intervalMs)
 			.. " vehicles=" .. tostring(input.vehicleCount) .. " stops=" .. tostring(input.stopCount)
 			.. " dataMs=" .. tostring(input.dataMs) .. " vehicleDataMs=" .. tostring(input.vehicleDataMs)
-			.. " departures=" .. tostring(input.departures) .. " full=" .. tostring(input.fullDepartures))
+			.. " departures=" .. tostring(input.departures) .. " full=" .. tostring(input.fullDepartures)
+			.. " stopDepartures=" .. tostring(input.stopDepartures))
+		-- Per stop log: entries in the last year, how many boarded nobody, the oldest entry's age, and the boarders.
+		local book = api.engine.getComponent(line, api.type.ComponentType.LOG_BOOK) as Engine.Component.LogBook
+		local since = input.nowMs - math.floor(input.yearMs)
+		local boarded = 0
+		local logs : {string} = {}
+		for logName, log in pairs(book ~= nil and book.name2log_native:asTable() or {}) do
+			if logName:match("^itemsAtStop%d+_c%d+$") then
+				local times, values = log.times_native:asTable(), log.values_native:asTable()
+				local inYear, zeros = 0, 0
+				for i = 1, #times do
+					if times[i] > since then
+						inYear = inYear + 1
+						if i > 1 then
+							local delta = values[i] - values[i - 1]
+							boarded = boarded + delta
+							if delta == 0 then
+								zeros = zeros + 1
+							end
+						end
+					end
+				end
+				local oldestAge = #times > 0 and (input.nowMs - times[1]) / input.yearMs or -1
+				logs[#logs + 1] = logName .. "(n=" .. #times .. " year=" .. inYear .. " zero=" .. zeros
+					.. " oldest=" .. string.format("%.2f", oldestAge) .. "yr)"
+			end
+		end
+		debugPrint(LOG_PREFIX .. "probe stops line=" .. tostring(line) .. " boarded=" .. boarded
+			.. " items=" .. tostring(input.itemsTransported) .. " " .. table.concat(logs, " "))
 		row.vehiclesText = ui.vehiclesText(facts.noun, facts.input.vehicleCount)
 		row.error = false
 		return true
