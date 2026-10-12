@@ -166,10 +166,11 @@ local function accountYears(line : Engine.Entity, years : integer) : {number}, {
 end
 
 -- Over the last year, at the stop and cargo type whose departures most often left full: how many did, out of how
--- many departures (nil, nil when unknown). The line logs a running total loaded per stop and cargo type, one entry
--- per departure ("itemsAtStop<k>_c<cargo>"); k is the line's stop index plus one, the last stop wrapping to 0
+-- many departures (nil, nil when unknown). The line logs a running total carried per stop and cargo type, one entry
+-- per arrival with anything on board ("itemsAtStop<k>_c<cargo>", seen in-game), so an entry at stop k is the
+-- departure from the stop before; k is the line's stop index plus one, the last stop wrapping to 0
 -- (seen in-game with a full-load stop). Stops set to wait for a full load are skipped: they leave full by design.
--- A departure is full when it loaded the vehicles' average capacity for that cargo (TransportVehicle allCaps, which
+-- A departure is full when it carried the vehicles' average capacity for that cargo (TransportVehicle allCaps, which
 -- covers every cargo a vehicle can switch to).
 local function fullDepartures(line : Engine.Entity, lineComponent : Engine.Component.Line, now : integer,
 		yearMs : integer) : integer, integer
@@ -219,7 +220,7 @@ local function fullDepartures(line : Engine.Entity, lineComponent : Engine.Compo
 	return pair[1], pair[2]
 end
 
--- Boarders at all stops and the capacity offered at the busiest stop over the last year (metrics.lineStopTotals over
+-- What arrived at all stops and the capacity offered at the busiest stop over the last year (metrics.lineStopTotals over
 -- the itemsAtStop<k>_c<cargo> logs); nil, nil when unknown.
 local function stopTotals(line : Engine.Entity, since : integer, capacity : number) : number, number
 	local ok, result = pcall(function() : {number}
@@ -239,8 +240,8 @@ local function stopTotals(line : Engine.Entity, since : integer, capacity : numb
 		for __, logs in pairs(byStop) do
 			stops[#stops + 1] = logs
 		end
-		local boarded, offered = metrics.lineStopTotals(stops, since, capacity)
-		return { boarded, offered }
+		local carried, offered = metrics.lineStopTotals(stops, since, capacity)
+		return { carried, offered }
 	end)
 	if not ok or result == nil then
 		return nil, nil
@@ -323,9 +324,9 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 	if lineComponent ~= nil and count > 0 then
 		full, departures = fullDepartures(line, lineComponent, now, yearMs)
 	end
-	local boarded, offered : number, number = nil, nil
+	local carried, offered : number, number = nil, nil
 	if count > 0 and capacity > 0 then
-		boarded, offered = stopTotals(line, now - yearMs, capacity / count)
+		carried, offered = stopTotals(line, now - yearMs, capacity / count)
 	end
 	local frequency = api.engine.util.line.getMaxFrequency(line)
 	local income, costs = accountYears(line, metrics.TREND_RECENT_YEARS + metrics.TREND_BEFORE_YEARS + 2)
@@ -352,7 +353,7 @@ local function collect(line : Engine.Entity, withRows : boolean) : PgraceTrimThe
 			nowMs = now,
 			fullDepartures = full,
 			departures = departures,
-			loggedBoarded = boarded,
+			loggedCarried = carried,
 			busiestStopOffered = offered,
 		},
 		noun = nounFor(carrier, passengers),

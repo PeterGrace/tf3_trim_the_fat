@@ -602,13 +602,13 @@ t.test("assess: a deep queue keeps a thin line plain Busy", function()
 	t.eq(a.thinMargin, true)
 end)
 
--- Full departures: a stop's itemsAtStop log is a running total of boarders, one entry per departure.
+-- Full departures: a stop's itemsAtStop log is a running total carried into the stop, one entry per arrival.
 t.test("constants: full departures", function()
 	t.eq(metrics.FULL_DEPARTURE_SHARE, 0.6)
 	t.eq(metrics.MIN_DEPARTURES, 3)
 end)
 
-t.test("countFullDepartures: departures since a time, full when a vehicle's capacity boarded", function()
+t.test("countFullDepartures: departures since a time, full when they carried a vehicle's capacity", function()
 	local times = { 100, 200, 300, 400, 500 }
 	local values = { 1000, 1020, 1035, 1055, 1075 }
 	local full, count = metrics.countFullDepartures(times, values, 20, 150)
@@ -777,82 +777,82 @@ local function stopLog(times, values)
 	return { times = times, values = values }
 end
 
-t.test("stopTotals: boarded and offered per departure in the window", function()
+t.test("stopTotals: carried and offered per arrival in the window", function()
 	local logs = { stopLog({ 100, 200, 300, 400 }, { 1000, 1015, 1035, 1040 }) }
-	local boarded, offered = metrics.stopTotals(logs, 150, 20)
-	t.eq(boarded, 40, "15 + 20 + 5; the entry at 100 is before the window")
+	local carried, offered = metrics.stopTotals(logs, 150, 20)
+	t.eq(carried, 40, "15 + 20 + 5; the entry at 100 is before the window")
 	t.eq(offered, 60, "three departures × 20")
-	boarded, offered = metrics.stopTotals(logs, 250, 20)
-	t.eq(boarded, 25)
+	carried, offered = metrics.stopTotals(logs, 250, 20)
+	t.eq(carried, 25)
 	t.eq(offered, 40)
 end)
 
-t.test("stopTotals: an entry holding more than a vehicle offered what boarded", function()
+t.test("stopTotals: an entry holding more than a vehicle offered what it carried", function()
 	-- The first entry only gives the starting total. 40 is two bunched buses; 28 an old, bigger bus.
-	local boarded, offered = metrics.stopTotals({ stopLog({ 100, 200, 300, 400 }, { 0, 40, 68, 78 }) }, 0, 20)
-	t.eq(boarded, 78)
+	local carried, offered = metrics.stopTotals({ stopLog({ 100, 200, 300, 400 }, { 0, 40, 68, 78 }) }, 0, 20)
+	t.eq(carried, 78)
 	t.eq(offered, 88, "40 + 28 + 20")
 end)
 
-t.test("stopTotals: cargo logs at the same time are one departure", function()
-	local boarded, offered = metrics.stopTotals({
+t.test("stopTotals: cargo logs at the same time are one arrival", function()
+	local carried, offered = metrics.stopTotals({
 		stopLog({ 100, 200, 300 }, { 0, 10, 15 }),
 		stopLog({ 100, 200, 300 }, { 0, 5, 10 }),
 	}, 0, 20)
-	t.eq(boarded, 25)
-	t.eq(offered, 40, "two departures, not four")
-	boarded, offered = metrics.stopTotals({
+	t.eq(carried, 25)
+	t.eq(offered, 40, "two arrivals, not four")
+	carried, offered = metrics.stopTotals({
 		stopLog({ 100, 200 }, { 0, 15 }),
 		stopLog({ 100, 200 }, { 0, 10 }),
 	}, 0, 20)
-	t.eq(offered, 25, "25 boarded on one departure")
-	boarded, offered = metrics.stopTotals({
+	t.eq(offered, 25, "25 carried on one arrival")
+	carried, offered = metrics.stopTotals({
 		stopLog({ 100, 200 }, { 0, 8 }),
 		stopLog({ 150, 300 }, { 0, 6 }),
 	}, 0, 20)
-	t.eq(boarded, 14)
-	t.eq(offered, 40, "each cargo on its own departure")
+	t.eq(carried, 14)
+	t.eq(offered, 40, "each cargo on its own arrival")
 end)
 
 t.test("stopTotals: empty or missing logs", function()
-	local boarded, offered = metrics.stopTotals({}, 0, 20)
-	t.eq(boarded, 0)
+	local carried, offered = metrics.stopTotals({}, 0, 20)
+	t.eq(carried, 0)
 	t.eq(offered, 0)
-	boarded, offered = metrics.stopTotals({ stopLog({}, {}) }, 0, 20)
+	carried, offered = metrics.stopTotals({ stopLog({}, {}) }, 0, 20)
 	t.eq(offered, 0)
-	boarded, offered = metrics.stopTotals({ stopLog({ 100 }, { 5 }) }, 0, 20)
+	carried, offered = metrics.stopTotals({ stopLog({ 100 }, { 5 }) }, 0, 20)
 	t.eq(offered, 0, "a single entry has no departure")
-	boarded, offered = metrics.stopTotals(nil, 0, 20)
+	carried, offered = metrics.stopTotals(nil, 0, 20)
 	t.eq(offered, 0)
 end)
 
-t.test("lineStopTotals: boarded at every stop, offered at the busiest", function()
-	-- The quiet stop logged only the departures where someone boarded.
-	local boarded, offered = metrics.lineStopTotals({
+t.test("lineStopTotals: carried at every stop, offered at the busiest", function()
+	-- The quiet stop logged only the departures where someone carried.
+	local carried, offered = metrics.lineStopTotals({
 		{ stopLog({ 100, 200, 300, 400 }, { 0, 20, 30, 50 }) },
 		{ stopLog({ 150, 350 }, { 0, 5 }) },
 	}, 0, 20)
-	t.eq(boarded, 55)
+	t.eq(carried, 55)
 	t.eq(offered, 60)
-	boarded, offered = metrics.lineStopTotals({}, 0, 20)
-	t.eq(boarded, 0)
+	carried, offered = metrics.lineStopTotals({}, 0, 20)
+	t.eq(carried, 0)
 	t.eq(offered, 0)
 end)
 
-t.test("averageLoad: stop-log boarded ÷ (stops × offered at the busiest stop)", function()
-	local input = line({ loggedBoarded = 660, busiestStopOffered = 400 })
+t.test("averageLoad: stop-log carried ÷ (stops × offered at the busiest stop)", function()
+	local input = line({ loggedCarried = 660, busiestStopOffered = 400 })
 	near(metrics.averageLoad(input), 0.825)
 end)
 
 t.test("averageLoad: stop logs need no interval or data window", function()
-	local input = line({ loggedBoarded = 600, busiestStopOffered = 600, intervalMs = NIL, dataMs = 0,
+	local input = line({ loggedCarried = 600, busiestStopOffered = 600, intervalMs = NIL, dataMs = 0,
 		vehicleDataMs = 0 })
 	near(metrics.averageLoad(input), 0.5)
 end)
 
 t.test("averageLoad: nothing in the stop logs falls back to the interval", function()
-	near(metrics.averageLoad(line({ loggedBoarded = 0, busiestStopOffered = 0, itemsTransported = 600 })), 0.5)
-	t.eq(metrics.averageLoad(line({ loggedBoarded = 600, busiestStopOffered = 600, vehicleCount = 0 })), nil,
+	near(metrics.averageLoad(line({ loggedCarried = 0, busiestStopOffered = 0, itemsTransported = 600 })), 0.5)
+	t.eq(metrics.averageLoad(line({ loggedCarried = 600, busiestStopOffered = 600, vehicleCount = 0 })), nil,
 		"no vehicles")
-	t.eq(metrics.averageLoad(line({ loggedBoarded = 600, busiestStopOffered = 600, stopCount = 0 })), nil, "no stops")
+	t.eq(metrics.averageLoad(line({ loggedCarried = 600, busiestStopOffered = 600, stopCount = 0 })), nil, "no stops")
 end)
