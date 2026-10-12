@@ -347,6 +347,30 @@ local function summaryText(s : PgraceTrimTheFatMetrics.Summary) : string
 	return table.concat(parts, " · ")
 end
 
+-- The panel's settings, kept for the game session so they survive closing and reopening the window. Mods get no
+-- settings store, so they reset when the game restarts.
+local record Remembered
+	enabled : {integer : boolean}
+	verdictEnabled : {integer : boolean}
+	decliningOnly : boolean
+	hideChanged : boolean
+	search : string
+	sortColumn : integer
+	sortAscending : boolean
+	expanded : boolean
+end
+
+local remembered : Remembered = {
+	enabled = {},
+	verdictEnabled = {},
+	decliningOnly = false,
+	hideChanged = false,
+	search = "",
+	sortColumn = 3,
+	sortAscending = true,
+	expanded = false,
+}
+
 local record OverviewParams
 	-- The window's expanded (maximised) state, owned by the window recipe, as F2.
 	expanded : boolean
@@ -358,13 +382,15 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 		return categories()
 	end):old()
 	local dataState = react.useStateLazy(function() : OverviewData
-		return buildOverview(cats)
+		local data = buildOverview(cats)
+		data.sortColumn, data.sortAscending = remembered.sortColumn, remembered.sortAscending
+		return data
 	end)
 	-- enabled[i] for categories()[i]. As F2: none on shows every line; turning some on shows only those.
 	local enabledState = react.useStateLazy(function() : {integer : boolean}
 		local enabled : {integer : boolean} = {}
 		for i = 1, #cats do
-			enabled[i] = false
+			enabled[i] = remembered.enabled[i] == true
 		end
 		return enabled
 	end)
@@ -373,25 +399,26 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 	end):old()
 	-- verdictEnabled[i] for groups[i], with the same rule as the transport filters.
 	local verdictState = react.useStateLazy(function() : {integer : boolean}
-		return {}
+		return remembered.verdictEnabled
 	end)
 	-- Declining is a marker, not a verdict: on, it narrows whatever the verdict filters show.
-	local decliningState = react.useState(false)
+	local decliningState = react.useState(remembered.decliningOnly)
 	local decliningOnly = decliningState:old()
-	local hideChangedState = react.useState(false)
+	local hideChangedState = react.useState(remembered.hideChanged)
 	local hideChanged = hideChangedState:old()
 	local data = dataState:old()
 	local enabled = enabledState:old()
 	local verdictEnabled = verdictState:old()
 	-- F2's search: lines whose name contains the text (lang_util.stringContains, as F2's Lines table).
 	local searchState = react.useStateLazy(function() : string
-		return ""
+		return remembered.search
 	end)
 	local search = searchState:old()
 
 	local function refresh(column : integer, ascending : boolean)
 		local fresh = buildOverview(cats)
 		fresh.sortColumn, fresh.sortAscending = column, ascending
+		remembered.sortColumn, remembered.sortAscending = column, ascending
 		dataState:set(fresh)
 	end
 
@@ -421,6 +448,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 					next[j] = verdictEnabled[j] == true
 				end
 				next[i] = value == 1
+				remembered.verdictEnabled = next
 				verdictState:set(next)
 			end,
 		}
@@ -431,6 +459,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 		value = decliningOnly and 1 or 0,
 		content = builtin.TextView{ meta = { class = "font-scale-body, warning" }, text = _("Declining ↘") },
 		onValueChange = function(value : integer)
+			remembered.decliningOnly = value == 1
 			decliningState:set(value == 1)
 		end,
 	}
@@ -440,6 +469,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 		value = hideChanged and 1 or 0,
 		content = builtin.TextView{ meta = { class = "font-scale-body" }, text = _("Hide changed") },
 		onValueChange = function(value : integer)
+			remembered.hideChanged = value == 1
 			hideChangedState:set(value == 1)
 		end,
 	}
@@ -461,6 +491,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 					next[j] = enabled[j]
 				end
 				next[i] = value == 1
+				remembered.enabled = next
 				enabledState:set(next)
 			end,
 		}
@@ -511,6 +542,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 					gui_react_util.makeHorizontalSpacer(),
 					statistics_react_util.createSearchField(search, function(text : string)
 						if text ~= searchState:old() then
+							remembered.search = text
 							searchState:set(text)
 						end
 					end, nil),
@@ -611,7 +643,7 @@ local Overview = react.RegisterRecipe("PgraceTrimTheFatOverview", function(param
 end)
 
 local OverviewWindow = react.RegisterWrapperRecipe("PgraceTrimTheFatOverviewWindow", builtin.Window, function(params : ToolReactUtil.IToolWindowParam<ToolParam>) : TreeNodeId
-	local expandedState = react.useState(false) as ReactStateT<boolean>
+	local expandedState = react.useState(remembered.expanded) as ReactStateT<boolean>
 	-- Size, position and animations come from overview.css.lua, by this class: F2's rules for its window.
 	return builtin.Window{
 		meta = { class = "pgrace-trim-the-fat-overview" },
@@ -626,6 +658,7 @@ local OverviewWindow = react.RegisterWrapperRecipe("PgraceTrimTheFatOverviewWind
 		content = Overview{
 			expanded = expandedState:old(),
 			setExpanded = function(expanded : boolean)
+				remembered.expanded = expanded
 				expandedState:set(expanded)
 			end,
 		},
